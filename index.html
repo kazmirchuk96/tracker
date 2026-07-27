@@ -1,0 +1,1144 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>12 тижнів — трекер цілей</title>
+<meta name="theme-color" content="#0F0E0A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="12 тижнів">
+<meta name="robots" content="noindex, nofollow">
+<style>
+  html, body { margin: 0; padding: 0; background: #0F0E0A; }
+  body { padding: 24px 12px; }
+</style>
+</head>
+<body>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+#tracker-root {
+  --surface-0: #0F0E0A;
+  --surface-1: #1C1B15;
+  --surface-2: #221F19;
+  --border: #34322B;
+  --border-strong: #4A473C;
+  --text-primary: #F3F1E8;
+  --text-secondary: #B7B4A6;
+  --text-muted: #8C8977;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text-primary);
+  width: 100%;
+  max-width: 720px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  position: relative;
+  background: var(--surface-0);
+  padding: 1.5rem;
+  border-radius: 20px;
+}
+#tracker-root h1 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
+.section-label { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 500; margin-bottom: 12px; }
+.card { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 20px; padding: 1.25rem 1.4rem; }
+.hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; transition: color 0.3s; }
+.badge { font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 500; white-space: nowrap; }
+.badge-ok { background: rgba(47,190,147,0.16); color: #6EE7C0; }
+.badge-behind { background: rgba(186,117,23,0.18); color: #F0B94D; }
+.group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: 16px; margin-bottom: 8px; }
+.metric-row { padding: 12px 14px; background: var(--surface-1); border-radius: 12px; margin-bottom: 8px; display: flex; gap: 12px; }
+.metric-accent { width: 4px; align-self: stretch; border-radius: 3px; flex-shrink: 0; }
+.metric-body { flex: 1; min-width: 0; }
+.metric-top-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.metric-label { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; }
+.plan-note { font-size: 11.5px; color: var(--text-muted); }
+.metric-input-row { display: flex; align-items: center; gap: 8px; }
+.stepper { display: flex; align-items: center; gap: 6px; }
+.step-btn { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-strong); background: var(--surface-2); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
+.step-btn:hover { background: var(--surface-0); border-color: #1D9E75; }
+.step-btn:active { transform: scale(0.92); }
+.stepper input { border: 0.5px solid var(--border); border-radius: 8px; width: 76px; height: 34px; text-align: center; font-size: 16px; font-weight: 500; background: var(--surface-2); color: var(--text-primary); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
+.stepper input:focus { outline: none; border-color: #1D9E75; }
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.icon-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
+.icon-btn:hover { background: var(--surface-0); color: var(--text-primary); }
+.warn-text { font-size: 11.5px; color: #854F0B; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+.habit-panel { background: var(--surface-1); border-radius: 12px; padding: 4px 14px; margin-bottom: 8px; }
+.habit-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; font-size: 14px; cursor: pointer; }
+input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: pointer; accent-color: #2FBE93; flex-shrink: 0; }
+.daily-block { background: var(--surface-1); border-radius: 12px; padding: 12px 14px 14px; margin-bottom: 8px; }
+.daily-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
+.daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.day-square { width: 100%; aspect-ratio: 1; max-width: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: 1.5px dashed var(--border-strong); background: var(--surface-2); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square:hover { border-color: #1D9E75; background: var(--surface-0); }
+.day-square:active { transform: scale(0.9); }
+.day-square.checked { background: #2FBE93; border: 1.5px solid #2FBE93; color: #0F0E0A; }
+.day-cell-label { font-size: 10px; color: var(--text-muted); }
+.progress-track { width: 56px; height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease, background 0.3s; }
+.week-row-item { border-radius: 14px; padding: 0.9rem 1.1rem; margin-bottom: 8px; background: var(--surface-2); border: 0.5px solid var(--border); border-left: 3px solid var(--border); cursor: pointer; }
+.hero-card { border-radius: 22px; padding: 1.5rem 1.6rem; margin-bottom: 1.5rem; background: var(--surface-2); border: 1px solid var(--border-strong); position: relative; overflow: hidden; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.save-status { font-size: 11px; color: var(--text-muted); }
+.delta { font-size: 11px; margin-top: 4px; }
+.delta-good { color: #6EE7C0; }
+.delta-bad { color: #F0B94D; }
+.dashboard-line { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); flex-wrap: wrap; }
+.menu-wrap { position: relative; }
+.menu-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.menu-btn:hover { background: var(--surface-1); }
+.menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: 0.5px solid var(--border-strong); border-radius: 12px; padding: 8px; min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 20; display: none; }
+.menu-panel.open { display: block; }
+.menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 13px; border-radius: 8px; cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
+.menu-item:hover { background: var(--surface-1); }
+.progress-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 2px 0; }
+.progress-collapsible { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
+.progress-collapsible.open { max-height: 3000px; }
+@keyframes celebratePulse { 0% { transform: scale(1); } 35% { transform: scale(1.15); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
+.celebrate { animation: celebratePulse 0.55s ease; }
+@keyframes chartDotPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.55; } }
+.chart-dot-live { animation: chartDotPulse 1.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes flashBg { 0% { background-color: #E1F5EE; } 100% { background-color: transparent; } }
+.flash { animation: flashBg 1.2s ease; }
+.today-pill { font-size: 11px; font-weight: 600; color: #6EE7C0; background: rgba(47,190,147,0.16); padding: 3px 10px; border-radius: 999px; letter-spacing: 0.02em; }
+@media (max-width: 520px) {
+  #stat-cards { grid-template-columns: 1fr 1fr !important; }
+  .card { padding: 1rem; }
+  .hero-card { padding: 1.1rem 1.2rem; }
+  .hero-num { font-size: 22px !important; }
+}
+</style>
+
+<div id="tracker-root">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 1.5rem;">
+    <div style="display:flex; gap:12px; align-items:center;">
+      <svg width="38" height="38" viewBox="0 0 40 40" style="flex-shrink:0;">
+        <path d="M4 30 L14 14 L20 22 L26 10 L36 30" fill="none" stroke="#9089E0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.65"/>
+        <circle cx="36" cy="30" r="2.5" fill="#2FBE93"/>
+        <path d="M4 30 L36 30" stroke="#34322B" stroke-width="1" stroke-dasharray="1,3"/>
+      </svg>
+      <div>
+        <h1 style="margin: 0 0 4px; font-size: 24px;">12 тижнів</h1>
+        <p style="color: var(--text-secondary); font-size: 12.5px; margin: 0;">27 липня — 18 жовтня 2026 · крок до п'ятирічної мапи</p>
+      </div>
+    </div>
+    <div class="menu-wrap">
+      <button class="menu-btn" id="menu-btn" title="Меню">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+      </button>
+      <div class="menu-panel" id="menu-panel">
+        <button class="menu-item" id="setup-goals"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/></svg>Налаштувати цілі (старт/ціль)</button>
+        <button class="menu-item" id="setup-sync"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 2a6 6 0 1 0 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Налаштувати синхронізацію</button>
+        <button class="menu-item" id="export-json"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Експорт JSON</button>
+        <button class="menu-item" id="export-csv"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Експорт CSV</button>
+        <button class="menu-item" id="import-json"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 14V6m0 0l-3 3m3-3l3 3M3 3h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Імпорт JSON</button>
+        <input type="file" id="import-file-input" accept="application/json" style="display:none;">
+        <div style="padding:8px 10px; font-size:11px; color:var(--text-muted); border-top:0.5px solid var(--border); margin-top:4px;"><span id="save-status" class="save-status">Збережено ✓</span></div>
+        <div style="padding:0 10px 6px; font-size:10.5px; color:var(--text-muted);" id="sync-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="journey-wrap" style="margin-bottom: 1.25rem;"></div>
+
+  <div id="hero-wrap"></div>
+
+  <div class="card" style="margin-bottom: 1.5rem; padding: 0.9rem 1.2rem;">
+    <div class="progress-toggle" id="progress-toggle">
+      <span style="font-size:13px; font-weight:500;">Прогрес і графіки</span>
+      <svg id="progress-chevron" width="16" height="16" viewBox="0 0 16 16" style="transition: transform 0.25s;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="progress-collapsible" id="progress-collapsible">
+      <div id="dashboard-line" class="dashboard-line" style="margin: 14px 0 12px;"></div>
+      <div id="stat-cards" style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 12px;"></div>
+      <div id="pace-banner" style="margin-bottom: 12px;"></div>
+      <div style="margin-bottom: 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
+          <div class="section-label" style="font-size:13px; margin-bottom:0;">Вага за 12 тижнів</div>
+          <span id="chart-weight-pct" style="font-family:'Fraunces', serif; font-size:15px; font-weight:600;"></span>
+        </div>
+        <div id="chart-weight"></div>
+      </div>
+      <div style="margin-bottom: 14px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
+          <div class="section-label" style="font-size:13px; margin-bottom:0;">Борг</div>
+          <span id="chart-debt-pct" style="font-family:'Fraunces', serif; font-size:15px; font-weight:600;"></span>
+        </div>
+        <div id="chart-debt"></div>
+      </div>
+      <div style="margin-bottom: 6px;">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
+          <div class="section-label" style="font-size:13px; margin-bottom:0;">Капітал</div>
+          <span id="chart-capital-pct" style="font-family:'Fraunces', serif; font-size:15px; font-weight:600;"></span>
+        </div>
+        <div id="chart-capital"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-label" id="history-toggle" style="cursor:pointer; display:flex; align-items:center; gap:6px;">
+    Історія тижнів
+    <svg id="history-chevron" width="14" height="14" viewBox="0 0 16 16" style="transition: transform 0.25s;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+  <div id="history-list" style="display:none;"></div>
+  <div style="text-align:center; font-size:10px; color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v18 · no native spinners, no plan arrows, min 0</div>
+</div>
+
+<div id="app-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
+  <div style="background:var(--surface-2, #221F19); border:0.5px solid var(--border-strong, #4A473C); border-radius:16px; max-width:340px; width:100%; padding:1.2rem 1.3rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+    <div id="app-modal-message" style="font-size:14px; line-height:1.5; margin-bottom:14px;"></div>
+    <div id="app-modal-input-wrap" style="display:none; margin-bottom:14px;">
+      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button id="app-modal-cancel" type="button" style="padding:8px 14px; border-radius:10px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:13px; cursor:pointer;">Скасувати</button>
+      <button id="app-modal-ok" type="button" style="padding:8px 14px; border-radius:10px; border:none; background:#2FBE93; color:#0F0E0A; font-weight:500; font-size:13px; cursor:pointer;">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="goals-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
+  <div style="background:var(--surface-2, #221F19); border:0.5px solid var(--border-strong, #4A473C); border-radius:16px; max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:1.25rem 1.4rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+    <div style="font-family:'Fraunces', serif; font-size:16px; font-weight:600; margin-bottom:4px;">Точка А і ціль</div>
+    <div style="font-size:12px; color:var(--text-secondary, #B7B4A6); margin-bottom:16px;">Звідки стартуємо і куди прийти за 12 тижнів. Порожнє поле = без змін.</div>
+
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Вага, кг</div>
+    <div style="display:flex; gap:8px; margin-bottom:14px;">
+      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+    </div>
+
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Борг, $</div>
+    <div style="display:flex; gap:8px; margin-bottom:6px;">
+      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+    </div>
+    <div style="font-size:11px; color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:14px;">Тут не залишок боргу, а СКІЛЬКИ ПЛАНУЄШ ВИПЛАТИТИ за 12 тижнів. Старт (А) зазвичай 0, ціль (Б) — сума всіх запланованих платежів (наприклад 0 → 1800).</div>
+
+    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Капітал, $</div>
+    <div style="display:flex; gap:8px; margin-bottom:6px;">
+      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+    </div>
+    <div style="font-size:11px; color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:18px;">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
+
+    <div style="display:flex; justify-content:flex-end; gap:8px;">
+      <button id="goals-cancel" type="button" style="padding:8px 14px; border-radius:10px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:13px; cursor:pointer;">Скасувати</button>
+      <button id="goals-save" type="button" style="padding:8px 14px; border-radius:10px; border:none; background:#2FBE93; color:#0F0E0A; font-weight:500; font-size:13px; cursor:pointer;">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const START = new Date(2026, 6, 27);
+  const WEEKS = 12;
+  let GOALS = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800 };
+  async function loadGoals(){
+    try { const r = await storage.get('goals'); if (r && r.value) GOALS = Object.assign({}, GOALS, JSON.parse(r.value)); } catch(e) {}
+  }
+  async function saveGoals(){ try { await storage.set('goals', JSON.stringify(GOALS)); } catch(e) {} }
+  const C_WEIGHT = '#9089E0', C_DEBT = '#5BA3E8', C_CAPITAL = '#2FBE93';
+  const C_DONE = '#2FBE93', C_MISSED = '#FF7A54', C_CURRENT = '#F0B94D', C_FUTURE_FALLBACK = '#4A473C';
+  const DAY_LABELS = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+  // "% виконання тижня" — це Weekly Execution Score за методикою "12 тижнів у році":
+  // рахує виконання ДІЙ (lead-показники), а не саму суму грошей. Для боргу дія —
+  // це фізичне відкладення готівки в конверт цього тижня; для капіталу — переказ
+  // на картку/рахунок. Чи зроблено дію = чи введена сума > 0 (не обов'язково точно
+  // за планом — за це окремо попереджає індикатор "незвично велика/мала сума").
+  // Прогрес до самих грошових цілей (борг $X, капітал $X) рахується окремо —
+  // дивись пейс-бейджі "у графіку" / "позаду" / "випереджає".
+  const WEIGHTS = { weighIn: 1, logDays: 1, calorieDays: 1, debtAction: 1, capitalAction: 1 };
+  const WEIGHT_TOTAL = WEIGHTS.weighIn + WEIGHTS.logDays + WEIGHTS.calorieDays + WEIGHTS.debtAction + WEIGHTS.capitalAction;
+  const WEEKLY_TACTICS = [{ id: 'w1', label: 'Зважування в понеділок зранку' }];
+
+  const ICONS = {
+    check: '<path d="M4 8.5l3 3 5.5-6.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    x: '<path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+    plus: '<path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+    minus: '<path d="M3 8h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+    reset: '<path d="M3.5 8a4.5 4.5 0 1 1 1.3 3.2M3.5 8V4.3M3.5 8h3.7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    copy: '<rect x="5.5" y="5.5" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3.3 9.5V4.3A1.3 1.3 0 0 1 4.6 3H9.8" stroke="currentColor" stroke-width="1.4" fill="none"/>',
+    warn: '<path d="M8 2.5l6.5 11.5h-13z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M8 6.5v3.5M8 12v.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'
+  };
+  function icon(name, size, extraStyle){ size = size || 14; return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 16 16" style="display:block;' + (extraStyle||'') + '">' + ICONS[name] + '</svg>'; }
+
+  // --- Власні модальні вікна замість window.confirm/prompt/alert. ---
+  // Нативні діалоги браузер може мовчки заблокувати ("Prevent this page from
+  // creating additional dialogs") після кількох поспіль — тоді кнопки виглядають
+  // так, ніби взагалі не працюють. Власний overlay такого не має.
+  function showAppModal(opts){
+    const overlay = document.getElementById('app-modal-overlay');
+    if (!overlay) return;
+    const msgEl = document.getElementById('app-modal-message');
+    const inputWrap = document.getElementById('app-modal-input-wrap');
+    const input = document.getElementById('app-modal-input');
+    const okBtn = document.getElementById('app-modal-ok');
+    const cancelBtn = document.getElementById('app-modal-cancel');
+    msgEl.textContent = opts.message || '';
+    if (opts.showInput){ inputWrap.style.display = 'block'; input.value = opts.inputValue || ''; }
+    else { inputWrap.style.display = 'none'; }
+    okBtn.textContent = opts.okLabel || 'OK';
+    cancelBtn.style.display = opts.hideCancel ? 'none' : 'inline-block';
+    overlay.style.display = 'flex';
+    function cleanup(){ overlay.style.display = 'none'; okBtn.onclick = null; cancelBtn.onclick = null; overlay.onclick = null; }
+    okBtn.onclick = () => { const val = opts.showInput ? input.value : true; cleanup(); if (opts.onOk) opts.onOk(val); };
+    cancelBtn.onclick = () => { cleanup(); if (opts.onCancel) opts.onCancel(); };
+    overlay.onclick = (e) => { if (e.target === overlay && !opts.hideCancel) { cleanup(); if (opts.onCancel) opts.onCancel(); } };
+    if (opts.showInput) setTimeout(() => input.focus(), 50);
+  }
+  function showAppAlert(message){ showAppModal({ message: message, okLabel: 'Гаразд', hideCancel: true }); }
+
+  function cv(name, fallback){
+    try {
+      const el = document.getElementById('tracker-root') || document.body;
+      const v = getComputedStyle(el).getPropertyValue(name).trim();
+      return v || fallback;
+    } catch(e){ return fallback; }
+  }
+
+  function weekStart(n){ const s = new Date(START); s.setDate(s.getDate() + (n-1)*7); return s; }
+  function weekEnd(n){ const e = weekStart(n); e.setDate(e.getDate() + 6); e.setHours(23,59,59,999); return e; }
+  function weekDates(n){
+    const fmt = d => d.toLocaleDateString('uk-UA', {day:'2-digit', month:'2-digit'});
+    return fmt(weekStart(n)) + ' – ' + fmt(weekEnd(n));
+  }
+  function expWeight(i){ return GOALS.weightStart + (GOALS.weightEnd - GOALS.weightStart) * i / WEEKS; }
+  function expDebtPaid(i){ return GOALS.debtStart + (GOALS.debtEnd - GOALS.debtStart) * i / WEEKS; }
+  function expCapital(i){ return GOALS.capitalStart + (GOALS.capitalEnd - GOALS.capitalStart) * i / WEEKS; }
+  function fmt1(n){ return Math.round(n * 10) / 10; }
+
+  function emptyWeek(){ return { weight: null, debtAmt: null, capitalAmt: null, checks: {}, logDays: [false,false,false,false,false,false,false], calorieDays: [false,false,false,false,false,false,false], open: false }; }
+
+  let state = {};
+  for (let i = 1; i <= WEEKS; i++) state[i] = emptyWeek();
+  let prevScores = {};
+  let progressOpen = false;
+  let historyOpen = false;
+
+  function showSaveStatus(text, isError){
+    const el = document.getElementById('save-status');
+    el.textContent = text;
+    el.style.color = isError ? '#D85A30' : 'var(--text-muted)';
+  }
+
+  // --- Сховище: localStorage (миттєвий локальний кеш) + опційна синхронізація
+  // через Google Apps Script Web App (Google Таблиця як спільна база для всіх пристроїв). ---
+  function getWebAppUrl(){ try { return (localStorage.getItem('tracker:weburl') || '').trim(); } catch(e){ return ''; } }
+  function setWebAppUrl(url){ try { localStorage.setItem('tracker:weburl', url || ''); } catch(e){} }
+  function updateSyncStatusUI(){
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+    el.textContent = getWebAppUrl() ? 'Синхронізація: увімкнена (Google Таблиця)' : 'Синхронізація: вимкнена (лише цей браузер)';
+  }
+
+  const storage = {
+    async get(key){
+      let local = null;
+      try { const raw = localStorage.getItem('tracker:' + key); if (raw) local = { key: key, value: raw }; } catch(e) {}
+      const url = getWebAppUrl();
+      if (url){
+        try {
+          const res = await fetch(url + '?action=get&key=' + encodeURIComponent(key));
+          const data = await res.json();
+          if (data && data.value){
+            try { localStorage.setItem('tracker:' + key, data.value); } catch(e) {}
+            return { key: key, value: data.value };
+          }
+        } catch(e) { /* офлайн або URL не працює — падаємо на локальний кеш */ }
+      }
+      return local;
+    },
+    async set(key, value){
+      try { localStorage.setItem('tracker:' + key, value); } catch(e) {}
+      const url = getWebAppUrl();
+      if (!url) return true; // синхронізація вимкнена — локально вже збережено
+      try {
+        await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // text/plain уникає CORS preflight
+          body: JSON.stringify({ action: 'set', key: key, value: value })
+        });
+        return true;
+      } catch(e) { return false; }
+    }
+  };
+
+  async function load(){
+    try { await loadGoals(); } catch(e) {}
+    try {
+      for (let i = 1; i <= WEEKS; i++){
+        try { const r = await storage.get('week:' + i); if (r && r.value) state[i] = Object.assign(emptyWeek(), JSON.parse(r.value)); } catch(e) {}
+      }
+      for (let i = 1; i <= WEEKS; i++) prevScores[i] = score(i);
+    } catch(e) {}
+    updateSyncStatusUI();
+    render();
+  }
+  async function saveWeek(n){
+    showSaveStatus('Збереження…');
+    const ok = await storage.set('week:' + n, JSON.stringify(state[n]));
+    if (ok) showSaveStatus('Збережено ✓');
+    else showSaveStatus('Збережено локально (хмара недоступна)', true);
+  }
+
+  async function importData(file){
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      for (let i = 1; i <= WEEKS; i++){
+        if (parsed['week' + i]) {
+          state[i] = Object.assign(emptyWeek(), parsed['week' + i]);
+          await saveWeek(i);
+        }
+      }
+      render();
+      showSaveStatus('Імпортовано ✓');
+    } catch(err){ showAppAlert('Не вдалося прочитати файл: ' + (err && err.message ? err.message : err)); }
+  }
+
+  function dayFraction(arr){ return arr.filter(Boolean).length / 7; }
+  function score(n){
+    const st = state[n];
+    let done = 0;
+    if (st.checks.w1) done += WEIGHTS.weighIn;
+    done += dayFraction(st.logDays) * WEIGHTS.logDays;
+    done += dayFraction(st.calorieDays) * WEIGHTS.calorieDays;
+    done += actionFraction_(n, 'debtAmt', GOALS.debtStart, GOALS.debtEnd) * WEIGHTS.debtAction;
+    done += actionFraction_(n, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd) * WEIGHTS.capitalAction;
+    return Math.round((done / WEIGHT_TOTAL) * 100);
+  }
+  function weekStatus(n){
+    const now = new Date();
+    if (now < weekStart(n)) return 'future';
+    if (now <= weekEnd(n)) return 'current';
+    return score(n) >= 85 ? 'done' : 'missed';
+  }
+  function displayStatus(n){
+    const dateSt = weekStatus(n);
+    const s = score(n);
+    if (dateSt === 'future'){
+      if (s >= 85) return 'done';
+      if (s > 0) return 'inprogress';
+      return 'future';
+    }
+    if (dateSt !== 'current') return dateSt;
+    if (s >= 85) return 'done';
+    if (s > 0) return 'inprogress';
+    return 'future';
+  }
+  function statusColor(st){ return st === 'done' ? C_DONE : st === 'missed' ? C_MISSED : (st === 'current' || st === 'inprogress') ? C_CURRENT : cv('--border-strong', C_FUTURE_FALLBACK); }
+  function currentWeek(){ const now = new Date(); for (let i = 1; i <= WEEKS; i++) if (now <= weekEnd(i)) return i; return WEEKS; }
+  function findPrevWeight(i){ for (let j = i-1; j >= 1; j--) if (state[j].weight) return state[j].weight; return GOALS.weightStart; }
+  function findPrevAmt(i, key){ for (let j = i-1; j >= 1; j--) if (state[j][key]) return state[j][key]; return null; }
+  function computeStreak(){
+    let streak = 0;
+    for (let i = WEEKS; i >= 1; i--){
+      const st = weekStatus(i);
+      if (st === 'future') continue;
+      if (st === 'current'){ if (score(i) >= 85) streak++; continue; }
+      if (score(i) >= 85) streak++; else break;
+    }
+    return streak;
+  }
+  function computeSnapshot(){
+    let cur = 0;
+    for (let i = 1; i <= WEEKS; i++){
+      const st = state[i];
+      const hasData = st.weight || st.debtAmt || st.capitalAmt || Object.values(st.checks).some(Boolean) || st.logDays.some(Boolean) || st.calorieDays.some(Boolean);
+      if (hasData) cur = i;
+    }
+    const cwNow = currentWeek();
+    // Pace is based only on weeks that have actually concluded (by date), never on
+    // whether the current week itself already has data — otherwise filling in this
+    // week's own value retroactively changes this same week's own displayed plan.
+    const completedWeeks = Math.max(cwNow - 1, 0);
+    const paceWeekWeight = completedWeeks;
+    const paceWeekDebt = completedWeeks;
+    const paceWeekCapital = completedWeeks;
+    let lastWeight = GOALS.weightStart;
+    for (let i = 1; i <= WEEKS; i++) if (state[i].weight) lastWeight = state[i].weight;
+    let debtPaid = 0, capitalAdded = 0;
+    for (let i = 1; i <= WEEKS; i++){ if (state[i].debtAmt) debtPaid += Number(state[i].debtAmt); if (state[i].capitalAmt) capitalAdded += Number(state[i].capitalAmt); }
+    const debtCurrent = GOALS.debtStart + debtPaid; // виплачено = старт (зазвичай 0) + все внесене
+    const capitalCurrent = GOALS.capitalStart + capitalAdded; // поточний капітал = старт + все внесене
+    const remWeightWeeks = Math.max(WEEKS - paceWeekWeight, 1);
+    const remDebtWeeks = Math.max(WEEKS - paceWeekDebt, 1);
+    const remCapitalWeeks = Math.max(WEEKS - paceWeekCapital, 1);
+    return {
+      cur, paceWeekWeight, paceWeekDebt, paceWeekCapital, lastWeight, debtPaid, capitalAdded, capitalCurrent, debtCurrent,
+      neededWeeklyLoss: (lastWeight - GOALS.weightEnd) / remWeightWeeks,
+      neededWeeklyDebt: (GOALS.debtEnd - debtCurrent) / remDebtWeeks,
+      neededWeeklyCapital: (GOALS.capitalEnd - capitalCurrent) / remCapitalWeeks,
+      weightOnTrack: lastWeight <= expWeight(paceWeekWeight) + 0.15,
+      debtOnTrack: debtCurrent >= expDebtPaid(paceWeekDebt) - 5,
+      capitalOnTrack: capitalCurrent >= expCapital(paceWeekCapital) - 5,
+      weightAhead: lastWeight < expWeight(paceWeekWeight) - 0.3,
+      debtAhead: debtCurrent > expDebtPaid(paceWeekDebt) + 50,
+      capitalAhead: capitalCurrent > expCapital(paceWeekCapital) + 50
+    };
+  }
+
+  // Рахує потрібну щотижневу суму так само, як snap.neededWeeklyDebt/Capital,
+  // але виключає власне значення тижня i з суми "вже внесено". Без цього план
+  // для ПОТОЧНОГО тижня стрибав щоразу, коли в нього ж вводили суму — бо власне
+  // ще не завершене введення одразу впливало на власну ж мету.
+  // Борг і капітал тепер рахуються ОДНАКОВО: старт → ціль як зростаюча сума
+  // внесків (скільки вже виплачено/накопичено), без окремого "isDebt"-режиму.
+  function neededWeeklyExcluding_(i, amtKey, start, end){
+    let total = 0;
+    for (let j = 1; j <= WEEKS; j++){
+      if (j === i) continue;
+      if (state[j][amtKey]) total += Number(state[j][amtKey]);
+    }
+    const remaining = (end - start) - total;
+    const completedWeeks = Math.max(currentWeek() - 1, 0);
+    const remWeeks = Math.max(WEEKS - completedWeeks, 1);
+    return remaining / remWeeks;
+  }
+
+  // Скільки заплановано внести/виплатити цього тижня (для рядка вводу і для
+  // Weekly Execution Score). Для минулих (уже закритих) тижнів — фіксований
+  // дефолт 145; для поточного/майбутніх — темп, що підлаштовується під факт.
+  function planFor_(i, amtKey, start, end){
+    const completedWeeks = Math.max(currentWeek() - 1, 0);
+    if (i <= completedWeeks) return 145;
+    return Math.max(Math.round(neededWeeklyExcluding_(i, amtKey, start, end)), 0);
+  }
+
+  // Частка виконання грошової дії цього тижня: 0, якщо нічого не внесено;
+  // інакше — скільки внесено відносно плану (максимум 100%, переплата не дає
+  // бонусу). Якщо план уже <= 0 (ціль випереджена наперед) — будь-яка сума
+  // рахується як повністю виконана дія.
+  function actionFraction_(n, amtKey, start, end){
+    const amt = state[n][amtKey];
+    if (!amt || amt <= 0) return 0;
+    const plan = planFor_(n, amtKey, start, end);
+    if (plan <= 0) return 1;
+    return Math.min(amt / plan, 1);
+  }
+
+  function renderJourney(){
+    const cur = currentWeek();
+    const w = 680, h = 76, pad = 22, r = 15;
+    const x = i => pad + (w - 2*pad) * (i-1) / (WEEKS-1);
+    const yLine = 32;
+    const borderColor = cv('--border', '#E1E0D9');
+    const mutedColor = cv('--text-muted', '#898781');
+    const ringColor = cv('--text-primary', '#F3F1E8');
+    let line = '<line x1="' + x(1) + '" y1="' + yLine + '" x2="' + x(WEEKS) + '" y2="' + yLine + '" stroke="' + borderColor + '" stroke-width="2" />';
+    let dots = '';
+    for (let i = 1; i <= WEEKS; i++){
+      const s = score(i);
+      const color = s >= 85 ? C_DONE : C_CURRENT;
+      const isToday = i === cur;
+      dots += '<circle cx="' + x(i) + '" cy="' + yLine + '" r="' + r + '" fill="' + color + '"' + (isToday ? ' stroke="' + ringColor + '" stroke-width="2"' : '') + ' style="transition: fill 0.3s;" />';
+      dots += '<text x="' + x(i) + '" y="' + (yLine + 4) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#0F0E0A">' + s + '</text>';
+      dots += '<text x="' + x(i) + '" y="' + (h - 4) + '" text-anchor="middle" font-size="10" fill="' + mutedColor + '">' + i + '</text>';
+    }
+    document.getElementById('journey-wrap').innerHTML =
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%; height:auto; display:block;">' + line + dots + '</svg>';
+  }
+
+  function deltaHtml(current, previous, betterWhenLower, unit){
+    if (previous === null || previous === undefined) return '';
+    const diff = current - previous;
+    if (Math.abs(diff) < 0.05) return '<div class="delta" style="color:var(--text-muted);">без змін з мин. тижня</div>';
+    const good = betterWhenLower ? diff < 0 : diff > 0;
+    const sign = diff > 0 ? '+' : '';
+    return '<div class="delta ' + (good ? 'delta-good' : 'delta-bad') + '">' + sign + fmt1(diff) + unit + ' з мин. тижня</div>';
+  }
+  function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr){
+    let badge = '';
+    if (hasData) badge = '<span class="badge ' + (onTrack ? 'badge-ok' : 'badge-behind') + '">' + (ahead ? 'випереджає' : onTrack ? 'у графіку' : 'позаду') + '</span>';
+    return '<div class="card" style="padding: 1rem 1.1rem; border-radius:16px;">' +
+      '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; gap:8px;">' +
+      '<div style="font-size: 11.5px; color: var(--text-secondary);">' + label + '</div>' + badge + '</div>' +
+      '<div class="hero-num" style="font-size: 23px; line-height: 1;">' + valueHtml + '</div>' +
+      '<div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 5px;">ціль ' + subLabel + '</div>' +
+      (deltaHtmlStr || '') + '</div>';
+  }
+  // --- Helpers для оновлених графіків: % прогресу, підсумок-речення людською
+  // мовою, підписи тижнів на осі, і бар-спарклайн тижневих внесків. ---
+  function progressPct_(kind, snap){
+    let total, done;
+    if (kind === 'weight'){ total = GOALS.weightStart - GOALS.weightEnd; done = GOALS.weightStart - snap.lastWeight; }
+    else if (kind === 'debt'){ total = GOALS.debtEnd - GOALS.debtStart; done = snap.debtCurrent - GOALS.debtStart; }
+    else { total = GOALS.capitalEnd - GOALS.capitalStart; done = snap.capitalCurrent - GOALS.capitalStart; }
+    if (!total) return 0;
+    return Math.max(0, Math.min(100, Math.round((done / total) * 100)));
+  }
+  function updateChartPct_(elId, kind, snap){
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const onTrack = kind === 'weight' ? snap.weightOnTrack : (kind === 'debt' ? snap.debtOnTrack : snap.capitalOnTrack);
+    if (snap.cur === 0){ el.textContent = ''; return; }
+    el.textContent = progressPct_(kind, snap) + '% шляху';
+    el.style.color = onTrack ? '#6EE7C0' : '#F0B94D';
+  }
+  function chartSummary_(kind, snap){
+    if (kind === 'weight'){
+      if (snap.cur === 0) return 'Ще немає замірів — внеси вагу за перший тиждень.';
+      if (snap.weightAhead) return 'Випереджаєш темп схуднення — можна ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень до кінця.';
+      if (!snap.weightOnTrack) return 'Темп відстає — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень, щоб встигнути.';
+      return 'У графіку — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень.';
+    }
+    const isDebt = kind === 'debt';
+    const ahead = isDebt ? snap.debtAhead : snap.capitalAhead;
+    const onTrack = isDebt ? snap.debtOnTrack : snap.capitalOnTrack;
+    const needed = isDebt ? snap.neededWeeklyDebt : snap.neededWeeklyCapital;
+    const noun = isDebt ? 'виплат боргу' : 'внесків капіталу';
+    if (snap.cur === 0) return 'Ще немає внесків — почни з першого тижня.';
+    if (ahead) return 'Випереджаєш план ' + noun + ' — можна ~$' + Math.max(Math.round(needed),0) + '/тиждень.';
+    if (!onTrack) return 'Темп відстає — потрібно ~$' + Math.round(needed) + '/тиждень ' + noun + ', щоб встигнути.';
+    return 'У графіку — тримай ~$' + Math.round(needed) + '/тиждень.';
+  }
+  function niceStep_(span, targetLines){
+    const raw = span / (targetLines || 5);
+    if (raw <= 0) return 1;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+    const residual = raw / magnitude;
+    let niceResidual;
+    if (residual > 5) niceResidual = 10;
+    else if (residual > 2) niceResidual = 5;
+    else if (residual > 1) niceResidual = 2;
+    else niceResidual = 1;
+    return niceResidual * magnitude;
+  }
+  function weekAxisLabels_(x, mutedColor, h, cur){
+    let s = '';
+    [1,3,6,9,12].forEach(i => {
+      const isCur = i === cur;
+      s += '<text x="' + x(i) + '" y="' + (h-6) + '" text-anchor="middle" font-size="10" font-weight="' + (isCur ? '700' : '400') + '" fill="' + (isCur ? C_CURRENT : mutedColor) + '">' + i + '</text>';
+    });
+    return s;
+  }
+  function weeklyBarsHtml_(amtKey, color){
+    const amounts = []; for (let i = 1; i <= WEEKS; i++) amounts.push(Number(state[i][amtKey]) || 0);
+    const maxAmt = Math.max(1, ...amounts);
+    const cur = currentWeek();
+    let bars = '';
+    for (let i = 1; i <= WEEKS; i++){
+      const amt = amounts[i-1];
+      const pct = amt > 0 ? Math.max(Math.round((amt / maxAmt) * 100), 6) : 0;
+      const isCur = i === cur;
+      bars += '<div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:0;">' +
+        '<div style="font-size:8px; color:' + color + '; font-weight:600; white-space:nowrap; height:10px;">' + (amt > 0 ? '$' + amt.toLocaleString() : '') + '</div>' +
+        '<div style="width:100%; height:36px; display:flex; align-items:flex-end;" title="Тиждень ' + i + ': $' + amt + '">' +
+          '<div style="width:100%; height:' + pct + '%; min-height:' + (amt > 0 ? '3px' : '1px') + '; background:' + (amt > 0 ? color : 'var(--border-strong)') + '; opacity:' + (amt > 0 ? 1 : 0.3) + '; border-radius:3px 3px 0 0;"></div>' +
+        '</div>' +
+        '<div style="font-size:8.5px; color:' + (isCur ? color : 'var(--text-muted)') + '; font-weight:' + (isCur ? '700' : '400') + ';">' + i + '</div>' +
+      '</div>';
+    }
+    return '<div style="border-top:1px solid ' + cv('--border', '#34322B') + '; margin-top:8px; padding-top:8px;">' +
+      '<div style="display:flex; gap:3px; align-items:flex-end;">' + bars + '</div>' +
+      '<div style="font-size:9.5px; color:var(--text-muted); margin-top:4px;">внески по тижнях' + (maxAmt > 1 ? ' · макс $' + maxAmt.toLocaleString() : '') + '</div>' +
+    '</div>';
+  }
+
+  // 9. "Тиждень X з 12 · лишилось Y" — раніше цей рядок був у розмітці, але ніколи не заповнювався.
+  function renderDashboardLine(snap){
+    const el = document.getElementById('dashboard-line');
+    if (!el) return;
+    const cur = currentWeek();
+    const remaining = Math.max(WEEKS - cur, 0);
+    const word = remaining === 1 ? 'тиждень' : (remaining >= 2 && remaining <= 4 ? 'тижні' : 'тижнів');
+    el.innerHTML = '<span style="font-weight:600; color:var(--text-primary);">Тиждень ' + cur + ' з ' + WEEKS + '</span><span>·</span><span>лишилось ' + remaining + ' ' + word + '</span>';
+  }
+
+  function renderStats(snap){
+    const hasData = snap.cur > 0;
+    const prevWeight = snap.cur > 1 ? findPrevWeight(snap.cur) : null;
+    const prevDebtAmt = snap.cur > 0 ? findPrevAmt(snap.cur + 1, 'debtAmt') : null;
+    const prevCapAmt = snap.cur > 0 ? findPrevAmt(snap.cur + 1, 'capitalAmt') : null;
+    const thisWeekDebt = snap.cur > 0 ? state[snap.cur].debtAmt : null;
+    const thisWeekCap = snap.cur > 0 ? state[snap.cur].capitalAmt : null;
+    document.getElementById('stat-cards').innerHTML =
+      statCard('Вага', fmt1(snap.lastWeight) + ' кг', GOALS.weightEnd + ' кг', snap.weightOnTrack, snap.weightAhead, hasData, prevWeight !== null && snap.cur > 1 ? deltaHtml(snap.lastWeight, prevWeight, true, ' кг') : '') +
+      statCard('Борг виплачено', '$' + Math.round(snap.debtCurrent).toLocaleString(), '$' + GOALS.debtEnd.toLocaleString(), snap.debtOnTrack, snap.debtAhead, hasData, thisWeekDebt && prevDebtAmt ? deltaHtml(thisWeekDebt, prevDebtAmt, false, '') : '') +
+      statCard('Капітал (внески)', '$' + Math.round(snap.capitalCurrent).toLocaleString(), '$' + GOALS.capitalEnd.toLocaleString(), snap.capitalOnTrack, snap.capitalAhead, hasData, thisWeekCap && prevCapAmt ? deltaHtml(thisWeekCap, prevCapAmt, false, '') : '');
+
+    const banner = document.getElementById('pace-banner');
+    const behind = [];
+    if (!snap.weightOnTrack) behind.push(['Вага', '~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень до кінця']);
+    if (!snap.debtOnTrack) behind.push(['Борг', '~$' + Math.round(snap.neededWeeklyDebt) + '/тиждень до кінця']);
+    if (!snap.capitalOnTrack) behind.push(['Капітал', '~$' + Math.round(snap.neededWeeklyCapital) + '/тиждень до кінця']);
+    const ahead = [];
+    if (snap.weightAhead) ahead.push(['Вага', 'можна ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень']);
+    if (snap.debtAhead) ahead.push(['Борг', 'можна ~$' + Math.max(Math.round(snap.neededWeeklyDebt),0) + '/тиждень']);
+    if (snap.capitalAhead) ahead.push(['Капітал', 'можна ~$' + Math.max(Math.round(snap.neededWeeklyCapital),0) + '/тиждень']);
+    if (!hasData || (behind.length === 0 && ahead.length === 0)){
+      banner.innerHTML = '';
+    } else if (behind.length > 0){
+      const rows = behind.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
+      banner.innerHTML = '<div class="card" style="border-left: 3px solid ' + C_CURRENT + '; border-radius: 14px; padding: 0.9rem 1.1rem;"><div style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">Темп відстає — новий орієнтир</div>' + rows + '</div>';
+    } else {
+      const rows = ahead.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
+      banner.innerHTML = '<div class="card" style="border-left: 3px solid ' + C_DONE + '; border-radius: 14px; padding: 0.9rem 1.1rem;"><div style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">🎉 Випереджаєш план</div>' + rows + '</div>';
+    }
+  }
+
+  function renderWeightChart(snap){
+    const w = 620, h = 190, padL = 38, padR = 16, padT = 16, padB = 26;
+    const cur = currentWeek();
+
+    // 2. Динамічний діапазон шкали замість жорстких 70-80 кг
+    const entered = []; for (let i = 1; i <= WEEKS; i++) if (state[i].weight) entered.push(state[i].weight);
+    const allVals = entered.concat([GOALS.weightStart, GOALS.weightEnd]);
+    let loV = Math.min.apply(null, allVals), hiV = Math.max.apply(null, allVals);
+    if (loV === hiV){ loV -= 1; hiV += 1; }
+    const spanV = hiV - loV;
+    const yMin = loV - spanV * 0.18, yMax = hiV + spanV * 0.18;
+
+    const x = i => padL + (w - padL - padR) * i / WEEKS;
+    const y = v => padT + (h - padT - padB) * (yMax - v) / (yMax - yMin);
+    const gridColor = cv('--border', '#E1E0D9'), mutedColor = cv('--text-muted', '#898781'), ringColor = cv('--surface-2', '#FFFFFF');
+
+    let grid = '';
+    const step = spanV > 6 ? 2 : (spanV > 2.5 ? 1 : 0.5);
+    for (let v = Math.ceil(yMin / step) * step; v <= yMax; v += step){
+      grid += '<line x1="' + padL + '" y1="' + y(v) + '" x2="' + (w-padR) + '" y2="' + y(v) + '" stroke="' + gridColor + '" stroke-width="1" />';
+      grid += '<text x="' + (padL - 8) + '" y="' + (y(v)+3) + '" text-anchor="end" font-size="10" fill="' + mutedColor + '">' + fmt1(v) + '</text>';
+    }
+
+    let expPath = ''; for (let i = 0; i <= WEEKS; i++) expPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(expWeight(i)) + ' ';
+
+    // 1. Старт — окремий порожній маркер із підписом "Старт", не плутається з реальними замірами.
+    let actPath = '', dots = '', started = false, lastPoint = null;
+    for (let i = 0; i <= WEEKS; i++){
+      const wt = i === 0 ? GOALS.weightStart : (state[i] && state[i].weight);
+      if (!wt) continue;
+      actPath += (!started ? 'M' : 'L') + x(i) + ',' + y(wt) + ' '; started = true;
+      if (i === 0){
+        dots += '<circle cx="' + x(0) + '" cy="' + y(wt) + '" r="4" fill="' + cv('--surface-2','#221F19') + '" stroke="' + C_WEIGHT + '" stroke-width="2" />';
+        dots += '<text x="' + (x(0)+6) + '" y="' + (y(wt) - 8) + '" text-anchor="start" font-size="9.5" fill="' + mutedColor + '">Старт</text>';
+      } else {
+        dots += '<circle cx="' + x(i) + '" cy="' + y(wt) + '" r="4.5" fill="' + C_WEIGHT + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === cur ? 'chart-dot-live' : '') + '" />';
+        lastPoint = { i: i, v: wt };
+      }
+    }
+    // 3. Значення останньої реальної точки — підписано прямо на графіку.
+    if (lastPoint) dots += '<text x="' + x(lastPoint.i) + '" y="' + (y(lastPoint.v) - 10) + '" text-anchor="middle" font-size="10.5" font-weight="600" fill="' + C_WEIGHT + '">' + fmt1(lastPoint.v) + ' кг</text>';
+
+    // 5. Заливка між планом і фактом: зелена — випереджаєш/у графіку, жовта — позаду.
+    let shade = '';
+    if (lastPoint){
+      const shadeColor = snap.weightOnTrack ? 'rgba(47,190,147,0.14)' : 'rgba(240,185,77,0.14)';
+      let bandPath = 'M' + x(0) + ',' + y(GOALS.weightStart) + ' ';
+      for (let i = 1; i <= lastPoint.i; i++) bandPath += 'L' + x(i) + ',' + y(state[i].weight || expWeight(i)) + ' ';
+      for (let i = lastPoint.i; i >= 0; i--) bandPath += 'L' + x(i) + ',' + y(expWeight(i)) + ' ';
+      shade = '<path d="' + bandPath + 'Z" fill="' + shadeColor + '" stroke="none" />';
+    }
+
+    const targetY = y(GOALS.weightEnd);
+    // 9. Мітки тижнів на осі, поточний тиждень виділено.
+    const xlabels = weekAxisLabels_(x, mutedColor, h, cur);
+    const remainingKg = Math.max(snap.lastWeight - GOALS.weightEnd, 0);
+
+    // 4. % прогресу над графіком
+    updateChartPct_('chart-weight-pct', 'weight', snap);
+
+    document.getElementById('chart-weight').innerHTML =
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%; height:auto; display:block; overflow:visible;">' +
+        grid + shade +
+        '<line x1="' + padL + '" y1="' + targetY + '" x2="' + (w-padR) + '" y2="' + targetY + '" stroke="' + C_WEIGHT + '" stroke-dasharray="3,3" stroke-width="1.2" />' +
+        '<text x="' + (w-padR) + '" y="' + (targetY - 6) + '" text-anchor="end" font-size="10" fill="' + C_WEIGHT + '">ціль ' + GOALS.weightEnd + ' кг</text>' +
+        '<path d="' + expPath + '" fill="none" stroke="' + cv('--border-strong', C_FUTURE_FALLBACK) + '" stroke-width="1.5" stroke-dasharray="4,4" />' +
+        '<path d="' + actPath + '" fill="none" stroke="' + C_WEIGHT + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />' +
+        dots + xlabels +
+      '</svg>' +
+      // 6 і 10. Підсумок людською мовою + скільки лишилось прямо під графіком.
+      '<div style="font-size:11.5px; color:var(--text-secondary); margin-top:6px; line-height:1.4;">' + chartSummary_('weight', snap) +
+        (snap.cur > 0 ? ' Залишилось ' + fmt1(remainingKg) + ' кг.' : '') + '</div>';
+  }
+
+  function renderMoneyChart(containerId, expFn, amtKey, start, end, color, kind, snap){
+    const w = 620, h = 190, padL = 50, padR = 16, padT = 16, padB = 26;
+    const cur = currentWeek();
+    const isDebt = kind === 'debt';
+    const onTrack = isDebt ? snap.debtOnTrack : snap.capitalOnTrack;
+    const current = isDebt ? snap.debtCurrent : snap.capitalCurrent;
+
+    // Кумулятивна сума по тижнях — борг і капітал тепер рахуються ОДНАКОВО (зростання).
+    const cumSeries = [start];
+    let cum = start;
+    for (let i = 1; i <= WEEKS; i++){ cum += Number(state[i][amtKey]) || 0; cumSeries.push(cum); }
+
+    // 2. Динамічний діапазон з урахуванням і плану, і факту (щоб перевиконання не вилазило за межі)
+    const lo0 = Math.min(start, end), hi0 = Math.max(start, end);
+    const cumMax = Math.max.apply(null, cumSeries), cumMin = Math.min.apply(null, cumSeries);
+    const lo = Math.min(lo0, cumMin), hi = Math.max(hi0, cumMax);
+    const span = (hi - lo) || 1;
+    const yMin = lo - span * 0.12, yMax = hi + span * 0.12;
+
+    const x = i => padL + (w - padL - padR) * i / WEEKS;
+    const y = v => padT + (h - padT - padB) * (yMax - v) / (yMax - yMin);
+    const gridColor = cv('--border', '#E1E0D9'), mutedColor = cv('--text-muted', '#898781'), ringColor = cv('--surface-2', '#FFFFFF');
+
+    let grid = '';
+    const step = niceStep_(hi0 - lo0, 5);
+    for (let v = Math.ceil(lo0 / step) * step; v <= hi0 + step * 0.001; v += step){
+      grid += '<line x1="' + padL + '" y1="' + y(v) + '" x2="' + (w-padR) + '" y2="' + y(v) + '" stroke="' + gridColor + '" stroke-width="1" />' +
+        '<text x="' + (padL - 8) + '" y="' + (y(v)+3) + '" text-anchor="end" font-size="10" fill="' + mutedColor + '">$' + Math.round(v).toLocaleString() + '</text>';
+    }
+
+    let expPath = ''; for (let i = 0; i <= WEEKS; i++) expPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(expFn(i)) + ' ';
+
+    // 1. Старт — окремий маркер, 3. остання точка підписана значенням.
+    let actPath = '', dots = '', lastPoint = null;
+    for (let i = 0; i <= WEEKS; i++){
+      if (i > 0 && !state[i][amtKey] && i > cur) continue;
+      const v = cumSeries[i];
+      actPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(v) + ' ';
+      if (i === 0){
+        dots += '<circle cx="' + x(0) + '" cy="' + y(v) + '" r="4" fill="' + cv('--surface-2','#221F19') + '" stroke="' + color + '" stroke-width="2" />';
+        dots += '<text x="' + (x(0)+6) + '" y="' + (y(v) - 8) + '" text-anchor="start" font-size="9.5" fill="' + mutedColor + '">Старт</text>';
+      } else if (state[i][amtKey]) {
+        dots += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="4.5" fill="' + color + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === cur ? 'chart-dot-live' : '') + '" />';
+        lastPoint = { i: i, v: v };
+      }
+    }
+    if (lastPoint) dots += '<text x="' + x(lastPoint.i) + '" y="' + (y(lastPoint.v) - 10) + '" text-anchor="middle" font-size="10.5" font-weight="600" fill="' + color + '">$' + Math.round(lastPoint.v).toLocaleString() + '</text>';
+
+    // 5. Заливка план/факт.
+    let shade = '';
+    if (lastPoint){
+      const shadeColor = onTrack ? 'rgba(47,190,147,0.14)' : 'rgba(240,185,77,0.14)';
+      let bandPath = 'M' + x(0) + ',' + y(cumSeries[0]) + ' ';
+      for (let i = 1; i <= lastPoint.i; i++) bandPath += 'L' + x(i) + ',' + y(cumSeries[i]) + ' ';
+      for (let i = lastPoint.i; i >= 0; i--) bandPath += 'L' + x(i) + ',' + y(expFn(i)) + ' ';
+      shade = '<path d="' + bandPath + 'Z" fill="' + shadeColor + '" stroke="none" />';
+    }
+
+    const targetY = y(end);
+    const xlabels = weekAxisLabels_(x, mutedColor, h, cur);
+    const remaining = Math.max(end - current, 0);
+
+    // 4. % прогресу над графіком
+    updateChartPct_(containerId + '-pct', kind, snap);
+
+    document.getElementById(containerId).innerHTML =
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%; height:auto; display:block; overflow:visible;">' +
+        grid + shade +
+        '<line x1="' + padL + '" y1="' + targetY + '" x2="' + (w-padR) + '" y2="' + targetY + '" stroke="' + color + '" stroke-dasharray="3,3" stroke-width="1.2" />' +
+        '<text x="' + (w-padR) + '" y="' + (targetY - 6) + '" text-anchor="end" font-size="10" fill="' + color + '">ціль $' + Math.round(end).toLocaleString() + '</text>' +
+        '<path d="' + expPath + '" fill="none" stroke="' + cv('--border-strong', C_FUTURE_FALLBACK) + '" stroke-width="1.5" stroke-dasharray="4,4" />' +
+        '<path d="' + actPath + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />' +
+        dots + xlabels +
+      '</svg>' +
+      // 7. Бар-спарклайн тижневих внесків, окремо від кумулятивної лінії.
+      weeklyBarsHtml_(amtKey, color) +
+      // 6 і 10. Підсумок людською мовою + скільки лишилось.
+      '<div style="font-size:11.5px; color:var(--text-secondary); margin-top:8px; line-height:1.4;">' + chartSummary_(kind, snap) +
+        (snap.cur > 0 ? ' Залишилось $' + Math.round(remaining).toLocaleString() + '.' : '') + '</div>';
+  }
+
+  function dailyToggle(state_key, weekIdx, label){
+    const arr = state[weekIdx][state_key];
+    const frac = dayFraction(arr), pct = Math.round(frac*100);
+    const color = pct >= 85 ? C_DONE : pct > 0 ? C_CURRENT : 'var(--text-muted)';
+    const wrap = document.createElement('div'); wrap.className = 'daily-block';
+    const head = document.createElement('div'); head.className = 'daily-head';
+    head.innerHTML = '<span>' + label + '</span><span style="color:' + color + '; font-weight:500;">' + arr.filter(Boolean).length + '/7 (' + pct + '%)</span>';
+    wrap.appendChild(head);
+    const grid = document.createElement('div'); grid.className = 'daily-grid';
+    arr.forEach((val, di) => {
+      const cell = document.createElement('div'); cell.className = 'day-cell';
+      const sq = document.createElement('div'); sq.className = 'day-square' + (val ? ' checked' : '');
+      sq.innerHTML = icon(val ? 'check' : 'plus', 14);
+      sq.onclick = () => { state[weekIdx][state_key][di] = !state[weekIdx][state_key][di]; saveWeek(weekIdx); render(); };
+      cell.appendChild(sq);
+      const lbl = document.createElement('div'); lbl.className = 'day-cell-label'; lbl.textContent = DAY_LABELS[di];
+      cell.appendChild(lbl);
+      grid.appendChild(cell);
+    });
+    wrap.appendChild(grid);
+    return wrap;
+  }
+  function stepper(value, step, decimals, onLive, onCommit, min){
+    if (min === undefined || min === null) min = 0;
+    const wrap = document.createElement('div'); wrap.className = 'stepper';
+    const minus = document.createElement('button'); minus.className = 'step-btn'; minus.type = 'button'; minus.innerHTML = icon('minus', 14);
+    const input = document.createElement('input'); input.type = 'number'; input.step = step; input.min = min; input.value = value !== null && value !== undefined ? value : '';
+    input.inputMode = decimals > 0 ? 'decimal' : 'numeric';
+    input.onfocus = () => input.select();
+    const plus = document.createElement('button'); plus.className = 'step-btn'; plus.type = 'button'; plus.innerHTML = icon('plus', 14);
+    function commitStep(v){ if (v < min) v = min; const rounded = Math.round(v / step) * step; const fixed = parseFloat(rounded.toFixed(decimals)); input.value = fixed; onLive(fixed); onCommit(); }
+    minus.onclick = () => commitStep((parseFloat(input.value) || 0) - step);
+    plus.onclick = () => commitStep((parseFloat(input.value) || 0) + step);
+    // While typing: only persist the value, never rebuild the DOM (that was causing focus loss / jank on every keystroke).
+    input.oninput = () => onLive(input.value ? parseFloat(input.value) : null);
+    // Full recalculation happens once editing is done — і тут же виправляємо, якщо ввели від'ємне число.
+    input.onblur = () => {
+      const v = parseFloat(input.value);
+      if (!isNaN(v) && v < min){ input.value = min; onLive(min); }
+      onCommit();
+    };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
+    wrap.appendChild(minus); wrap.appendChild(input); wrap.appendChild(plus);
+    wrap._input = input;
+    return wrap;
+  }
+  function metricRow(label, color, inputEl, planText, warnText, copyTitle, onCopy, fillLabel, onFill){
+    const row = document.createElement('div'); row.className = 'metric-row';
+    const accent = document.createElement('div'); accent.className = 'metric-accent'; accent.style.background = color;
+    row.appendChild(accent);
+    const body = document.createElement('div'); body.className = 'metric-body';
+    const top = document.createElement('div'); top.className = 'metric-top-row';
+    const lbl = document.createElement('span'); lbl.className = 'metric-label'; lbl.textContent = label; top.appendChild(lbl);
+    if (onFill){
+      const planBtn = document.createElement('button');
+      planBtn.type = 'button';
+      planBtn.className = 'plan-note';
+      planBtn.style.cssText = 'background:none; border:none; text-decoration:underline dotted; text-underline-offset:3px; cursor:pointer; padding:0; font:inherit;';
+      planBtn.title = 'Підставити ' + fillLabel;
+      planBtn.textContent = planText + ' · підставити';
+      planBtn.onclick = onFill;
+      top.appendChild(planBtn);
+    } else {
+      const plan = document.createElement('span'); plan.className = 'plan-note'; plan.textContent = planText; top.appendChild(plan);
+    }
+    body.appendChild(top);
+    const inputRow = document.createElement('div'); inputRow.className = 'metric-input-row';
+    inputRow.appendChild(inputEl);
+    if (onCopy){
+      const cb = document.createElement('button'); cb.className = 'icon-btn'; cb.type = 'button'; cb.title = copyTitle; cb.innerHTML = icon('copy', 14);
+      cb.onclick = onCopy;
+      inputRow.appendChild(cb);
+    }
+    body.appendChild(inputRow);
+    if (warnText){
+      const warn = document.createElement('div'); warn.className = 'warn-text';
+      warn.innerHTML = icon('warn', 13) + '<span>' + warnText + '</span>';
+      body.appendChild(warn);
+    }
+    row.appendChild(body);
+    return row;
+  }
+
+  function buildWeekBody(i, snap){
+    const frag = document.createDocumentFragment();
+    const prevW = i > 1 ? state[i-1].weight : null;
+    const wWarn = (state[i].weight && Math.abs(state[i].weight - findPrevWeight(i)) > 2) ? 'Велика зміна від минулого тижня (' + fmt1(findPrevWeight(i)) + ' кг)' : null;
+    const wTarget = fmt1(expWeight(i));
+    const wStep = stepper(state[i].weight, 0.1, 1,
+      (v) => { state[i].weight = v; saveWeek(i); },
+      () => render());
+    frag.appendChild(metricRow('Вага, кг', C_WEIGHT, wStep, 'план ' + wTarget + ' кг', wWarn,
+      prevW ? ('Скопіювати ' + fmt1(prevW) + ' кг з тижня ' + (i-1)) : null,
+      prevW ? () => { state[i].weight = prevW; saveWeek(i); render(); } : null,
+      wTarget + ' кг', () => { state[i].weight = wTarget; saveWeek(i); render(); }));
+
+    const planDebt = planFor_(i, 'debtAmt', GOALS.debtStart, GOALS.debtEnd);
+    const planDebtNote = 'план $' + planDebt;
+    const prevDebt = i > 1 ? state[i-1].debtAmt : null;
+    const dWarn = (state[i].debtAmt && state[i].debtAmt > planDebt * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
+    const dStep = stepper(state[i].debtAmt, 5, 0,
+      (v) => { state[i].debtAmt = v; saveWeek(i); },
+      () => render());
+    frag.appendChild(metricRow('Борг · відклав у конверт, $', C_DEBT, dStep, planDebtNote, dWarn,
+      prevDebt ? ('Скопіювати $' + prevDebt + ' з тижня ' + (i-1)) : null,
+      prevDebt ? () => { state[i].debtAmt = prevDebt; saveWeek(i); render(); } : null,
+      '$' + planDebt, () => { state[i].debtAmt = planDebt; saveWeek(i); render(); }));
+
+    const planCapital = planFor_(i, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd);
+    const planCapNote = 'план $' + planCapital;
+    const prevCap = i > 1 ? state[i-1].capitalAmt : null;
+    const cWarn = (state[i].capitalAmt && state[i].capitalAmt > planCapital * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
+    const cStep = stepper(state[i].capitalAmt, 5, 0,
+      (v) => { state[i].capitalAmt = v; saveWeek(i); },
+      () => render());
+    frag.appendChild(metricRow('Капітал · переказ на Монобанк $ або OKX', C_CAPITAL, cStep, planCapNote, cWarn,
+      prevCap ? ('Скопіювати $' + prevCap + ' з тижня ' + (i-1)) : null,
+      prevCap ? () => { state[i].capitalAmt = prevCap; saveWeek(i); render(); } : null,
+      '$' + planCapital, () => { state[i].capitalAmt = planCapital; saveWeek(i); render(); }));
+
+    const habitLabel = document.createElement('div'); habitLabel.className = 'group-label'; habitLabel.textContent = 'Схуднення';
+    frag.appendChild(habitLabel);
+    const habitPanel = document.createElement('div'); habitPanel.className = 'habit-panel';
+    WEEKLY_TACTICS.forEach(t => {
+      const row = document.createElement('label'); row.className = 'habit-row';
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!state[i].checks[t.id];
+      cb.onchange = (e) => { state[i].checks[t.id] = e.target.checked; saveWeek(i); render(); };
+      row.appendChild(cb);
+      const span = document.createElement('span'); span.textContent = t.label; row.appendChild(span);
+      habitPanel.appendChild(row);
+    });
+    frag.appendChild(habitPanel);
+    frag.appendChild(dailyToggle('logDays', i, 'Облік їжі кожного дня'));
+    frag.appendChild(dailyToggle('calorieDays', i, 'Не більше 2000 ккал/день'));
+    return frag;
+  }
+
+  function renderHero(snap){
+    const i = currentWeek();
+    const s = score(i);
+    const accentColor = statusColor(displayStatus(i));
+    const wasCelebrated = prevScores[i] !== undefined && prevScores[i] < 85 && s >= 85;
+    const wrap = document.getElementById('hero-wrap');
+    wrap.innerHTML = '';
+    const card = document.createElement('div');
+    card.className = 'hero-card' + (wasCelebrated ? ' flash' : '');
+    card.style.borderTop = '4px solid ' + accentColor;
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px;';
+    header.innerHTML = '<div style="display:flex; align-items:center; gap:10px;"><span class="today-pill">Сьогодні</span><strong style="font-size:16px;">Тиждень ' + i + '</strong><span style="color:var(--text-secondary); font-size:13px;">' + weekDates(i) + '</span></div>';
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'icon-btn'; resetBtn.title = 'Скинути тиждень'; resetBtn.innerHTML = icon('reset', 15);
+    resetBtn.onclick = () => {
+      showAppModal({ message: 'Скинути всі дані тижня ' + i + '?', okLabel: 'Скинути', onOk: () => { state[i] = emptyWeek(); saveWeek(i); render(); } });
+    };
+    header.appendChild(resetBtn);
+    card.appendChild(header);
+
+    const scoreRow = document.createElement('div');
+    scoreRow.style.cssText = 'display:flex; align-items:baseline; gap:10px; margin: 6px 0 2px;';
+    const scoreNum = document.createElement('span');
+    scoreNum.className = 'hero-num' + (wasCelebrated ? ' celebrate' : '');
+    scoreNum.style.cssText = 'font-size:42px; color:' + accentColor + ';';
+    scoreNum.textContent = s + '%';
+    scoreRow.appendChild(scoreNum);
+    const scoreLbl = document.createElement('span');
+    scoreLbl.style.cssText = 'font-size:13px; color:var(--text-secondary);';
+    scoreLbl.textContent = 'виконання тижня' + (wasCelebrated ? ' · 🎉 ціль досягнута!' : '');
+    scoreRow.appendChild(scoreLbl);
+    card.appendChild(scoreRow);
+
+    const scoreCaption = document.createElement('div');
+    scoreCaption.style.cssText = 'font-size:10.5px; color:var(--text-muted); letter-spacing:0.02em; margin: 0 0 18px;';
+    scoreCaption.textContent = 'Weekly Execution Score — 5 дій тижня: зважування, облік їжі, калорії, конверт на борг, переказ на капітал.';
+    card.appendChild(scoreCaption);
+
+    card.appendChild(buildWeekBody(i, snap));
+    wrap.appendChild(card);
+    prevScores[i] = s;
+  }
+
+  function renderHistory(snap){
+    const list = document.getElementById('history-list');
+    list.innerHTML = '';
+    const today = currentWeek();
+    for (let i = 1; i <= WEEKS; i++){
+      if (i === today) continue;
+      const s = score(i);
+      const st = displayStatus(i);
+      const accentColor = statusColor(st);
+      const item = document.createElement('div');
+      item.className = 'week-row-item';
+      item.style.borderLeftColor = accentColor;
+      const header = document.createElement('div');
+      header.style.cssText = 'display:flex; justify-content:space-between; align-items:center;';
+      header.innerHTML = '<div><strong style="font-size:13.5px;">Тиждень ' + i + '</strong> <span style="color:var(--text-secondary); font-size:12.5px; margin-left:8px;">' + weekDates(i) + '</span></div>' +
+        '<div style="display:flex; align-items:center; gap:10px;"><div class="progress-track"><div class="progress-fill" style="width:' + s + '%; background:' + accentColor + ';"></div></div>' +
+        '<span style="font-size:12.5px; color:' + accentColor + '; font-weight:500; min-width:30px; text-align:right;">' + s + '%</span>' +
+        '<svg width="14" height="14" viewBox="0 0 16 16" style="transform:rotate(' + (state[i].open ? '180' : '0') + 'deg); transition: transform 0.2s;"><path d="M4 6l4 4 4-4" stroke="var(--text-secondary)" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+      item.onclick = () => { state[i].open = !state[i].open; render(); };
+      item.appendChild(header);
+      if (state[i].open){
+        const body = document.createElement('div');
+        body.style.cssText = 'margin-top:14px;';
+        body.onclick = (e) => e.stopPropagation();
+        body.appendChild(buildWeekBody(i, snap));
+        item.appendChild(body);
+      }
+      list.appendChild(item);
+      prevScores[i] = s;
+    }
+  }
+
+  function exportData(format){
+    let content, mime, filename;
+    if (format === 'json'){
+      const data = {}; for (let i = 1; i <= WEEKS; i++) data['week' + i] = state[i];
+      content = JSON.stringify(data, null, 2); mime = 'application/json'; filename = '12-week-tracker.json';
+    } else {
+      const rows = ['week,dates,weight,debtAmt,capitalAmt,logDaysDone,calorieDaysDone,weighIn,score'];
+      for (let i = 1; i <= WEEKS; i++){
+        const st = state[i];
+        rows.push([i, weekDates(i), st.weight || '', st.debtAmt || '', st.capitalAmt || '', st.logDays.filter(Boolean).length, st.calorieDays.filter(Boolean).length, st.checks.w1 ? 1 : 0, score(i)].join(','));
+      }
+      content = rows.join('\n'); mime = 'text/csv'; filename = '12-week-tracker.csv';
+    }
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const $ = (id) => document.getElementById(id);
+  if ($('menu-btn')) $('menu-btn').onclick = (e) => { e.stopPropagation(); if ($('menu-panel')) $('menu-panel').classList.toggle('open'); };
+  document.addEventListener('click', () => { if ($('menu-panel')) $('menu-panel').classList.remove('open'); });
+  if ($('export-json')) $('export-json').onclick = () => exportData('json');
+  if ($('export-csv')) $('export-csv').onclick = () => exportData('csv');
+  if ($('import-json')) $('import-json').onclick = () => { if ($('import-file-input')) $('import-file-input').click(); };
+  if ($('import-file-input')) $('import-file-input').onchange = (e) => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; };
+  if ($('setup-sync')) $('setup-sync').onclick = () => {
+    const current = getWebAppUrl();
+    showAppModal({
+      message: 'Встав URL Google Apps Script Web App для синхронізації (порожньо — вимкнути):',
+      showInput: true, inputValue: current, okLabel: 'Зберегти',
+      onOk: (url) => { setWebAppUrl((url || '').trim()); updateSyncStatusUI(); load(); }
+    });
+  };
+  function openGoalsModal(){
+    $('goal-weight-start').value = GOALS.weightStart;
+    $('goal-weight-end').value = GOALS.weightEnd;
+    $('goal-debt-start').value = GOALS.debtStart;
+    $('goal-debt-end').value = GOALS.debtEnd;
+    $('goal-capital-start').value = GOALS.capitalStart;
+    $('goal-capital-end').value = GOALS.capitalEnd;
+    if ($('goals-overlay')) $('goals-overlay').style.display = 'flex';
+  }
+  function closeGoalsModal(){ if ($('goals-overlay')) $('goals-overlay').style.display = 'none'; }
+  if ($('setup-goals')) $('setup-goals').onclick = openGoalsModal;
+  if ($('goals-cancel')) $('goals-cancel').onclick = closeGoalsModal;
+  if ($('goals-overlay')) $('goals-overlay').onclick = (e) => { if (e.target.id === 'goals-overlay') closeGoalsModal(); };
+  if ($('goals-save')) $('goals-save').onclick = async () => {
+    const num = (id, fallback) => { const v = parseFloat($(id).value); return isNaN(v) ? fallback : v; };
+    GOALS.weightStart = num('goal-weight-start', GOALS.weightStart);
+    GOALS.weightEnd = num('goal-weight-end', GOALS.weightEnd);
+    GOALS.debtStart = num('goal-debt-start', GOALS.debtStart);
+    GOALS.debtEnd = num('goal-debt-end', GOALS.debtEnd);
+    GOALS.capitalStart = num('goal-capital-start', GOALS.capitalStart);
+    GOALS.capitalEnd = num('goal-capital-end', GOALS.capitalEnd);
+    await saveGoals();
+    closeGoalsModal();
+    render();
+  };
+  if ($('progress-toggle')) $('progress-toggle').onclick = () => {
+    progressOpen = !progressOpen;
+    if ($('progress-collapsible')) $('progress-collapsible').classList.toggle('open', progressOpen);
+    if ($('progress-chevron')) $('progress-chevron').style.transform = progressOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+  };
+  if ($('history-toggle')) $('history-toggle').onclick = () => {
+    historyOpen = !historyOpen;
+    if ($('history-list')) $('history-list').style.display = historyOpen ? 'block' : 'none';
+    if ($('history-chevron')) $('history-chevron').style.transform = historyOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+  };
+
+  function render(){
+    try {
+      const snap = computeSnapshot();
+      renderDashboardLine(snap);
+      renderJourney();
+      renderStats(snap);
+      renderWeightChart(snap);
+      renderMoneyChart('chart-debt', expDebtPaid, 'debtAmt', GOALS.debtStart, GOALS.debtEnd, C_DEBT, 'debt', snap);
+      renderMoneyChart('chart-capital', expCapital, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd, C_CAPITAL, 'capital', snap);
+      renderHero(snap);
+      renderHistory(snap);
+    } catch(err){
+      const root = document.getElementById('tracker-root');
+      if (root) root.innerHTML = '<div style="padding:20px; font-family:sans-serif; color:#854F0B;">Трекер не зміг відобразитись через помилку: ' + (err && err.message ? err.message : String(err)) + '. Спробуй відкрити цей артефакт у звичайному браузері телефону через кнопку "Publish".</div>';
+    }
+  }
+
+  load();
+})();
+</script>
+</body>
+</html>
