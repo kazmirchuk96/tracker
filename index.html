@@ -26,6 +26,49 @@
   --text-primary: #F3F1E8;
   --text-secondary: #B7B4A6;
   --text-muted: #8C8977;
+
+  /* --- I6: семантичні кольори станів. Раніше зелений/жовтий/червоний були
+     розсипані по коду як літерали (#2FBE93, rgba(47,190,147,0.16) тощо),
+     тож зміна теми їх не підхоплювала. --- */
+  --accent: #2FBE93;
+  --accent-soft: rgba(47, 190, 147, 0.16);
+  --accent-text: #6EE7C0;
+  --warn: #F0B94D;
+  --warn-soft: rgba(240, 185, 77, 0.16);
+  --warn-text: #F0B94D;
+  --danger: #FF7A54;
+  --focus: #1D9E75;
+
+  /* --- I1: шкала радіусів. Було 9 випадкових значень (3/8/12/14/16/20/22...),
+     стало 4 кроки + пігулка. Правило: sm — дрібні елементи, md — контроли,
+     lg — внутрішні панелі, xl — зовнішні картки. --- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* --- I3: одна товщина рамки замість 0.5/1/1.5px. 0.5px на екранах з DPR 2
+     округлюється непередбачувано і місцями не малюється взагалі. --- */
+  --bw: 1px;
+  /* акцентні смужки (ліва грань банера, верхня грань картки тижня) —
+     не хейрлайн, а самостійний елемент, тому окремий токен */
+  --bw-accent: 3px;
+
+  /* --- I2: один розмір для всіх круглих кнопок-іконок і тап-цілей.
+     Було чотири різні (30/28/34/36px) без жодної причини. --- */
+  --tap: 44px;
+
+  /* --- I4: шкала розмірів тексту. Було 14 різних значень, стало 6.
+     Нижня межа 11.5px — Apple HIG не радить опускатись нижче 11pt
+     навіть для допоміжного тексту. --- */
+  --fs-xs: 11.5px;
+  --fs-sm: 12.5px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 22px;
+  --fs-display: 42px;
+
   font-family: 'Inter', -apple-system, sans-serif;
   color: var(--text-primary);
   width: 100%;
@@ -39,11 +82,11 @@
      Без цих env() у standalone-режимі (запуск з іконки) верх і низ підʼїжджали
      під вирізи. max() лишає звичайні 1.5rem там, де вирізів немає. */
   padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
-  border-radius: 20px;
+  border-radius: var(--r-xl);
   overflow-x: clip;
 }
 #tracker-root h1 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
-.section-label { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 500; margin-bottom: 12px; }
+.section-label { font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 500; margin-bottom: 12px; }
 /* 3.1: раніше вся стрічка була одним SVG з viewBox 680px, який стискався під
    ширину картки — на iPhone кружечок виходив 14.6px, а цифра всередині 5.3px.
    Тепер це звичайні HTML-елементи фіксованого розміру 44px (мінімум Apple HIG),
@@ -51,7 +94,7 @@
 .journey-strip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
 .journey-strip::-webkit-scrollbar { display: none; }
 .journey-cell { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
-.journey-dot { width: 44px; height: 44px; border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #0F0E0A; font-variant-numeric: tabular-nums; transition: background 0.3s, box-shadow 0.2s, transform 0.1s; }
+.journey-dot { width: var(--tap); height: var(--tap); border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: var(--fs-md); font-weight: 700; color: #0F0E0A; font-variant-numeric: tabular-nums; transition: background 0.3s, box-shadow 0.2s, transform 0.1s; }
 .journey-cell:active .journey-dot { transform: scale(0.92); }
 /* Позначка обраного тижня. Раніше тут був подвійний box-shadow: темний проміжок
    плюс кільце кольору --text-primary (найяскравішого в палітрі) — на темному тлі
@@ -59,66 +102,77 @@
    ореол упритул до кружечка: помітно, але не кричить. */
 .journey-cell.selected .journey-dot { box-shadow: 0 0 0 3px rgba(243, 241, 232, 0.28); }
 .journey-cell.selected .journey-num { color: var(--text-secondary); font-weight: 600; }
-.journey-num { font-size: 11px; color: var(--text-muted); }
+.journey-num { font-size: var(--fs-xs); color: var(--text-muted); }
 /* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
    тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
 @media (max-width: 470px) { .bar-amt { display: none; } }
-.journey-cell.today .journey-num { color: #F0B94D; font-weight: 700; }
-.card { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 20px; padding: 1.25rem 1.4rem; }
+.journey-cell.today .journey-num { color: var(--warn-text); font-weight: 700; }
+.card { background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-xl); padding: 1.25rem 1.4rem; }
 .hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; transition: color 0.3s; }
-.badge { font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 500; white-space: nowrap; }
-.badge-ok { background: rgba(47,190,147,0.16); color: #6EE7C0; }
-.badge-behind { background: rgba(186,117,23,0.18); color: #F0B94D; }
-.group-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: 16px; margin-bottom: 8px; }
-.metric-row { padding: 12px 14px; background: var(--surface-1); border-radius: 12px; margin-bottom: 8px; display: flex; gap: 12px; }
-.metric-accent { width: 4px; align-self: stretch; border-radius: 3px; flex-shrink: 0; }
+/* I7: усі індикатори стану — один патерн "пігулка". Відрізняються
+   лише кольором (нейтральний / у графіку / відстає), не формою. */
+.chip, .badge, .today-pill { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: 4px 10px; border-radius: var(--r-pill); letter-spacing: 0.02em; white-space: nowrap; }
+.badge-ok, .today-pill { background: var(--accent-soft); color: var(--accent-text); }
+.badge-behind { background: var(--warn-soft); color: var(--warn-text); }
+.group-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: 16px; margin-bottom: 8px; }
+.metric-row { padding: 12px 14px; background: var(--surface-1); border-radius: var(--r-md); margin-bottom: 8px; display: flex; gap: 12px; }
+.metric-accent { width: 4px; align-self: stretch; border-radius: var(--r-sm); flex-shrink: 0; }
 .metric-body { flex: 1; min-width: 0; }
 .metric-top-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
-.metric-label { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; }
-.plan-note { font-size: 11.5px; color: var(--text-muted); }
+.metric-label { font-size: var(--fs-sm); color: var(--text-secondary); font-weight: 500; }
+.plan-note { font-size: var(--fs-sm); color: var(--text-muted); }
 /* 3.7: поле + "підставити" + "копіювати" на вузькому екрані можуть не влізти
    в один рядок — дозволяємо перенос, щоб не виникало горизонтального скролу. */
 .metric-input-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.fill-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 11px; border-radius: 12px; border: 0.5px solid var(--border-strong); background: var(--surface-0); color: var(--text-secondary); font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.fill-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 11px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong); background: var(--surface-0); color: var(--text-secondary); font-family: inherit; font-size: var(--fs-sm); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+/* I5: явна ієрархія дій. Первинна — заливка, більший горизонтальний
+   відступ, жирніший шрифт. Вторинна — без фону й рамки, приглушений колір,
+   щоб не конкурувала за увагу. */
+.btn { min-height: var(--tap); border-radius: var(--r-md); font-family: inherit; font-size: var(--fs-md); cursor: pointer; transition: background 0.15s, color 0.15s, opacity 0.15s; }
+.btn-primary { padding: 12px 24px; border: none; background: var(--accent); color: var(--surface-0); font-weight: 600; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-secondary { padding: 12px 16px; border: none; background: transparent; color: var(--text-secondary); font-weight: 400; }
+.btn-secondary:hover { background: var(--surface-1); color: var(--text-primary); }
 .fill-btn:hover { background: var(--surface-2); color: var(--text-primary); border-color: var(--text-muted); }
 .stepper { display: flex; align-items: center; gap: 6px; }
 .stepper { flex: 1; min-width: 0; }
-.stepper input { border: 0.5px solid var(--border); border-radius: 12px; width: 100%; box-sizing: border-box; height: 44px; padding: 0 12px; text-align: left; font-size: 16px; font-weight: 500; background: var(--surface-2); color: var(--text-primary); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
-.stepper input:focus { outline: none; border-color: #1D9E75; }
+.stepper input { border: var(--bw) solid var(--border); border-radius: var(--r-md); width: 100%; box-sizing: border-box; height: var(--tap); padding: 0 12px; text-align: left; font-size: var(--fs-lg); font-weight: 500; background: var(--surface-2); color: var(--text-primary); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
+.stepper input:focus { outline: none; border-color: var(--focus); }
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
-.icon-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
+.icon-btn { width: var(--tap); height: var(--tap); border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
 .icon-btn:hover { background: var(--surface-0); color: var(--text-primary); }
-.warn-text { font-size: 11.5px; color: #854F0B; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
-.habit-panel { background: var(--surface-1); border-radius: 12px; padding: 4px 14px; margin-bottom: 8px; }
-.habit-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; font-size: 14px; cursor: pointer; }
-input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: pointer; accent-color: #2FBE93; flex-shrink: 0; }
-.daily-block { background: var(--surface-1); border-radius: 12px; padding: 12px 14px 14px; margin-bottom: 8px; }
-.daily-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
+.warn-text { font-size: var(--fs-sm); color: #854F0B; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+.habit-panel { background: var(--surface-1); border-radius: var(--r-md); padding: 4px 14px; margin-bottom: 8px; }
+.habit-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; font-size: var(--fs-md); cursor: pointer; }
+input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
+.daily-block { background: var(--surface-1); border-radius: var(--r-md); padding: 12px 14px 14px; margin-bottom: 8px; }
+.daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: 10px; }
 .daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
 @media (max-width: 470px) { .daily-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; } }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.day-square { width: 100%; aspect-ratio: 1; min-height: 44px; max-width: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: 1.5px dashed var(--border-strong); background: var(--surface-2); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
-.day-square:hover { border-color: #1D9E75; background: var(--surface-0); }
+.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) dashed var(--border-strong); background: var(--surface-2); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square:hover { border-color: var(--focus); background: var(--surface-0); }
 .day-square:active { transform: scale(0.9); }
-.day-square.checked { background: #2FBE93; border: 1.5px solid #2FBE93; color: #0F0E0A; }
-.day-cell-label { font-size: 10px; color: var(--text-muted); }
-.hero-card { border-radius: 22px; padding: 1.5rem 1.6rem; margin-bottom: 1.5rem; background: var(--surface-2); border: 1px solid var(--border-strong); position: relative; overflow: hidden; }
-.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 10px; }
+.day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
+.day-cell-label { font-size: var(--fs-xs); color: var(--text-muted); }
+.hero-card { border-radius: var(--r-xl); padding: 1.5rem 1.6rem; margin-bottom: 1.5rem; background: var(--surface-2); border: var(--bw) solid var(--border-strong); position: relative; overflow: hidden; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: var(--fs-sm); color: var(--text-secondary); margin-top: 10px; }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-.save-status { font-size: 11px; color: var(--text-muted); }
-.delta { font-size: 11px; margin-top: 4px; }
-.delta-good { color: #6EE7C0; }
-.delta-bad { color: #F0B94D; }
-.dashboard-line { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); flex-wrap: wrap; }
+.save-status { font-size: var(--fs-xs); color: var(--text-muted); }
+.delta { font-size: var(--fs-xs); margin-top: 4px; }
+.delta-good { color: var(--accent-text); }
+.delta-bad { color: var(--warn-text); }
+.dashboard-line { display: flex; align-items: center; gap: 10px; font-size: var(--fs-md); color: var(--text-secondary); flex-wrap: wrap; }
 .menu-wrap { position: relative; }
-.menu-btn { width: 44px; height: 44px; border-radius: 50%; border: 0.5px solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.menu-btn { width: var(--tap); height: var(--tap); border-radius: 50%; border: var(--bw) solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .menu-btn:hover { background: var(--surface-1); }
-.menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: 0.5px solid var(--border-strong); border-radius: 12px; padding: 8px; min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 20; display: none; }
+.menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: var(--bw) solid var(--border-strong); border-radius: var(--r-md); padding: 8px; min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 20; display: none; }
 .menu-panel.open { display: block; }
-.menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 13px; border-radius: 8px; cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
+[data-icon] { display: inline-flex; align-items: center; flex-shrink: 0; }
+.menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: var(--fs-md); border-radius: var(--r-sm); cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
 .menu-item:hover { background: var(--surface-1); }
 .progress-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 2px 0; }
 .progress-collapsible { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
@@ -129,12 +183,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 .chart-dot-live { animation: chartDotPulse 1.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
 @keyframes flashBg { 0% { background-color: #E1F5EE; } 100% { background-color: transparent; } }
 .flash { animation: flashBg 1.2s ease; }
-.today-pill { font-size: 11px; font-weight: 600; color: #6EE7C0; background: rgba(47,190,147,0.16); padding: 3px 10px; border-radius: 999px; letter-spacing: 0.02em; }
+
 @media (max-width: 520px) {
   #stat-cards { grid-template-columns: 1fr 1fr !important; }
   .card { padding: 1rem; }
   .hero-card { padding: 1.1rem 1.2rem; }
-  .hero-num { font-size: 22px !important; }
+  .hero-num { font-size: var(--fs-xl) !important; }
 }
 </style>
 
@@ -147,23 +201,23 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
         <path d="M4 30 L36 30" stroke="#34322B" stroke-width="1" stroke-dasharray="1,3"/>
       </svg>
       <div>
-        <h1 style="margin: 0 0 4px; font-size: 24px;">12 тижнів</h1>
-        <p style="color: var(--text-secondary); font-size: 12.5px; margin: 0;">27 липня — 18 жовтня 2026 · крок до п'ятирічної мапи <span id="sync-badge" style="color: var(--text-muted); font-size: 11px;"></span></p>
+        <h1 style="margin: 0 0 4px; font-size: var(--fs-xl);">12 тижнів</h1>
+        <p style="color: var(--text-secondary); font-size: var(--fs-sm); margin: 0;">27 липня — 18 жовтня 2026 · крок до п'ятирічної мапи <span id="sync-badge" style="color: var(--text-muted); font-size: var(--fs-xs);"></span></p>
       </div>
     </div>
     <div class="menu-wrap">
       <button class="menu-btn" id="menu-btn" title="Меню">
-        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/></svg>
+        <span data-icon="dots" data-icon-size="16"></span>
       </button>
       <div class="menu-panel" id="menu-panel">
-        <button class="menu-item" id="setup-goals"><svg width="14" height="14" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/></svg>Налаштувати цілі (старт/ціль)</button>
-        <button class="menu-item" id="setup-sync"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 2a6 6 0 1 0 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Налаштувати синхронізацію</button>
-        <button class="menu-item" id="export-json"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Експорт JSON</button>
-        <button class="menu-item" id="export-csv"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Експорт CSV</button>
-        <button class="menu-item" id="import-json"><svg width="14" height="14" viewBox="0 0 16 16"><path d="M8 14V6m0 0l-3 3m3-3l3 3M3 3h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Імпорт JSON</button>
+        <button class="menu-item" id="setup-goals"><span data-icon="target"></span>Налаштувати цілі (старт/ціль)</button>
+        <button class="menu-item" id="setup-sync"><span data-icon="sync"></span>Налаштувати синхронізацію</button>
+        <button class="menu-item" id="export-json"><span data-icon="download"></span>Експорт JSON</button>
+        <button class="menu-item" id="export-csv"><span data-icon="download"></span>Експорт CSV</button>
+        <button class="menu-item" id="import-json"><span data-icon="upload"></span>Імпорт JSON</button>
         <input type="file" id="import-file-input" accept="application/json" style="display:none;">
-        <div style="padding:8px 10px; font-size:11px; color:var(--text-muted); border-top:0.5px solid var(--border); margin-top:4px;"><span id="save-status" class="save-status">Збережено ✓</span></div>
-        <div style="padding:0 10px 6px; font-size:10.5px; color:var(--text-muted);" id="sync-status"></div>
+        <div style="padding:8px 10px; font-size:var(--fs-xs); color:var(--text-muted); border-top: var(--bw) solid var(--border); margin-top:4px;"><span id="save-status" class="save-status">Збережено ✓</span></div>
+        <div style="padding:0 10px 6px; font-size:var(--fs-xs); color:var(--text-muted);" id="sync-status"></div>
       </div>
     </div>
   </div>
@@ -174,8 +228,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 
   <div class="card" style="margin-bottom: 1.5rem; padding: 0.9rem 1.2rem;">
     <div class="progress-toggle" id="progress-toggle">
-      <span style="font-size:13px; font-weight:500;">Прогрес і графіки</span>
-      <svg id="progress-chevron" width="16" height="16" viewBox="0 0 16 16" style="transition: transform 0.25s; transform: rotate(180deg);"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span style="font-size:var(--fs-md); font-weight:500;">Прогрес і графіки</span>
+      <span id="progress-chevron" data-icon="chevronDown" data-icon-size="16" style="display:flex; transition: transform 0.25s; transform: rotate(180deg);"></span>
     </div>
     <div class="progress-collapsible open" id="progress-collapsible">
       <div id="dashboard-line" class="dashboard-line" style="margin: 14px 0 12px;"></div>
@@ -183,72 +237,72 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       <div id="pace-banner" style="margin-bottom: 12px;"></div>
       <div style="margin-bottom: 14px;">
         <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
-          <div class="section-label" style="font-size:13px; margin-bottom:0;">Вага за 12 тижнів</div>
-          <span id="chart-weight-pct" style="font-family:'Fraunces', serif; font-size:15px; font-weight:600;"></span>
+          <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Вага за 12 тижнів</div>
+          <span id="chart-weight-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
         </div>
         <div id="chart-weight"></div>
       </div>
       <div style="margin-bottom: 14px;">
         <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
-          <div class="section-label" style="font-size:13px; margin-bottom:0;">Борг</div>
-          <span id="chart-debt-pct" style="font-family:'Fraunces', serif; font-size:15px; font-weight:600;"></span>
+          <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Борг</div>
+          <span id="chart-debt-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
         </div>
         <div id="chart-debt"></div>
       </div>
       <div style="margin-bottom: 6px;">
         <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:2px;">
-          <div class="section-label" style="font-size:13px; margin-bottom:0;">Капітал</div>
-          <span id="chart-capital-pct" style="font-family:'Fraunces', serif; font-size:15px; font-weight:600;"></span>
+          <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Капітал</div>
+          <span id="chart-capital-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
         </div>
         <div id="chart-capital"></div>
       </div>
     </div>
   </div>
 
-  <div style="text-align:center; font-size:10px; color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v22 · mobile: 44px targets, 1:1 charts, safe-area, soft ring</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v23 · UI: design tokens (radius, border, type, color scales)</div>
 </div>
 
 <div id="app-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
-  <div style="background:var(--surface-2, #221F19); border:0.5px solid var(--border-strong, #4A473C); border-radius:16px; max-width:340px; width:100%; padding:1.2rem 1.3rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
-    <div id="app-modal-message" style="font-size:14px; line-height:1.5; margin-bottom:14px;"></div>
+  <div style="background:var(--surface-2, #221F19); border: var(--bw) solid var(--border-strong, #4A473C); border-radius: var(--r-lg); max-width:340px; width:100%; padding:1.2rem 1.3rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+    <div id="app-modal-message" style="font-size:var(--fs-md); line-height:1.5; margin-bottom:14px;"></div>
     <div id="app-modal-input-wrap" style="display:none; margin-bottom:14px;">
-      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
+      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
-      <button id="app-modal-cancel" type="button" style="min-height:44px; padding:10px 18px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:13px; cursor:pointer;">Скасувати</button>
-      <button id="app-modal-ok" type="button" style="min-height:44px; padding:10px 18px; border-radius:12px; border:none; background:#2FBE93; color:#0F0E0A; font-weight:500; font-size:13px; cursor:pointer;">OK</button>
+      <button id="app-modal-cancel" type="button" class="btn btn-secondary">Скасувати</button>
+      <button id="app-modal-ok" type="button" class="btn btn-primary">OK</button>
     </div>
   </div>
 </div>
 
 <div id="goals-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
-  <div style="background:var(--surface-2, #221F19); border:0.5px solid var(--border-strong, #4A473C); border-radius:16px; max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:1.25rem 1.4rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
-    <div style="font-family:'Fraunces', serif; font-size:16px; font-weight:600; margin-bottom:4px;">Точка А і ціль</div>
-    <div style="font-size:12px; color:var(--text-secondary, #B7B4A6); margin-bottom:16px;">Звідки стартуємо і куди прийти за 12 тижнів. Порожнє поле = без змін.</div>
+  <div style="background:var(--surface-2, #221F19); border: var(--bw) solid var(--border-strong, #4A473C); border-radius: var(--r-lg); max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:1.25rem 1.4rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+    <div style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600; margin-bottom:4px;">Точка А і ціль</div>
+    <div style="font-size:var(--fs-sm); color:var(--text-secondary, #B7B4A6); margin-bottom:16px;">Звідки стартуємо і куди прийти за 12 тижнів. Порожнє поле = без змін.</div>
 
-    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Вага, кг</div>
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Вага, кг</div>
     <div style="display:flex; gap:8px; margin-bottom:14px;">
-      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
-      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
+      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
 
-    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Борг, $</div>
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Борг, $</div>
     <div style="display:flex; gap:8px; margin-bottom:6px;">
-      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
-      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
+      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
-    <div style="font-size:11px; color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:14px;">Тут не залишок боргу, а СКІЛЬКИ ПЛАНУЄШ ВИПЛАТИТИ за 12 тижнів. Старт (А) зазвичай 0, ціль (Б) — сума всіх запланованих платежів (наприклад 0 → 1800).</div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:14px;">Тут не залишок боргу, а СКІЛЬКИ ПЛАНУЄШ ВИПЛАТИТИ за 12 тижнів. Старт (А) зазвичай 0, ціль (Б) — сума всіх запланованих платежів (наприклад 0 → 1800).</div>
 
-    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Капітал, $</div>
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Капітал, $</div>
     <div style="display:flex; gap:8px; margin-bottom:6px;">
-      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
-      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
+      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
-    <div style="font-size:11px; color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:18px;">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:18px;">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
 
     <div style="display:flex; justify-content:flex-end; gap:8px;">
-      <button id="goals-cancel" type="button" style="min-height:44px; padding:10px 18px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:13px; cursor:pointer;">Скасувати</button>
-      <button id="goals-save" type="button" style="min-height:44px; padding:10px 18px; border-radius:12px; border:none; background:#2FBE93; color:#0F0E0A; font-weight:500; font-size:13px; cursor:pointer;">Зберегти</button>
+      <button id="goals-cancel" type="button" class="btn btn-secondary">Скасувати</button>
+      <button id="goals-save" type="button" class="btn btn-primary">Зберегти</button>
     </div>
   </div>
 </div>
@@ -280,7 +334,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     minus: '<path d="M3 8h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
     reset: '<path d="M3.5 8a4.5 4.5 0 1 1 1.3 3.2M3.5 8V4.3M3.5 8h3.7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     copy: '<rect x="5.5" y="5.5" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3.3 9.5V4.3A1.3 1.3 0 0 1 4.6 3H9.8" stroke="currentColor" stroke-width="1.4" fill="none"/>',
-    warn: '<path d="M8 2.5l6.5 11.5h-13z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M8 6.5v3.5M8 12v.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>'
+    warn: '<path d="M8 2.5l6.5 11.5h-13z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M8 6.5v3.5M8 12v.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>',
+    // I8: перенесено сюди з інлайнових <svg> у розмітці — одне джерело правди
+    dots: '<circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/>',
+    target: '<circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/>',
+    sync: '<path d="M8 2a6 6 0 1 0 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    download: '<path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    upload: '<path d="M8 14V6m0 0l-3 3m3-3l3 3M3 3h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    fill: '<path d="M8 2v9m0 0l-3.2-3.2M8 11l3.2-3.2M3 14h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    chevronLeft: '<path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    chevronRight: '<path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    chevronDown: '<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
   };
   function icon(name, size, extraStyle){ size = size || 14; return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 16 16" style="display:block;' + (extraStyle||'') + '">' + ICONS[name] + '</svg>'; }
 
@@ -622,11 +686,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr){
     let badge = '';
     if (hasData) badge = '<span class="badge ' + (onTrack ? 'badge-ok' : 'badge-behind') + '">' + (ahead ? 'випереджає' : onTrack ? 'у графіку' : 'позаду') + '</span>';
-    return '<div class="card" style="padding: 1rem 1.1rem; border-radius:16px;">' +
+    return '<div class="card" style="padding: 1rem 1.1rem; border-radius: var(--r-lg);">' +
       '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:6px; gap:8px;">' +
-      '<div style="font-size: 11.5px; color: var(--text-secondary);">' + label + '</div>' + badge + '</div>' +
-      '<div class="hero-num" style="font-size: 23px; line-height: 1;">' + valueHtml + '</div>' +
-      '<div style="font-size: 11.5px; color: var(--text-secondary); margin-top: 5px;">ціль ' + subLabel + '</div>' +
+      '<div style="font-size: var(--fs-sm); color: var(--text-secondary);">' + label + '</div>' + badge + '</div>' +
+      '<div class="hero-num" style="font-size: var(--fs-xl); line-height: 1;">' + valueHtml + '</div>' +
+      '<div style="font-size: var(--fs-sm); color: var(--text-secondary); margin-top: 5px;">ціль ' + subLabel + '</div>' +
       (deltaHtmlStr || '') + '</div>';
   }
   // --- Helpers для оновлених графіків: % прогресу, підсумок-речення людською
@@ -694,16 +758,16 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       const pct = amt > 0 ? Math.max(Math.round((amt / maxAmt) * 100), 6) : 0;
       const isCur = i === cur;
       bars += '<div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:0;">' +
-        '<div class="bar-amt" style="font-size:10px; color:' + color + '; font-weight:600; white-space:nowrap; height:13px;">' + (amt > 0 ? '$' + amt.toLocaleString() : '') + '</div>' +
+        '<div class="bar-amt" style="font-size:var(--fs-xs); color:' + color + '; font-weight:600; white-space:nowrap; height:13px;">' + (amt > 0 ? '$' + amt.toLocaleString() : '') + '</div>' +
         '<div style="width:100%; height:44px; display:flex; align-items:flex-end;" title="Тиждень ' + i + ': $' + amt + '">' +
-          '<div style="width:100%; height:' + pct + '%; min-height:' + (amt > 0 ? '3px' : '1px') + '; background:' + (amt > 0 ? color : 'var(--border-strong)') + '; opacity:' + (amt > 0 ? 1 : 0.3) + '; border-radius:3px 3px 0 0;"></div>' +
+          '<div style="width:100%; height:' + pct + '%; min-height:' + (amt > 0 ? '3px' : '1px') + '; background:' + (amt > 0 ? color : 'var(--border-strong)') + '; opacity:' + (amt > 0 ? 1 : 0.3) + '; border-radius: var(--r-sm) 3px 0 0;"></div>' +
         '</div>' +
-        '<div style="font-size:11px; color:' + (isCur ? color : 'var(--text-muted)') + '; font-weight:' + (isCur ? '700' : '400') + ';">' + i + '</div>' +
+        '<div style="font-size:var(--fs-xs); color:' + (isCur ? color : 'var(--text-muted)') + '; font-weight:' + (isCur ? '700' : '400') + ';">' + i + '</div>' +
       '</div>';
     }
-    return '<div style="border-top:1px solid ' + cv('--border', '#34322B') + '; margin-top:8px; padding-top:8px;">' +
+    return '<div style="border-top: var(--bw) solid ' + cv('--border', '#34322B') + '; margin-top:8px; padding-top:8px;">' +
       '<div style="display:flex; gap:3px; align-items:flex-end;">' + bars + '</div>' +
-      '<div style="font-size:11px; color:var(--text-muted); margin-top:5px;">внески по тижнях' + (maxAmt > 1 ? ' · макс $' + maxAmt.toLocaleString() : '') + '</div>' +
+      '<div style="font-size:var(--fs-xs); color:var(--text-muted); margin-top:5px;">внески по тижнях' + (maxAmt > 1 ? ' · макс $' + maxAmt.toLocaleString() : '') + '</div>' +
     '</div>';
   }
 
@@ -741,11 +805,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     if (!hasData || (behind.length === 0 && ahead.length === 0)){
       banner.innerHTML = '';
     } else if (behind.length > 0){
-      const rows = behind.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
-      banner.innerHTML = '<div class="card" style="border-left: 3px solid ' + C_CURRENT + '; border-radius: 14px; padding: 0.9rem 1.1rem;"><div style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">Темп відстає — новий орієнтир</div>' + rows + '</div>';
+      const rows = behind.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:var(--fs-md); padding:5px 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
+      banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_CURRENT + '; border-radius: var(--r-lg); padding: 0.9rem 1.1rem;"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: 6px;">Темп відстає — новий орієнтир</div>' + rows + '</div>';
     } else {
-      const rows = ahead.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
-      banner.innerHTML = '<div class="card" style="border-left: 3px solid ' + C_DONE + '; border-radius: 14px; padding: 0.9rem 1.1rem;"><div style="font-size: 13px; font-weight: 500; margin-bottom: 6px;">🎉 Випереджаєш план</div>' + rows + '</div>';
+      const rows = ahead.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:var(--fs-md); padding:5px 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
+      banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_DONE + '; border-radius: var(--r-lg); padding: 0.9rem 1.1rem;"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: 6px;">🎉 Випереджаєш план</div>' + rows + '</div>';
     }
   }
 
@@ -829,7 +893,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
         dots + xlabels +
       '</svg>' +
       // 6 і 10. Підсумок людською мовою + скільки лишилось прямо під графіком.
-      '<div style="font-size:11.5px; color:var(--text-secondary); margin-top:6px; line-height:1.4;">' + chartSummary_('weight', snap) +
+      '<div style="font-size:var(--fs-sm); color:var(--text-secondary); margin-top:6px; line-height:1.4;">' + chartSummary_('weight', snap) +
         (snap.cur > 0 ? ' Залишилось ' + fmt1(remainingKg) + ' кг.' : '') + '</div>';
   }
 
@@ -910,7 +974,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       // 7. Бар-спарклайн тижневих внесків, окремо від кумулятивної лінії.
       weeklyBarsHtml_(amtKey, color) +
       // 6 і 10. Підсумок людською мовою + скільки лишилось.
-      '<div style="font-size:11.5px; color:var(--text-secondary); margin-top:8px; line-height:1.4;">' + chartSummary_(kind, snap) +
+      '<div style="font-size:var(--fs-sm); color:var(--text-secondary); margin-top:8px; line-height:1.4;">' + chartSummary_(kind, snap) +
         (snap.cur > 0 ? ' Залишилось $' + Math.round(remaining).toLocaleString() + '.' : '') + '</div>';
   }
 
@@ -983,7 +1047,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       fillBtn.type = 'button';
       fillBtn.className = 'fill-btn';
       fillBtn.title = 'Підставити ' + fillLabel + ' у поле';
-      fillBtn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" style="flex-shrink:0;"><path d="M8 2v9m0 0l-3.2-3.2M8 11l3.2-3.2M3 14h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>' + fillLabel + '</span>';
+      fillBtn.innerHTML = icon('fill', 13, 'flex-shrink:0;') + '<span>' + fillLabel + '</span>';
       fillBtn.onclick = onFill;
       inputRow.appendChild(fillBtn);
     }
@@ -1085,7 +1149,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     wrap.innerHTML = '';
     const card = document.createElement('div');
     card.className = 'hero-card' + (wasCelebrated ? ' flash' : '');
-    card.style.borderTop = '4px solid ' + accentColor;
+    card.style.borderTop = 'var(--bw-accent) solid ' + accentColor;
 
     const header = document.createElement('div');
     header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom: 4px;';
@@ -1094,8 +1158,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     titleWrap.style.cssText = 'display:flex; align-items:center; gap:8px; flex-wrap:wrap; min-width:0;';
     titleWrap.innerHTML =
       (isCurrent ? '<span class="today-pill">Сьогодні</span>' : '')
-      + '<strong style="font-size:16px;">Тиждень ' + i + '</strong>'
-      + '<span style="color:var(--text-secondary); font-size:13px;">' + weekDates(i) + '</span>';
+      + '<strong style="font-size:var(--fs-lg);">Тиждень ' + i + '</strong>'
+      + '<span style="color:var(--text-secondary); font-size:var(--fs-md);">' + weekDates(i) + '</span>';
     header.appendChild(titleWrap);
 
     const actions = document.createElement('div');
@@ -1104,7 +1168,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     // U2: перемикання тижнів прямо в картці — більше не треба лізти в "Історію".
     const prevBtn = document.createElement('button');
     prevBtn.className = 'icon-btn'; prevBtn.type = 'button'; prevBtn.title = 'Попередній тиждень';
-    prevBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 16 16"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    prevBtn.innerHTML = icon('chevronLeft', 15);
     prevBtn.disabled = i <= 1;
     prevBtn.style.opacity = i <= 1 ? '0.3' : '1';
     prevBtn.onclick = () => { if (i > 1){ selectedWeek = i - 1; render(); } };
@@ -1112,7 +1176,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 
     const nextBtn = document.createElement('button');
     nextBtn.className = 'icon-btn'; nextBtn.type = 'button'; nextBtn.title = 'Наступний тиждень';
-    nextBtn.innerHTML = '<svg width="15" height="15" viewBox="0 0 16 16"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    nextBtn.innerHTML = icon('chevronRight', 15);
     nextBtn.disabled = i >= WEEKS;
     nextBtn.style.opacity = i >= WEEKS ? '0.3' : '1';
     nextBtn.onclick = () => { if (i < WEEKS){ selectedWeek = i + 1; render(); } };
@@ -1123,7 +1187,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       todayBtn.type = 'button';
       todayBtn.title = 'Повернутись до поточного тижня';
       todayBtn.textContent = 'Сьогодні';
-      todayBtn.style.cssText = 'padding:5px 10px; border-radius:999px; border:0.5px solid var(--border-strong); background:var(--surface-1); color:var(--text-primary); font-size:11.5px; font-family:inherit; cursor:pointer; white-space:nowrap;';
+      todayBtn.style.cssText = 'padding:5px 10px; border-radius: var(--r-pill); border: var(--bw) solid var(--border-strong); background:var(--surface-1); color:var(--text-primary); font-size:var(--fs-sm); font-family:inherit; cursor:pointer; white-space:nowrap;';
       todayBtn.onclick = () => { selectedWeek = null; render(); };
       actions.appendChild(todayBtn);
     }
@@ -1138,7 +1202,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       }
       showAppModal({
         html: 'Скинути всі дані тижня ' + i + '? Буде втрачено:'
-          + '<ul style="margin:10px 0 0; padding-left:18px; line-height:1.6; font-size:13px;"><li>'
+          + '<ul style="margin:10px 0 0; padding-left:18px; line-height:1.6; font-size:var(--fs-md);"><li>'
           + items.join('</li><li>') + '</li></ul>',
         okLabel: 'Скинути',
         onOk: () => { state[i] = emptyWeek(); saveWeek(i); render(); }
@@ -1153,17 +1217,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     scoreRow.style.cssText = 'display:flex; align-items:baseline; gap:10px; margin: 6px 0 2px;';
     const scoreNum = document.createElement('span');
     scoreNum.className = 'hero-num' + (wasCelebrated ? ' celebrate' : '');
-    scoreNum.style.cssText = 'font-size:42px; color:' + accentColor + ';';
+    scoreNum.style.cssText = 'font-size:var(--fs-display); color:' + accentColor + ';';
     scoreNum.textContent = s + '%';
     scoreRow.appendChild(scoreNum);
     const scoreLbl = document.createElement('span');
-    scoreLbl.style.cssText = 'font-size:13px; color:var(--text-secondary);';
+    scoreLbl.style.cssText = 'font-size:var(--fs-md); color:var(--text-secondary);';
     scoreLbl.textContent = 'виконання тижня' + (wasCelebrated ? ' · 🎉 ціль досягнута!' : '');
     scoreRow.appendChild(scoreLbl);
     card.appendChild(scoreRow);
 
     const scoreCaption = document.createElement('div');
-    scoreCaption.style.cssText = 'font-size:10.5px; color:var(--text-muted); letter-spacing:0.02em; margin: 0 0 18px;';
+    scoreCaption.style.cssText = 'font-size:var(--fs-xs); color:var(--text-muted); letter-spacing:0.02em; margin: 0 0 18px;';
     scoreCaption.textContent = 'Weekly Execution Score — 5 дій тижня: зважування, облік їжі, калорії, конверт на борг, переказ на капітал.';
     card.appendChild(scoreCaption);
 
@@ -1262,6 +1326,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     lastWidth = window.innerWidth;
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(function(){ render(); }, 150);
+  });
+
+  // I8: розмітка не може викликати icon(), тому іконки в ній позначені
+  // атрибутом data-icon і підставляються тут — з того самого обʼєкта ICONS.
+  document.querySelectorAll('#tracker-root [data-icon]').forEach(function(el){
+    const name = el.getAttribute('data-icon');
+    if (ICONS[name]) el.innerHTML = icon(name, parseInt(el.getAttribute('data-icon-size'), 10) || 14);
   });
 
   load();
