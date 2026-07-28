@@ -34,11 +34,36 @@
   margin: 0 auto;
   position: relative;
   background: var(--surface-0);
-  padding: 1.5rem;
+  /* 3.6: мета-теги viewport-fit=cover + apple-mobile-web-app-capable кажуть iOS
+     малювати контент на весь екран — під динамічний острівець і home-indicator.
+     Без цих env() у standalone-режимі (запуск з іконки) верх і низ підʼїжджали
+     під вирізи. max() лишає звичайні 1.5rem там, де вирізів немає. */
+  padding: max(1.5rem, env(safe-area-inset-top)) max(1.5rem, env(safe-area-inset-right)) max(1.5rem, env(safe-area-inset-bottom)) max(1.5rem, env(safe-area-inset-left));
   border-radius: 20px;
+  overflow-x: clip;
 }
 #tracker-root h1 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
 .section-label { font-family: 'Fraunces', serif; font-size: 15px; font-weight: 500; margin-bottom: 12px; }
+/* 3.1: раніше вся стрічка була одним SVG з viewBox 680px, який стискався під
+   ширину картки — на iPhone кружечок виходив 14.6px, а цифра всередині 5.3px.
+   Тепер це звичайні HTML-елементи фіксованого розміру 44px (мінімум Apple HIG),
+   а якщо 12 штук не влазять — стрічка горизонтально прокручується. */
+.journey-strip { display: flex; gap: 8px; overflow-x: auto; padding: 4px 2px 6px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+.journey-strip::-webkit-scrollbar { display: none; }
+.journey-cell { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.journey-dot { width: 44px; height: 44px; border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 700; color: #0F0E0A; font-variant-numeric: tabular-nums; transition: background 0.3s, box-shadow 0.2s, transform 0.1s; }
+.journey-cell:active .journey-dot { transform: scale(0.92); }
+/* Позначка обраного тижня. Раніше тут був подвійний box-shadow: темний проміжок
+   плюс кільце кольору --text-primary (найяскравішого в палітрі) — на темному тлі
+   це читалось як приціл і перетягувало увагу з решти інтерфейсу. Тепер мʼякий
+   ореол упритул до кружечка: помітно, але не кричить. */
+.journey-cell.selected .journey-dot { box-shadow: 0 0 0 3px rgba(243, 241, 232, 0.28); }
+.journey-cell.selected .journey-num { color: var(--text-secondary); font-weight: 600; }
+.journey-num { font-size: 11px; color: var(--text-muted); }
+/* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
+   тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
+@media (max-width: 470px) { .bar-amt { display: none; } }
+.journey-cell.today .journey-num { color: #F0B94D; font-weight: 700; }
 .card { background: var(--surface-2); border: 0.5px solid var(--border); border-radius: 20px; padding: 1.25rem 1.4rem; }
 .hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; transition: color 0.3s; }
 .badge { font-size: 11px; padding: 4px 10px; border-radius: 999px; font-weight: 500; white-space: nowrap; }
@@ -48,22 +73,22 @@
 .metric-row { padding: 12px 14px; background: var(--surface-1); border-radius: 12px; margin-bottom: 8px; display: flex; gap: 12px; }
 .metric-accent { width: 4px; align-self: stretch; border-radius: 3px; flex-shrink: 0; }
 .metric-body { flex: 1; min-width: 0; }
-.metric-top-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+.metric-top-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
 .metric-label { font-size: 11.5px; color: var(--text-secondary); font-weight: 500; }
 .plan-note { font-size: 11.5px; color: var(--text-muted); }
-.metric-input-row { display: flex; align-items: center; gap: 8px; }
+/* 3.7: поле + "підставити" + "копіювати" на вузькому екрані можуть не влізти
+   в один рядок — дозволяємо перенос, щоб не виникало горизонтального скролу. */
+.metric-input-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .fill-btn { display: inline-flex; align-items: center; gap: 5px; padding: 7px 11px; border-radius: 12px; border: 0.5px solid var(--border-strong); background: var(--surface-0); color: var(--text-secondary); font-family: inherit; font-size: 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; }
 .fill-btn:hover { background: var(--surface-2); color: var(--text-primary); border-color: var(--text-muted); }
 .stepper { display: flex; align-items: center; gap: 6px; }
-.step-btn { width: 30px; height: 30px; border-radius: 50%; border: 0.5px solid var(--border-strong); background: var(--surface-2); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, border-color 0.15s; }
-.step-btn:hover { background: var(--surface-0); border-color: #1D9E75; }
-.step-btn:active { transform: scale(0.92); }
-.stepper input { border: 0.5px solid var(--border); border-radius: 8px; width: 76px; height: 34px; text-align: center; font-size: 16px; font-weight: 500; background: var(--surface-2); color: var(--text-primary); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
+.stepper { flex: 1; min-width: 0; }
+.stepper input { border: 0.5px solid var(--border); border-radius: 12px; width: 100%; box-sizing: border-box; height: 44px; padding: 0 12px; text-align: left; font-size: 16px; font-weight: 500; background: var(--surface-2); color: var(--text-primary); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
 .stepper input:focus { outline: none; border-color: #1D9E75; }
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
-.icon-btn { width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
+.icon-btn { width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
 .icon-btn:hover { background: var(--surface-0); color: var(--text-primary); }
 .warn-text { font-size: 11.5px; color: #854F0B; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
 .habit-panel { background: var(--surface-1); border-radius: 12px; padding: 4px 14px; margin-bottom: 8px; }
@@ -72,8 +97,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 .daily-block { background: var(--surface-1); border-radius: 12px; padding: 12px 14px 14px; margin-bottom: 8px; }
 .daily-head { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 10px; }
 .daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+@media (max-width: 470px) { .daily-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; } }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.day-square { width: 100%; aspect-ratio: 1; max-width: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: 1.5px dashed var(--border-strong); background: var(--surface-2); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square { width: 100%; aspect-ratio: 1; min-height: 44px; max-width: 56px; border-radius: 12px; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: 1.5px dashed var(--border-strong); background: var(--surface-2); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .day-square:hover { border-color: #1D9E75; background: var(--surface-0); }
 .day-square:active { transform: scale(0.9); }
 .day-square.checked { background: #2FBE93; border: 1.5px solid #2FBE93; color: #0F0E0A; }
@@ -88,7 +114,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 .delta-bad { color: #F0B94D; }
 .dashboard-line { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-secondary); flex-wrap: wrap; }
 .menu-wrap { position: relative; }
-.menu-btn { width: 34px; height: 34px; border-radius: 50%; border: 0.5px solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.menu-btn { width: 44px; height: 44px; border-radius: 50%; border: 0.5px solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .menu-btn:hover { background: var(--surface-1); }
 .menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: 0.5px solid var(--border-strong); border-radius: 12px; padding: 8px; min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 20; display: none; }
 .menu-panel.open { display: block; }
@@ -179,18 +205,18 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     </div>
   </div>
 
-  <div style="text-align:center; font-size:10px; color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v21 · UX: timeline nav replaces history list</div>
+  <div style="text-align:center; font-size:10px; color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v22 · mobile: 44px targets, 1:1 charts, safe-area, soft ring</div>
 </div>
 
 <div id="app-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
   <div style="background:var(--surface-2, #221F19); border:0.5px solid var(--border-strong, #4A473C); border-radius:16px; max-width:340px; width:100%; padding:1.2rem 1.3rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
     <div id="app-modal-message" style="font-size:14px; line-height:1.5; margin-bottom:14px;"></div>
     <div id="app-modal-input-wrap" style="display:none; margin-bottom:14px;">
-      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
     </div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
-      <button id="app-modal-cancel" type="button" style="padding:8px 14px; border-radius:10px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:13px; cursor:pointer;">Скасувати</button>
-      <button id="app-modal-ok" type="button" style="padding:8px 14px; border-radius:10px; border:none; background:#2FBE93; color:#0F0E0A; font-weight:500; font-size:13px; cursor:pointer;">OK</button>
+      <button id="app-modal-cancel" type="button" style="min-height:44px; padding:10px 18px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:13px; cursor:pointer;">Скасувати</button>
+      <button id="app-modal-ok" type="button" style="min-height:44px; padding:10px 18px; border-radius:12px; border:none; background:#2FBE93; color:#0F0E0A; font-weight:500; font-size:13px; cursor:pointer;">OK</button>
     </div>
   </div>
 </div>
@@ -202,27 +228,27 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 
     <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Вага, кг</div>
     <div style="display:flex; gap:8px; margin-bottom:14px;">
-      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
-      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
+      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
     </div>
 
     <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Борг, $</div>
     <div style="display:flex; gap:8px; margin-bottom:6px;">
-      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
-      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
+      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
     </div>
     <div style="font-size:11px; color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:14px;">Тут не залишок боргу, а СКІЛЬКИ ПЛАНУЄШ ВИПЛАТИТИ за 12 тижнів. Старт (А) зазвичай 0, ціль (Б) — сума всіх запланованих платежів (наприклад 0 → 1800).</div>
 
     <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Капітал, $</div>
     <div style="display:flex; gap:8px; margin-bottom:6px;">
-      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
-      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:9px 11px; border-radius:8px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:14px;">
+      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
+      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:16px;">
     </div>
     <div style="font-size:11px; color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:18px;">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
 
     <div style="display:flex; justify-content:flex-end; gap:8px;">
-      <button id="goals-cancel" type="button" style="padding:8px 14px; border-radius:10px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:13px; cursor:pointer;">Скасувати</button>
-      <button id="goals-save" type="button" style="padding:8px 14px; border-radius:10px; border:none; background:#2FBE93; color:#0F0E0A; font-weight:500; font-size:13px; cursor:pointer;">Зберегти</button>
+      <button id="goals-cancel" type="button" style="min-height:44px; padding:10px 18px; border-radius:12px; border:0.5px solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:13px; cursor:pointer;">Скасувати</button>
+      <button id="goals-save" type="button" style="min-height:44px; padding:10px 18px; border-radius:12px; border:none; background:#2FBE93; color:#0F0E0A; font-weight:500; font-size:13px; cursor:pointer;">Зберегти</button>
     </div>
   </div>
 </div>
@@ -555,38 +581,34 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   function renderJourney(){
     const cur = currentWeek();
     const sel = activeWeek();
-    const w = 680, h = 76, pad = 22, r = 15;
-    const x = i => pad + (w - 2*pad) * (i-1) / (WEEKS-1);
-    const yLine = 32;
-    const borderColor = cv('--border', '#E1E0D9');
-    const mutedColor = cv('--text-muted', '#898781');
-    const ringColor = cv('--text-primary', '#F3F1E8');
-    let line = '<line x1="' + x(1) + '" y1="' + yLine + '" x2="' + x(WEEKS) + '" y2="' + yLine + '" stroke="' + borderColor + '" stroke-width="2" />';
-    let dots = '';
+    const wrap = document.getElementById('journey-wrap');
+    wrap.innerHTML = '';
+    const strip = document.createElement('div');
+    strip.className = 'journey-strip';
     for (let i = 1; i <= WEEKS; i++){
       const s = score(i);
-      const color = s >= 85 ? C_DONE : C_CURRENT;
-      const isToday = i === cur;
-      const isSel = i === sel;
-      // Обраний тиждень — світлий обідок; сьогоднішній — крапка під номером.
-      dots += '<circle cx="' + x(i) + '" cy="' + yLine + '" r="' + r + '" fill="' + color + '"' +
-        (isSel ? ' stroke="' + ringColor + '" stroke-width="2.5"' : '') + ' style="transition: fill 0.3s;" />';
-      dots += '<text x="' + x(i) + '" y="' + (yLine + 4) + '" text-anchor="middle" font-size="11" font-weight="700" fill="#0F0E0A" style="pointer-events:none;">' + s + '</text>';
-      dots += '<text x="' + x(i) + '" y="' + (h - 4) + '" text-anchor="middle" font-size="10" fill="' +
-        (isToday ? C_CURRENT : mutedColor) + '" font-weight="' + (isToday ? '700' : '400') + '" style="pointer-events:none;">' + i + '</text>';
-      // Невидиме коло-мішень: більше за видиме, щоб у нього легше було влучити пальцем.
-      dots += '<circle class="journey-hit" data-week="' + i + '" cx="' + x(i) + '" cy="' + yLine + '" r="' + (r + 9) +
-        '" fill="transparent" style="cursor:pointer;"><title>Тиждень ' + i + ' — ' + s + '%</title></circle>';
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'journey-cell' + (i === sel ? ' selected' : '') + (i === cur ? ' today' : '');
+      cell.title = 'Тиждень ' + i + ' — ' + s + '%' + (i === cur ? ' (поточний)' : '');
+      const dot = document.createElement('span');
+      dot.className = 'journey-dot';
+      dot.style.background = s >= 85 ? C_DONE : C_CURRENT;
+      dot.textContent = s;
+      const num = document.createElement('span');
+      num.className = 'journey-num';
+      num.textContent = i;
+      cell.appendChild(dot); cell.appendChild(num);
+      cell.onclick = () => { selectedWeek = i; render(); };
+      strip.appendChild(cell);
     }
-    const wrap = document.getElementById('journey-wrap');
-    wrap.innerHTML =
-      '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%; height:auto; display:block;">' + line + dots + '</svg>';
-    wrap.querySelectorAll('.journey-hit').forEach(function(el){
-      el.addEventListener('click', function(){
-        selectedWeek = parseInt(el.getAttribute('data-week'), 10);
-        render();
-      });
-    });
+    wrap.appendChild(strip);
+    // Якщо стрічка не влазить у ширину екрана — підкручуємо її так, щоб
+    // обраний тиждень був по центру видимої області.
+    const selEl = strip.children[sel - 1];
+    if (selEl && strip.scrollWidth > strip.clientWidth){
+      strip.scrollLeft = Math.max(0, selEl.offsetLeft - (strip.clientWidth - selEl.offsetWidth) / 2);
+    }
   }
 
   function deltaHtml(current, previous, betterWhenLower, unit){
@@ -658,7 +680,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     let s = '';
     [1,3,6,9,12].forEach(i => {
       const isCur = i === cur;
-      s += '<text x="' + x(i) + '" y="' + (h-6) + '" text-anchor="middle" font-size="10" font-weight="' + (isCur ? '700' : '400') + '" fill="' + (isCur ? C_CURRENT : mutedColor) + '">' + i + '</text>';
+      s += '<text x="' + x(i) + '" y="' + (h-6) + '" text-anchor="middle" font-size="11" font-weight="' + (isCur ? '700' : '400') + '" fill="' + (isCur ? C_CURRENT : mutedColor) + '">' + i + '</text>';
     });
     return s;
   }
@@ -672,16 +694,16 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       const pct = amt > 0 ? Math.max(Math.round((amt / maxAmt) * 100), 6) : 0;
       const isCur = i === cur;
       bars += '<div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; min-width:0;">' +
-        '<div style="font-size:8px; color:' + color + '; font-weight:600; white-space:nowrap; height:10px;">' + (amt > 0 ? '$' + amt.toLocaleString() : '') + '</div>' +
-        '<div style="width:100%; height:36px; display:flex; align-items:flex-end;" title="Тиждень ' + i + ': $' + amt + '">' +
+        '<div class="bar-amt" style="font-size:10px; color:' + color + '; font-weight:600; white-space:nowrap; height:13px;">' + (amt > 0 ? '$' + amt.toLocaleString() : '') + '</div>' +
+        '<div style="width:100%; height:44px; display:flex; align-items:flex-end;" title="Тиждень ' + i + ': $' + amt + '">' +
           '<div style="width:100%; height:' + pct + '%; min-height:' + (amt > 0 ? '3px' : '1px') + '; background:' + (amt > 0 ? color : 'var(--border-strong)') + '; opacity:' + (amt > 0 ? 1 : 0.3) + '; border-radius:3px 3px 0 0;"></div>' +
         '</div>' +
-        '<div style="font-size:8.5px; color:' + (isCur ? color : 'var(--text-muted)') + '; font-weight:' + (isCur ? '700' : '400') + ';">' + i + '</div>' +
+        '<div style="font-size:11px; color:' + (isCur ? color : 'var(--text-muted)') + '; font-weight:' + (isCur ? '700' : '400') + ';">' + i + '</div>' +
       '</div>';
     }
     return '<div style="border-top:1px solid ' + cv('--border', '#34322B') + '; margin-top:8px; padding-top:8px;">' +
       '<div style="display:flex; gap:3px; align-items:flex-end;">' + bars + '</div>' +
-      '<div style="font-size:9.5px; color:var(--text-muted); margin-top:4px;">внески по тижнях' + (maxAmt > 1 ? ' · макс $' + maxAmt.toLocaleString() : '') + '</div>' +
+      '<div style="font-size:11px; color:var(--text-muted); margin-top:5px;">внески по тижнях' + (maxAmt > 1 ? ' · макс $' + maxAmt.toLocaleString() : '') + '</div>' +
     '</div>';
   }
 
@@ -727,8 +749,18 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     }
   }
 
+  // 3.2: підганяє систему координат SVG під реальну ширину контейнера.
+  // Доти viewBox був жорстко 620px і стискався під ~292px екрана iPhone
+  // (масштаб 0.47), через що підпис 10px ставав 4.7px — нечитабельно.
+  // Тепер малюємо 1:1, і заявлений розмір шрифту дорівнює екранному.
+  function chartWidth_(containerId){
+    const el = document.getElementById(containerId);
+    const measured = el && el.clientWidth ? el.clientWidth : 0;
+    return Math.max(260, Math.min(measured || 620, 900));
+  }
+
   function renderWeightChart(snap){
-    const w = 620, h = 190, padL = 38, padR = 16, padT = 16, padB = 26;
+    const w = chartWidth_('chart-weight'), h = 190, padL = 38, padR = 16, padT = 16, padB = 26;
     const cur = currentWeek();
 
     // 2. Динамічний діапазон шкали замість жорстких 70-80 кг
@@ -747,7 +779,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     const step = spanV > 6 ? 2 : (spanV > 2.5 ? 1 : 0.5);
     for (let v = Math.ceil(yMin / step) * step; v <= yMax; v += step){
       grid += '<line x1="' + padL + '" y1="' + y(v) + '" x2="' + (w-padR) + '" y2="' + y(v) + '" stroke="' + gridColor + '" stroke-width="1" />';
-      grid += '<text x="' + (padL - 8) + '" y="' + (y(v)+3) + '" text-anchor="end" font-size="10" fill="' + mutedColor + '">' + fmt1(v) + '</text>';
+      grid += '<text x="' + (padL - 8) + '" y="' + (y(v)+3) + '" text-anchor="end" font-size="11" fill="' + mutedColor + '">' + fmt1(v) + '</text>';
     }
 
     let expPath = ''; for (let i = 0; i <= WEEKS; i++) expPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(expWeight(i)) + ' ';
@@ -760,14 +792,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       actPath += (!started ? 'M' : 'L') + x(i) + ',' + y(wt) + ' '; started = true;
       if (i === 0){
         dots += '<circle cx="' + x(0) + '" cy="' + y(wt) + '" r="4" fill="' + cv('--surface-2','#221F19') + '" stroke="' + C_WEIGHT + '" stroke-width="2" />';
-        dots += '<text x="' + (x(0)+6) + '" y="' + (y(wt) - 8) + '" text-anchor="start" font-size="9.5" fill="' + mutedColor + '">Старт</text>';
+        dots += '<text x="' + (x(0)+6) + '" y="' + (y(wt) - 8) + '" text-anchor="start" font-size="11" fill="' + mutedColor + '">Старт</text>';
       } else {
         dots += '<circle cx="' + x(i) + '" cy="' + y(wt) + '" r="4.5" fill="' + C_WEIGHT + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === cur ? 'chart-dot-live' : '') + '" />';
         lastPoint = { i: i, v: wt };
       }
     }
     // 3. Значення останньої реальної точки — підписано прямо на графіку.
-    if (lastPoint) dots += '<text x="' + x(lastPoint.i) + '" y="' + (y(lastPoint.v) - 10) + '" text-anchor="middle" font-size="10.5" font-weight="600" fill="' + C_WEIGHT + '">' + fmt1(lastPoint.v) + ' кг</text>';
+    if (lastPoint) dots += '<text x="' + x(lastPoint.i) + '" y="' + (y(lastPoint.v) - 10) + '" text-anchor="middle" font-size="12" font-weight="600" fill="' + C_WEIGHT + '">' + fmt1(lastPoint.v) + ' кг</text>';
 
     // 5. Заливка між планом і фактом: зелена — випереджаєш/у графіку, жовта — позаду.
     let shade = '';
@@ -791,7 +823,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%; height:auto; display:block; overflow:visible;">' +
         grid + shade +
         '<line x1="' + padL + '" y1="' + targetY + '" x2="' + (w-padR) + '" y2="' + targetY + '" stroke="' + C_WEIGHT + '" stroke-dasharray="3,3" stroke-width="1.2" />' +
-        '<text x="' + (w-padR) + '" y="' + (targetY - 6) + '" text-anchor="end" font-size="10" fill="' + C_WEIGHT + '">ціль ' + GOALS.weightEnd + ' кг</text>' +
+        '<text x="' + (w-padR) + '" y="' + (targetY - 6) + '" text-anchor="end" font-size="11" fill="' + C_WEIGHT + '">ціль ' + GOALS.weightEnd + ' кг</text>' +
         '<path d="' + expPath + '" fill="none" stroke="' + cv('--border-strong', C_FUTURE_FALLBACK) + '" stroke-width="1.5" stroke-dasharray="4,4" />' +
         '<path d="' + actPath + '" fill="none" stroke="' + C_WEIGHT + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />' +
         dots + xlabels +
@@ -802,7 +834,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   }
 
   function renderMoneyChart(containerId, expFn, amtKey, start, end, color, kind, snap){
-    const w = 620, h = 190, padL = 50, padR = 16, padT = 16, padB = 26;
+    const w = chartWidth_(containerId), h = 190, padL = 50, padR = 16, padT = 16, padB = 26;
     const cur = currentWeek();
     const isDebt = kind === 'debt';
     const onTrack = isDebt ? snap.debtOnTrack : snap.capitalOnTrack;
@@ -828,7 +860,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     const step = niceStep_(hi0 - lo0, 5);
     for (let v = Math.ceil(lo0 / step) * step; v <= hi0 + step * 0.001; v += step){
       grid += '<line x1="' + padL + '" y1="' + y(v) + '" x2="' + (w-padR) + '" y2="' + y(v) + '" stroke="' + gridColor + '" stroke-width="1" />' +
-        '<text x="' + (padL - 8) + '" y="' + (y(v)+3) + '" text-anchor="end" font-size="10" fill="' + mutedColor + '">$' + Math.round(v).toLocaleString() + '</text>';
+        '<text x="' + (padL - 8) + '" y="' + (y(v)+3) + '" text-anchor="end" font-size="11" fill="' + mutedColor + '">$' + Math.round(v).toLocaleString() + '</text>';
     }
 
     let expPath = ''; for (let i = 0; i <= WEEKS; i++) expPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(expFn(i)) + ' ';
@@ -841,13 +873,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       actPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(v) + ' ';
       if (i === 0){
         dots += '<circle cx="' + x(0) + '" cy="' + y(v) + '" r="4" fill="' + cv('--surface-2','#221F19') + '" stroke="' + color + '" stroke-width="2" />';
-        dots += '<text x="' + (x(0)+6) + '" y="' + (y(v) - 8) + '" text-anchor="start" font-size="9.5" fill="' + mutedColor + '">Старт</text>';
+        dots += '<text x="' + (x(0)+6) + '" y="' + (y(v) - 8) + '" text-anchor="start" font-size="11" fill="' + mutedColor + '">Старт</text>';
       } else if (state[i][amtKey]) {
         dots += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="4.5" fill="' + color + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === cur ? 'chart-dot-live' : '') + '" />';
         lastPoint = { i: i, v: v };
       }
     }
-    if (lastPoint) dots += '<text x="' + x(lastPoint.i) + '" y="' + (y(lastPoint.v) - 10) + '" text-anchor="middle" font-size="10.5" font-weight="600" fill="' + color + '">$' + Math.round(lastPoint.v).toLocaleString() + '</text>';
+    if (lastPoint) dots += '<text x="' + x(lastPoint.i) + '" y="' + (y(lastPoint.v) - 10) + '" text-anchor="middle" font-size="12" font-weight="600" fill="' + color + '">$' + Math.round(lastPoint.v).toLocaleString() + '</text>';
 
     // 5. Заливка план/факт.
     let shade = '';
@@ -870,7 +902,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%; height:auto; display:block; overflow:visible;">' +
         grid + shade +
         '<line x1="' + padL + '" y1="' + targetY + '" x2="' + (w-padR) + '" y2="' + targetY + '" stroke="' + color + '" stroke-dasharray="3,3" stroke-width="1.2" />' +
-        '<text x="' + (w-padR) + '" y="' + (targetY - 6) + '" text-anchor="end" font-size="10" fill="' + color + '">ціль $' + Math.round(end).toLocaleString() + '</text>' +
+        '<text x="' + (w-padR) + '" y="' + (targetY - 6) + '" text-anchor="end" font-size="11" fill="' + color + '">ціль $' + Math.round(end).toLocaleString() + '</text>' +
         '<path d="' + expPath + '" fill="none" stroke="' + cv('--border-strong', C_FUTURE_FALLBACK) + '" stroke-width="1.5" stroke-dasharray="4,4" />' +
         '<path d="' + actPath + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />' +
         dots + xlabels +
@@ -904,20 +936,18 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     wrap.appendChild(grid);
     return wrap;
   }
-  // hideButtons — U6: для грошових сум ± практично марний (щоб набрати $133
-  // кроком по 5 потрібно 26 натискань), тому там лишається тільки поле вводу
-  // плюс кнопка "підставити план". Для ваги ±0.1 кг навпаки зручний.
-  function stepper(value, step, decimals, onLive, onCommit, min, hideButtons){
+  // Раніше тут були кнопки ±. Прибрані повністю: для грошей крок 5 давав 26+
+  // натискань на суму типу $133, а для ваги крок 0.1 кг — так само незручно
+  // порівняно з прямим набором. Лишилось поле вводу висотою 44px (мінімум
+  // Apple HIG) плюс кнопки "підставити"/"скопіювати" поруч.
+  function stepper(value, step, decimals, onLive, onCommit, min){
     if (min === undefined || min === null) min = 0;
     const wrap = document.createElement('div'); wrap.className = 'stepper';
-    const minus = document.createElement('button'); minus.className = 'step-btn'; minus.type = 'button'; minus.innerHTML = icon('minus', 14);
-    const input = document.createElement('input'); input.type = 'number'; input.step = step; input.min = min; input.value = value !== null && value !== undefined ? value : '';
+    const input = document.createElement('input');
+    input.type = 'number'; input.step = step; input.min = min;
+    input.value = value !== null && value !== undefined ? value : '';
     input.inputMode = decimals > 0 ? 'decimal' : 'numeric';
     input.onfocus = () => input.select();
-    const plus = document.createElement('button'); plus.className = 'step-btn'; plus.type = 'button'; plus.innerHTML = icon('plus', 14);
-    function commitStep(v){ if (v < min) v = min; const rounded = Math.round(v / step) * step; const fixed = parseFloat(rounded.toFixed(decimals)); input.value = fixed; onLive(fixed); onCommit(); }
-    minus.onclick = () => commitStep((parseFloat(input.value) || 0) - step);
-    plus.onclick = () => commitStep((parseFloat(input.value) || 0) + step);
     // While typing: only persist the value, never rebuild the DOM (that was causing focus loss / jank on every keystroke).
     input.oninput = () => onLive(input.value ? parseFloat(input.value) : null);
     // Full recalculation happens once editing is done — і тут же виправляємо, якщо ввели від'ємне число.
@@ -927,15 +957,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       onCommit();
     };
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
-    if (hideButtons){
-      input.style.flex = '1';
-      input.style.minWidth = '0';
-      input.style.textAlign = 'left';
-      input.style.paddingLeft = '12px';
-      wrap.appendChild(input);
-    } else {
-      wrap.appendChild(minus); wrap.appendChild(input); wrap.appendChild(plus);
-    }
+    wrap.appendChild(input);
     wrap._input = input;
     return wrap;
   }
@@ -999,8 +1021,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     const dWarn = (state[i].debtAmt && state[i].debtAmt > planDebt * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
     const dStep = stepper(state[i].debtAmt, 5, 0,
       (v) => { state[i].debtAmt = v; saveWeek(i); },
-      () => render(), 0, true);
-    frag.appendChild(metricRow('Борг · відклав у конверт, $', C_DEBT, dStep, planDebtNote, dWarn,
+      () => render());
+    frag.appendChild(metricRow('Борг · конверт готівкою', C_DEBT, dStep, planDebtNote, dWarn,
       prevDebt ? ('Скопіювати $' + prevDebt + ' з тижня ' + (i-1)) : null,
       prevDebt ? () => { state[i].debtAmt = prevDebt; saveWeek(i); render(); } : null,
       '$' + planDebt, () => { state[i].debtAmt = planDebt; saveWeek(i); render(); }));
@@ -1011,8 +1033,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     const cWarn = (state[i].capitalAmt && state[i].capitalAmt > planCapital * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
     const cStep = stepper(state[i].capitalAmt, 5, 0,
       (v) => { state[i].capitalAmt = v; saveWeek(i); },
-      () => render(), 0, true);
-    frag.appendChild(metricRow('Капітал · переказ на Монобанк $ або OKX', C_CAPITAL, cStep, planCapNote, cWarn,
+      () => render());
+    frag.appendChild(metricRow('Капітал · Моно $ / OKX', C_CAPITAL, cStep, planCapNote, cWarn,
       prevCap ? ('Скопіювати $' + prevCap + ' з тижня ' + (i-1)) : null,
       prevCap ? () => { state[i].capitalAmt = prevCap; saveWeek(i); render(); } : null,
       '$' + planCapital, () => { state[i].capitalAmt = planCapital; saveWeek(i); render(); }));
@@ -1230,6 +1252,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       if (root) root.innerHTML = '<div style="padding:20px; font-family:sans-serif; color:#854F0B;">Трекер не зміг відобразитись через помилку: ' + (err && err.message ? err.message : String(err)) + '. Спробуй відкрити цей артефакт у звичайному браузері телефону через кнопку "Publish".</div>';
     }
   }
+
+  // Графіки тепер малюються під виміряну ширину контейнера, тому при зміні
+  // розміру вікна (чи повороті телефона) їх треба перерахувати.
+  let resizeTimer = null;
+  let lastWidth = window.innerWidth;
+  window.addEventListener('resize', function(){
+    if (window.innerWidth === lastWidth) return; // iOS смикає resize при appearance/зникненні панелей
+    lastWidth = window.innerWidth;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){ render(); }, 150);
+  });
 
   load();
 })();
