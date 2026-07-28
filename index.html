@@ -123,7 +123,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       </svg>
       <div>
         <h1 style="margin: 0 0 4px; font-size: 24px;">12 тижнів</h1>
-        <p style="color: var(--text-secondary); font-size: 12.5px; margin: 0;">27 липня — 18 жовтня 2026 · крок до п'ятирічної мапи</p>
+        <p style="color: var(--text-secondary); font-size: 12.5px; margin: 0;">27 липня — 18 жовтня 2026 · крок до п'ятирічної мапи <span id="sync-badge" style="color: var(--text-muted); font-size: 11px;"></span></p>
       </div>
     </div>
     <div class="menu-wrap">
@@ -185,7 +185,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     <svg id="history-chevron" width="14" height="14" viewBox="0 0 16 16" style="transition: transform 0.25s;"><path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
   </div>
   <div id="history-list" style="display:none;"></div>
-  <div style="text-align:center; font-size:10px; color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v18 · no native spinners, no plan arrows, min 0</div>
+  <div style="text-align:center; font-size:10px; color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v19 · instant load (cached paint + batched sync)</div>
 </div>
 
 <div id="app-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
@@ -238,9 +238,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   const START = new Date(2026, 6, 27);
   const WEEKS = 12;
   let GOALS = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800 };
-  async function loadGoals(){
-    try { const r = await storage.get('goals'); if (r && r.value) GOALS = Object.assign({}, GOALS, JSON.parse(r.value)); } catch(e) {}
-  }
   async function saveGoals(){ try { await storage.set('goals', JSON.stringify(GOALS)); } catch(e) {} }
   const C_WEIGHT = '#9089E0', C_DEBT = '#5BA3E8', C_CAPITAL = '#2FBE93';
   const C_DONE = '#2FBE93', C_MISSED = '#FF7A54', C_CURRENT = '#F0B94D', C_FUTURE_FALLBACK = '#4A473C';
@@ -336,25 +333,39 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     el.textContent = getWebAppUrl() ? 'Синхронізація: увімкнена (Google Таблиця)' : 'Синхронізація: вимкнена (лише цей браузер)';
   }
 
-  const storage = {
-    async get(key){
-      let local = null;
-      try { const raw = localStorage.getItem('tracker:' + key); if (raw) local = { key: key, value: raw }; } catch(e) {}
-      const url = getWebAppUrl();
-      if (url){
+  // Локальний кеш — синхронний, без жодного мережевого запиту.
+  function localGet(key){ try { return localStorage.getItem('tracker:' + key); } catch(e){ return null; } }
+  function localSet(key, value){ try { localStorage.setItem('tracker:' + key, value); } catch(e) {} }
+
+  const ALL_KEYS = (function(){ const k = ['goals']; for (let i = 1; i <= WEEKS; i++) k.push('week:' + i); return k; })();
+
+  // Забирає ВСІ ключі одним запитом (action=getall). Якщо бекенд старої
+  // версії такої дії не знає — падає на паралельні запити. Раніше тут було
+  // 13 ЧЕРГОВИХ запитів, кожен чекав попереднього — звідси 20 секунд
+  // порожнього екрана при відкритті.
+  async function remoteFetchAll(url){
+    try {
+      const res = await fetch(url + '?action=getall');
+      const data = await res.json();
+      if (data && data.items && typeof data.items === 'object') return data.items;
+    } catch(e) { /* старий бекенд або немає звʼязку — пробуємо запасний шлях */ }
+    try {
+      const results = await Promise.all(ALL_KEYS.map(async function(key){
         try {
           const res = await fetch(url + '?action=get&key=' + encodeURIComponent(key));
-          const data = await res.json();
-          if (data && data.value){
-            try { localStorage.setItem('tracker:' + key, data.value); } catch(e) {}
-            return { key: key, value: data.value };
-          }
-        } catch(e) { /* офлайн або URL не працює — падаємо на локальний кеш */ }
-      }
-      return local;
-    },
+          const d = await res.json();
+          return [key, (d && d.value) ? d.value : null];
+        } catch(e){ return [key, null]; }
+      }));
+      const map = {};
+      results.forEach(function(pair){ if (pair[1]) map[pair[0]] = pair[1]; });
+      return map;
+    } catch(e){ return null; }
+  }
+
+  const storage = {
     async set(key, value){
-      try { localStorage.setItem('tracker:' + key, value); } catch(e) {}
+      localSet(key, value);
       const url = getWebAppUrl();
       if (!url) return true; // синхронізація вимкнена — локально вже збережено
       try {
@@ -368,15 +379,33 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     }
   };
 
+  function applyGoalsRaw(raw){ try { if (raw) GOALS = Object.assign({}, GOALS, JSON.parse(raw)); } catch(e) {} }
+  function applyWeekRaw(i, raw){ try { if (raw) state[i] = Object.assign(emptyWeek(), JSON.parse(raw)); } catch(e) {} }
+  function refreshPrevScores(){ for (let i = 1; i <= WEEKS; i++) prevScores[i] = score(i); }
+  function setSyncBadge(text){ const el = document.getElementById('sync-badge'); if (el) el.textContent = text || ''; }
+
   async function load(){
-    try { await loadGoals(); } catch(e) {}
-    try {
-      for (let i = 1; i <= WEEKS; i++){
-        try { const r = await storage.get('week:' + i); if (r && r.value) state[i] = Object.assign(emptyWeek(), JSON.parse(r.value)); } catch(e) {}
-      }
-      for (let i = 1; i <= WEEKS; i++) prevScores[i] = score(i);
-    } catch(e) {}
+    // Крок 1 — миттєво малюємо з локального кешу, БЕЗ мережі.
+    // Користувач бачить трекер одразу, а не через 20 секунд.
+    applyGoalsRaw(localGet('goals'));
+    for (let i = 1; i <= WEEKS; i++) applyWeekRaw(i, localGet('week:' + i));
+    refreshPrevScores();
     updateSyncStatusUI();
+    render();
+
+    // Крок 2 — синхронізація у фоні; екран уже показано, чекати нема чого.
+    const url = getWebAppUrl();
+    if (!url) return;
+    setSyncBadge('синхронізація…');
+    const remote = await remoteFetchAll(url);
+    if (!remote){ setSyncBadge('офлайн'); return; }
+    if (remote['goals']){ localSet('goals', remote['goals']); applyGoalsRaw(remote['goals']); }
+    for (let i = 1; i <= WEEKS; i++){
+      const raw = remote['week:' + i];
+      if (raw){ localSet('week:' + i, raw); applyWeekRaw(i, raw); }
+    }
+    refreshPrevScores();
+    setSyncBadge('');
     render();
   }
   async function saveWeek(n){
