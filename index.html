@@ -22,7 +22,9 @@
   --surface-1: #1C1B15;
   --surface-2: #221F19;
   --border: #34322B;
-  --border-strong: #4A473C;
+  /* A1: межі інтерактивних контролів мають давати ≥3:1 (WCAG 1.4.11).
+     Було #4A473C = 2.08:1 — провал. #767161 дає 3.96:1 на найтемнішому фоні. */
+  --border-strong: #767161;
   --text-primary: #F3F1E8;
   --text-secondary: #B7B4A6;
   --text-muted: #8C8977;
@@ -105,7 +107,6 @@
 .journey-num { font-size: var(--fs-xs); color: var(--text-muted); }
 /* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
    тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
-@media (max-width: 470px) { .bar-amt { display: none; } }
 .journey-cell.today .journey-num { color: var(--warn-text); font-weight: 700; }
 .card { background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-xl); padding: 1.25rem 1.4rem; }
 .hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; transition: color 0.3s; }
@@ -143,21 +144,34 @@ input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .icon-btn { width: var(--tap); height: var(--tap); border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
 .icon-btn:hover { background: var(--surface-0); color: var(--text-primary); }
-.warn-text { font-size: var(--fs-sm); color: #854F0B; margin-top: 8px; display: flex; align-items: center; gap: 5px; }
+/* A7: єдиний видимий стиль фокуса для всього інтерактиву. Використовуємо
+   outline з відступом — на відміну від border він не обрізається
+   заокругленням і не змінює розміри елемента (тобто не зсуває layout). */
+#tracker-root :focus-visible,
+#app-modal-overlay :focus-visible,
+#goals-overlay :focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+#tracker-root .journey-cell:focus-visible .journey-dot { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+#tracker-root .journey-cell:focus-visible { outline: none; }
+.warn-text { font-size: var(--fs-sm); color: var(--warn-text); margin-top: 8px; display: flex; align-items: center; gap: 5px; }
 .habit-panel { background: var(--surface-1); border-radius: var(--r-md); padding: 4px 14px; margin-bottom: 8px; }
 .habit-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; font-size: var(--fs-md); cursor: pointer; }
 input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
 .daily-block { background: var(--surface-1); border-radius: var(--r-md); padding: 12px 14px 14px; margin-bottom: 8px; }
 .daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: 10px; }
 .daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-@media (max-width: 470px) { .daily-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; } }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; }
 .day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) dashed var(--border-strong); background: var(--surface-2); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .day-square:hover { border-color: var(--focus); background: var(--surface-0); }
 .day-square:active { transform: scale(0.9); }
 .day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
+/* A3: квадратик дня тепер має role="checkbox" і потрапляє у Tab-послідовність */
+.day-square[aria-checked="true"] { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
 .day-cell-label { font-size: var(--fs-xs); color: var(--text-muted); }
-.hero-card { border-radius: var(--r-xl); padding: 1.5rem 1.6rem; margin-bottom: 1.5rem; background: var(--surface-2); border: var(--bw) solid var(--border-strong); position: relative; overflow: hidden; }
+.hero-card { border-radius: var(--r-xl); padding: 1.5rem 1.6rem; margin-bottom: 1.5rem; background: var(--surface-2); border: var(--bw) solid var(--border); position: relative; overflow: hidden; }
 .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: var(--fs-sm); color: var(--text-secondary); margin-top: 10px; }
 .legend span { display: inline-flex; align-items: center; gap: 5px; }
 .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
@@ -169,12 +183,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 .menu-wrap { position: relative; }
 .menu-btn { width: var(--tap); height: var(--tap); border-radius: 50%; border: var(--bw) solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .menu-btn:hover { background: var(--surface-1); }
-.menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: var(--bw) solid var(--border-strong); border-radius: var(--r-md); padding: 8px; min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 20; display: none; }
+.menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: 8px; min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 20; display: none; }
 .menu-panel.open { display: block; }
 [data-icon] { display: inline-flex; align-items: center; flex-shrink: 0; }
 .menu-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: var(--fs-md); border-radius: var(--r-sm); cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
 .menu-item:hover { background: var(--surface-1); }
-.progress-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 2px 0; }
+.progress-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: 2px 0; width: 100%; background: none; border: none; color: inherit; font-family: inherit; text-align: left; min-height: var(--tap); }
 .progress-collapsible { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
 .progress-collapsible.open { max-height: 3000px; }
 @keyframes celebratePulse { 0% { transform: scale(1); } 35% { transform: scale(1.15); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
@@ -184,11 +198,51 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 @keyframes flashBg { 0% { background-color: #E1F5EE; } 100% { background-color: transparent; } }
 .flash { animation: flashBg 1.2s ease; }
 
+/* ---------------------------------------------------------------------
+   Розділ 4 (Responsive). Раніше тут був один-єдиний медіа-запит на 520px,
+   що чіпав чотири властивості, плюс два розсипані на 470px. Тепер це три
+   свідомі точки зламу, кожна прив'язана до конкретного розрахунку, а не
+   до круглого числа.
+   --------------------------------------------------------------------- */
+
+/* ≤520px — телефон. Три картки показників у ряд стають нечитабельними. */
 @media (max-width: 520px) {
   #stat-cards { grid-template-columns: 1fr 1fr !important; }
   .card { padding: 1rem; }
   .hero-card { padding: 1.1rem 1.2rem; }
   .hero-num { font-size: var(--fs-xl) !important; }
+}
+
+/* ≤460px — сім квадратиків по 44px перестають вміщатись.
+   Розрахунок: 7×44 + 6×6 = 344px потрібного проти (ширина − 100px)
+   доступного, тобто межа настає близько 444px. Беремо 460 із запасом.
+   Тут же ховаємо підписи сум над стовпчиками бар-чарта — дванадцять
+   підписів на такій ширині перетворюються на кашу. */
+@media (max-width: 460px) {
+  .daily-grid { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .bar-amt { display: none; }
+}
+
+/* ≤380px — старі/компактні телефони. Дві картки показників у ряд дають
+   близько 130px на картку, чого замало для числа з підписом. */
+@media (max-width: 380px) {
+  #stat-cards { grid-template-columns: 1fr !important; }
+  .daily-grid { grid-template-columns: repeat(3, 1fr); }
+  .card { padding: 0.85rem; }
+  .hero-card { padding: 1rem; }
+  .metric-input-row { gap: 6px; }
+}
+
+/* Системне налаштування "зменшити рух". У трекері є нескінченна пульсація
+   точки поточного тижня на графіках — саме такі анімації провокують
+   дискомфорт у людей із вестибулярними розладами. WCAG 2.3.3. */
+@media (prefers-reduced-motion: reduce) {
+  #tracker-root *, #app-modal-overlay *, #goals-overlay * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 </style>
 
@@ -206,7 +260,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       </div>
     </div>
     <div class="menu-wrap">
-      <button class="menu-btn" id="menu-btn" title="Меню">
+      <button class="menu-btn" id="menu-btn" title="Меню" aria-label="Меню трекера" aria-haspopup="true" aria-expanded="false" aria-controls="menu-panel">
         <span data-icon="dots" data-icon-size="16"></span>
       </button>
       <div class="menu-panel" id="menu-panel">
@@ -227,10 +281,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   <div id="hero-wrap"></div>
 
   <div class="card" style="margin-bottom: 1.5rem; padding: 0.9rem 1.2rem;">
-    <div class="progress-toggle" id="progress-toggle">
+    <button class="progress-toggle" id="progress-toggle" type="button" aria-expanded="true" aria-controls="progress-collapsible">
       <span style="font-size:var(--fs-md); font-weight:500;">Прогрес і графіки</span>
       <span id="progress-chevron" data-icon="chevronDown" data-icon-size="16" style="display:flex; transition: transform 0.25s; transform: rotate(180deg);"></span>
-    </div>
+    </button>
     <div class="progress-collapsible open" id="progress-collapsible">
       <div id="dashboard-line" class="dashboard-line" style="margin: 14px 0 12px;"></div>
       <div id="stat-cards" style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 10px; margin-bottom: 12px;"></div>
@@ -259,14 +313,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v23 · UI: design tokens (radius, border, type, color scales)</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:2rem;">build v24 · a11y (ARIA, focus, contrast), responsive, QA validation</div>
 </div>
 
-<div id="app-modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
-  <div style="background:var(--surface-2, #221F19); border: var(--bw) solid var(--border-strong, #4A473C); border-radius: var(--r-lg); max-width:340px; width:100%; padding:1.2rem 1.3rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+<div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
+  <div style="background:var(--surface-2, #221F19); border: var(--bw) solid var(--border, #34322B); border-radius: var(--r-lg); max-width:340px; width:100%; padding:1.2rem 1.3rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
     <div id="app-modal-message" style="font-size:var(--fs-md); line-height:1.5; margin-bottom:14px;"></div>
     <div id="app-modal-input-wrap" style="display:none; margin-bottom:14px;">
-      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
     <div style="display:flex; justify-content:flex-end; gap:8px;">
       <button id="app-modal-cancel" type="button" class="btn btn-secondary">Скасувати</button>
@@ -275,28 +329,28 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   </div>
 </div>
 
-<div id="goals-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
-  <div style="background:var(--surface-2, #221F19); border: var(--bw) solid var(--border-strong, #4A473C); border-radius: var(--r-lg); max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:1.25rem 1.4rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
-    <div style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600; margin-bottom:4px;">Точка А і ціль</div>
+<div id="goals-overlay" role="dialog" aria-modal="true" aria-labelledby="goals-title" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:16px;">
+  <div style="background:var(--surface-2, #221F19); border: var(--bw) solid var(--border, #34322B); border-radius: var(--r-lg); max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:1.25rem 1.4rem; font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+    <h2 id="goals-title" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600; margin:0 0 4px;">Точка А і ціль</h2>
     <div style="font-size:var(--fs-sm); color:var(--text-secondary, #B7B4A6); margin-bottom:16px;">Звідки стартуємо і куди прийти за 12 тижнів. Порожнє поле = без змін.</div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Вага, кг</div>
     <div style="display:flex; gap:8px; margin-bottom:14px;">
-      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
-      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Борг, $</div>
     <div style="display:flex; gap:8px; margin-bottom:6px;">
-      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
-      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
     <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:14px;">Тут не залишок боргу, а СКІЛЬКИ ПЛАНУЄШ ВИПЛАТИТИ за 12 тижнів. Старт (А) зазвичай 0, ціль (Б) — сума всіх запланованих платежів (наприклад 0 → 1800).</div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:6px;">Капітал, $</div>
     <div style="display:flex; gap:8px; margin-bottom:6px;">
-      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
-      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #4A473C); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:12px 12px; border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
     <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:18px;">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
 
@@ -316,6 +370,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   const C_WEIGHT = '#9089E0', C_DEBT = '#5BA3E8', C_CAPITAL = '#2FBE93';
   const C_DONE = '#2FBE93', C_MISSED = '#FF7A54', C_CURRENT = '#F0B94D', C_FUTURE_FALLBACK = '#4A473C';
   const DAY_LABELS = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+  // Повні назви — для aria-label. Скорочення "Пн"/"Вт" скрінрідер вимовляє
+  // як беззмістовний набір літер.
+  const DAY_FULL = ['Понеділок','Вівторок','Середа','Четвер','Пʼятниця','Субота','Неділя'];
   // "% виконання тижня" — це Weekly Execution Score за методикою "12 тижнів у році":
   // рахує виконання ДІЙ (lead-показники), а не саму суму грошей. Для боргу дія —
   // це фізичне відкладення готівки в конверт цього тижня; для капіталу — переказ
@@ -352,6 +409,65 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   // Нативні діалоги браузер може мовчки заблокувати ("Prevent this page from
   // creating additional dialogs") після кількох поспіль — тоді кнопки виглядають
   // так, ніби взагалі не працюють. Власний overlay такого не має.
+  // --- A5/A6: спільне керування фокусом для обох модалок. ---
+  // Раніше модалки не мали ні role="dialog", ні перенесення фокуса, ні пастки
+  // фокуса (Tab виходив у контент позаду), ні закриття по Escape. Ці функції
+  // закривають усе перелічене одним механізмом на обидва діалоги.
+  const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+  // Стек, а не одна змінна: попередження може відкритись поверх діалогу
+  // цілей, і тоді обробник нижнього діалогу не можна ні загубити, ні
+  // лишити активним — інакше один Escape закрив би обидва.
+  const modalStack = [];
+
+  function openModal(overlay, opts){
+    opts = opts || {};
+    const restoreTo = document.activeElement;   // куди повернути фокус після закриття
+    overlay.style.display = 'flex';
+
+    function focusables(){
+      return Array.from(overlay.querySelectorAll(FOCUSABLE))
+        .filter(el => el.offsetParent !== null || el === document.activeElement);
+    }
+    function onKeydown(e){
+      if (e.key === 'Escape'){ e.preventDefault(); closeModal(overlay); if (opts.onEscape) opts.onEscape(); return; }
+      if (e.key !== 'Tab') return;
+      // Пастка фокуса: Tab по колу всередині модалки, не вислизає назад у сторінку.
+      const items = focusables();
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+    // Обробник попереднього діалогу тимчасово вимикаємо, щоб події не
+    // спрацьовували одразу на двох рівнях.
+    const parent = modalStack[modalStack.length - 1];
+    if (parent) document.removeEventListener('keydown', parent.onKeydown, true);
+    document.addEventListener('keydown', onKeydown, true);
+    modalStack.push({ overlay: overlay, onKeydown: onKeydown, restoreTo: restoreTo });
+
+    // Фокус усередину: на поле вводу, якщо воно є, інакше на першу кнопку.
+    setTimeout(() => {
+      const target = opts.focusEl || overlay.querySelector('input:not([type=hidden])') || focusables()[0];
+      if (target) target.focus();
+    }, 50);
+  }
+
+  function closeModal(overlay){
+    overlay.style.display = 'none';
+    const idx = modalStack.map(m => m.overlay).lastIndexOf(overlay);
+    if (idx === -1) return;
+    const entry = modalStack.splice(idx, 1)[0];
+    document.removeEventListener('keydown', entry.onKeydown, true);
+    // Повертаємо керування діалогу, що лишився під цим.
+    const parent = modalStack[modalStack.length - 1];
+    if (parent) document.addEventListener('keydown', parent.onKeydown, true);
+    // Фокус повертається на елемент, що відкрив діалог, — інакше він падає
+    // на <body> і навігація з клавіатури починається спочатку.
+    if (entry.restoreTo && typeof entry.restoreTo.focus === 'function' && document.contains(entry.restoreTo)) {
+      entry.restoreTo.focus();
+    }
+  }
+
   function showAppModal(opts){
     const overlay = document.getElementById('app-modal-overlay');
     if (!overlay) return;
@@ -365,14 +481,22 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     else { inputWrap.style.display = 'none'; }
     okBtn.textContent = opts.okLabel || 'OK';
     cancelBtn.style.display = opts.hideCancel ? 'none' : 'inline-block';
-    overlay.style.display = 'flex';
-    function cleanup(){ overlay.style.display = 'none'; okBtn.onclick = null; cancelBtn.onclick = null; overlay.onclick = null; }
+    function cleanup(){ closeModal(overlay); okBtn.onclick = null; cancelBtn.onclick = null; overlay.onclick = null; }
     okBtn.onclick = () => { const val = opts.showInput ? input.value : true; cleanup(); if (opts.onOk) opts.onOk(val); };
     cancelBtn.onclick = () => { cleanup(); if (opts.onCancel) opts.onCancel(); };
     overlay.onclick = (e) => { if (e.target === overlay && !opts.hideCancel) { cleanup(); if (opts.onCancel) opts.onCancel(); } };
-    if (opts.showInput) setTimeout(() => input.focus(), 50);
+    openModal(overlay, {
+      focusEl: opts.showInput ? input : okBtn,
+      onEscape: () => { okBtn.onclick = null; cancelBtn.onclick = null; overlay.onclick = null; if (opts.onCancel) opts.onCancel(); }
+    });
   }
-  function showAppAlert(message){ showAppModal({ message: message, okLabel: 'Гаразд', hideCancel: true }); }
+  function showAppAlert(message){
+    // Переноси рядків через textContent не працюють, тому перетворюємо
+    // на розмітку — з екрануванням, бо в тексті може бути ввід користувача.
+    const esc = String(message)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    showAppModal({ html: esc.replace(/\n/g, '<br>'), okLabel: 'Гаразд', hideCancel: true });
+  }
 
   function cv(name, fallback){
     try {
@@ -506,18 +630,64 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     else showSaveStatus('Збережено локально (хмара недоступна)', true);
   }
 
+  // Q3: раніше тут був лише try/catch навколо JSON.parse. Якщо файл був
+  // валідним JSON, але з іншою структурою (наприклад weight: "abc"),
+  // Object.assign мовчки підставляв сміття, і далі NaN розповзався по score,
+  // темпу і графіках без жодного повідомлення. Тепер кожне поле перевіряється
+  // за типом, а неочікувані значення відкидаються з підсумковим звітом.
+  function sanitizeWeek(raw){
+    const clean = emptyWeek();
+    const skipped = [];
+    const numField = (key, max) => {
+      if (raw[key] === undefined || raw[key] === null || raw[key] === '') return;
+      const v = Number(raw[key]);
+      if (!isFinite(v) || v < 0 || v > max){ skipped.push(key); return; }
+      clean[key] = v;
+    };
+    numField('weight', 500);
+    numField('debtAmt', 10000000);
+    numField('capitalAmt', 10000000);
+    if (raw.checks && typeof raw.checks === 'object' && !Array.isArray(raw.checks)){
+      clean.checks = { w1: !!raw.checks.w1 };
+    } else if (raw.checks !== undefined) skipped.push('checks');
+    ['logDays', 'calorieDays'].forEach(key => {
+      if (raw[key] === undefined) return;
+      if (Array.isArray(raw[key]) && raw[key].length === 7) clean[key] = raw[key].map(Boolean);
+      else skipped.push(key);
+    });
+    if (typeof raw.notes === 'string') clean.notes = raw.notes.slice(0, 2000);
+    else if (raw.notes !== undefined) skipped.push('notes');
+    return { clean: clean, skipped: skipped };
+  }
+
   async function importData(file){
     try {
       const text = await file.text();
       const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)){
+        showAppAlert('Це не схоже на файл трекера — очікується обʼєкт із ключами week1…week12.');
+        return;
+      }
+      let imported = 0;
+      const allSkipped = [];
       for (let i = 1; i <= WEEKS; i++){
-        if (parsed['week' + i]) {
-          state[i] = Object.assign(emptyWeek(), parsed['week' + i]);
-          await saveWeek(i);
-        }
+        const raw = parsed['week' + i];
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue;
+        const res = sanitizeWeek(raw);
+        state[i] = res.clean;
+        await saveWeek(i);
+        imported++;
+        res.skipped.forEach(f => { if (allSkipped.indexOf(f) === -1) allSkipped.push(f); });
+      }
+      if (!imported){
+        showAppAlert('У файлі не знайдено жодного тижня (очікуються ключі week1…week12).');
+        return;
       }
       render();
       showSaveStatus('Імпортовано ✓');
+      if (allSkipped.length){
+        showAppAlert('Імпортовано тижнів: ' + imported + '.\nДеякі поля пропущено через некоректні значення: ' + allSkipped.join(', ') + '.');
+      }
     } catch(err){ showAppAlert('Не вдалося прочитати файл: ' + (err && err.message ? err.message : err)); }
   }
 
@@ -649,12 +819,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     wrap.innerHTML = '';
     const strip = document.createElement('div');
     strip.className = 'journey-strip';
+    strip.setAttribute('role', 'tablist');
+    strip.setAttribute('aria-label', 'Тижні програми');
     for (let i = 1; i <= WEEKS; i++){
       const s = score(i);
       const cell = document.createElement('button');
       cell.type = 'button';
       cell.className = 'journey-cell' + (i === sel ? ' selected' : '') + (i === cur ? ' today' : '');
       cell.title = 'Тиждень ' + i + ' — ' + s + '%' + (i === cur ? ' (поточний)' : '');
+      cell.setAttribute('role', 'tab');
+      cell.setAttribute('aria-selected', i === sel ? 'true' : 'false');
+      cell.setAttribute('aria-label', 'Тиждень ' + i + ', виконано ' + s + ' відсотків' + (i === cur ? ', поточний тиждень' : ''));
       const dot = document.createElement('span');
       dot.className = 'journey-dot';
       dot.style.background = s >= 85 ? C_DONE : C_CURRENT;
@@ -987,11 +1162,24 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     head.innerHTML = '<span>' + label + '</span><span style="color:' + color + '; font-weight:500;">' + arr.filter(Boolean).length + '/7 (' + pct + '%)</span>';
     wrap.appendChild(head);
     const grid = document.createElement('div'); grid.className = 'daily-grid';
+    grid.setAttribute('role', 'group');
+    grid.setAttribute('aria-label', label);
     arr.forEach((val, di) => {
       const cell = document.createElement('div'); cell.className = 'day-cell';
+      // A3: раніше це був звичайний <div> з onclick — недосяжний з клавіатури
+      // й невидимий для скрінрідера. Тепер повноцінний чекбокс: роль, стан,
+      // місце у Tab-послідовності і реакція на Space/Enter.
       const sq = document.createElement('div'); sq.className = 'day-square' + (val ? ' checked' : '');
+      sq.setAttribute('role', 'checkbox');
+      sq.setAttribute('aria-checked', val ? 'true' : 'false');
+      sq.setAttribute('tabindex', '0');
+      sq.setAttribute('aria-label', DAY_FULL[di] + ' — ' + label);
       sq.innerHTML = icon(val ? 'check' : 'plus', 14);
-      sq.onclick = () => { state[weekIdx][state_key][di] = !state[weekIdx][state_key][di]; saveWeek(weekIdx); render(); };
+      const toggle = () => { state[weekIdx][state_key][di] = !state[weekIdx][state_key][di]; saveWeek(weekIdx); render(); };
+      sq.onclick = toggle;
+      sq.onkeydown = (e) => {
+        if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggle(); }
+      };
       cell.appendChild(sq);
       const lbl = document.createElement('div'); lbl.className = 'day-cell-label'; lbl.textContent = DAY_LABELS[di];
       cell.appendChild(lbl);
@@ -1052,7 +1240,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       inputRow.appendChild(fillBtn);
     }
     if (onCopy){
-      const cb = document.createElement('button'); cb.className = 'icon-btn'; cb.type = 'button'; cb.title = copyTitle; cb.innerHTML = icon('copy', 14);
+      const cb = document.createElement('button'); cb.className = 'icon-btn'; cb.type = 'button'; cb.title = copyTitle;
+      cb.setAttribute('aria-label', copyTitle); cb.innerHTML = icon('copy', 14);
       cb.onclick = onCopy;
       inputRow.appendChild(cb);
     }
@@ -1168,6 +1357,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     // U2: перемикання тижнів прямо в картці — більше не треба лізти в "Історію".
     const prevBtn = document.createElement('button');
     prevBtn.className = 'icon-btn'; prevBtn.type = 'button'; prevBtn.title = 'Попередній тиждень';
+    prevBtn.setAttribute('aria-label', 'Перейти до попереднього тижня');
     prevBtn.innerHTML = icon('chevronLeft', 15);
     prevBtn.disabled = i <= 1;
     prevBtn.style.opacity = i <= 1 ? '0.3' : '1';
@@ -1176,6 +1366,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 
     const nextBtn = document.createElement('button');
     nextBtn.className = 'icon-btn'; nextBtn.type = 'button'; nextBtn.title = 'Наступний тиждень';
+    nextBtn.setAttribute('aria-label', 'Перейти до наступного тижня');
     nextBtn.innerHTML = icon('chevronRight', 15);
     nextBtn.disabled = i >= WEEKS;
     nextBtn.style.opacity = i >= WEEKS ? '0.3' : '1';
@@ -1193,7 +1384,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     }
 
     const resetBtn = document.createElement('button');
-    resetBtn.className = 'icon-btn'; resetBtn.type = 'button'; resetBtn.title = 'Скинути тиждень'; resetBtn.innerHTML = icon('reset', 15);
+    resetBtn.className = 'icon-btn'; resetBtn.type = 'button'; resetBtn.title = 'Скинути тиждень';
+    resetBtn.setAttribute('aria-label', 'Скинути всі дані тижня ' + i); resetBtn.innerHTML = icon('reset', 15);
     resetBtn.onclick = () => {
       const items = weekResetPreview(i);
       if (!items.length){
@@ -1228,7 +1420,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
 
     const scoreCaption = document.createElement('div');
     scoreCaption.style.cssText = 'font-size:var(--fs-xs); color:var(--text-muted); letter-spacing:0.02em; margin: 0 0 18px;';
-    scoreCaption.textContent = 'Weekly Execution Score — 5 дій тижня: зважування, облік їжі, калорії, конверт на борг, переказ на капітал.';
+    // A8: скрінрідер, налаштований на українську, вимовляє англійський термін
+    // неправильно, якщо не позначити мову фрагмента.
+    scoreCaption.innerHTML = '<span lang="en">Weekly Execution Score</span> — 5 дій тижня: зважування, облік їжі, калорії, конверт на борг, переказ на капітал.';
     card.appendChild(scoreCaption);
 
     card.appendChild(buildWeekBody(i, snap));
@@ -1256,8 +1450,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
   }
 
   const $ = (id) => document.getElementById(id);
-  if ($('menu-btn')) $('menu-btn').onclick = (e) => { e.stopPropagation(); if ($('menu-panel')) $('menu-panel').classList.toggle('open'); };
-  document.addEventListener('click', () => { if ($('menu-panel')) $('menu-panel').classList.remove('open'); });
+  function setMenuOpen(open){
+    if ($('menu-panel')) $('menu-panel').classList.toggle('open', open);
+    if ($('menu-btn')) $('menu-btn').setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if ($('menu-btn')) $('menu-btn').onclick = (e) => {
+    e.stopPropagation();
+    setMenuOpen(!($('menu-panel') && $('menu-panel').classList.contains('open')));
+  };
+  document.addEventListener('click', () => setMenuOpen(false));
   if ($('export-json')) $('export-json').onclick = () => exportData('json');
   if ($('export-csv')) $('export-csv').onclick = () => exportData('csv');
   if ($('import-json')) $('import-json').onclick = () => { if ($('import-file-input')) $('import-file-input').click(); };
@@ -1277,20 +1478,45 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     $('goal-debt-end').value = GOALS.debtEnd;
     $('goal-capital-start').value = GOALS.capitalStart;
     $('goal-capital-end').value = GOALS.capitalEnd;
-    if ($('goals-overlay')) $('goals-overlay').style.display = 'flex';
+    if ($('goals-overlay')) openModal($('goals-overlay'));
   }
-  function closeGoalsModal(){ if ($('goals-overlay')) $('goals-overlay').style.display = 'none'; }
+  function closeGoalsModal(){ if ($('goals-overlay')) closeModal($('goals-overlay')); }
   if ($('setup-goals')) $('setup-goals').onclick = openGoalsModal;
   if ($('goals-cancel')) $('goals-cancel').onclick = closeGoalsModal;
   if ($('goals-overlay')) $('goals-overlay').onclick = (e) => { if (e.target.id === 'goals-overlay') closeGoalsModal(); };
   if ($('goals-save')) $('goals-save').onclick = async () => {
+    // Q2: раніше тут був лише parseFloat без жодної перевірки — можна було
+    // задати ціль ваги "-50" чи старт боргу "-999", і далі всі формули темпу,
+    // відсотків і графіків починали видавати безглузді значення без
+    // найменшого попередження.
     const num = (id, fallback) => { const v = parseFloat($(id).value); return isNaN(v) ? fallback : v; };
-    GOALS.weightStart = num('goal-weight-start', GOALS.weightStart);
-    GOALS.weightEnd = num('goal-weight-end', GOALS.weightEnd);
-    GOALS.debtStart = num('goal-debt-start', GOALS.debtStart);
-    GOALS.debtEnd = num('goal-debt-end', GOALS.debtEnd);
-    GOALS.capitalStart = num('goal-capital-start', GOALS.capitalStart);
-    GOALS.capitalEnd = num('goal-capital-end', GOALS.capitalEnd);
+    const next = {
+      weightStart: num('goal-weight-start', GOALS.weightStart),
+      weightEnd:   num('goal-weight-end', GOALS.weightEnd),
+      debtStart:   num('goal-debt-start', GOALS.debtStart),
+      debtEnd:     num('goal-debt-end', GOALS.debtEnd),
+      capitalStart:num('goal-capital-start', GOALS.capitalStart),
+      capitalEnd:  num('goal-capital-end', GOALS.capitalEnd)
+    };
+
+    const errors = [];
+    Object.keys(next).forEach(k => { if (next[k] < 0) errors.push('значення не можуть бути відʼємними'); });
+    if (next.weightStart > 0 && next.weightEnd > 0 && next.weightStart === next.weightEnd)
+      errors.push('старт і ціль ваги однакові — не буде що відстежувати');
+    if (next.debtStart === next.debtEnd)
+      errors.push('старт і ціль боргу однакові — не буде що відстежувати');
+    if (next.capitalStart === next.capitalEnd)
+      errors.push('старт і ціль капіталу однакові — не буде що відстежувати');
+    if (next.weightStart > 0 && next.weightStart > 400)
+      errors.push('вага понад 400 кг виглядає як помилка вводу');
+
+    const uniqueErrors = errors.filter((e, i) => errors.indexOf(e) === i);
+    if (uniqueErrors.length){
+      showAppAlert('Не вдалося зберегти:\n• ' + uniqueErrors.join('\n• '));
+      return;
+    }
+
+    GOALS = Object.assign(GOALS, next);
     await saveGoals();
     closeGoalsModal();
     render();
@@ -1299,6 +1525,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
     progressOpen = !progressOpen;
     if ($('progress-collapsible')) $('progress-collapsible').classList.toggle('open', progressOpen);
     if ($('progress-chevron')) $('progress-chevron').style.transform = progressOpen ? 'rotate(180deg)' : 'rotate(0deg)';
+    $('progress-toggle').setAttribute('aria-expanded', progressOpen ? 'true' : 'false');
+    // Графіки малюються під виміряну ширину — доки секція згорнута, вона
+    // нульової висоти, тому після розгортання їх треба перерахувати.
+    if (progressOpen) setTimeout(render, 260);
   };
 
   function render(){
@@ -1313,7 +1543,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: 2px; cursor: poi
       renderHero(snap);
     } catch(err){
       const root = document.getElementById('tracker-root');
-      if (root) root.innerHTML = '<div style="padding:20px; font-family:sans-serif; color:#854F0B;">Трекер не зміг відобразитись через помилку: ' + (err && err.message ? err.message : String(err)) + '. Спробуй відкрити цей артефакт у звичайному браузері телефону через кнопку "Publish".</div>';
+      if (root) root.innerHTML = '<div style="padding:20px; font-family:sans-serif; color:#F0B94D;">Трекер не зміг відобразитись через помилку: ' + (err && err.message ? err.message : String(err)) + '. Спробуй відкрити цей артефакт у звичайному браузері телефону через кнопку "Publish".</div>';
     }
   }
 
