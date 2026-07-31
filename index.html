@@ -11,7 +11,6 @@
 <meta name="robots" content="noindex, nofollow">
 <style>
   html, body { margin: 0; padding: 0; background: #0F0E0A; }
-  /* відступи сторінки — з тієї ж шкали, що й усе всередині */
   body { padding: var(--sp-5) var(--sp-3); }
 </style>
 </head>
@@ -19,26 +18,41 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
 :root {
-  --surface-0: #0F0E0A;
-  --surface-1: #1C1B15;
-  --surface-2: #221F19;
-  --border: #34322B;
+  /* --- Пункт 2: сходинки глибини. Кожен наступний шар світліший за попередній:
+     сторінка -> картка -> рядок усередині картки -> контрол.
+     До цього шари йшли навпаки, і глибина читалась навиворіт. --- */
+  --surface-0: #0F0E0A;   /* фон сторінки */
+  --surface-1: #1A1914;   /* картки */
+  --surface-2: #232119;   /* рядки всередині карток */
+  --surface-3: #2C2921;   /* контроли: поля вводу, квадратики днів */
+  /* рамка теж мусила посвітлішати — на #2C2921 стара #34322B майже зникала */
+  --border: #3A3830;
   /* A1: межі інтерактивних контролів мають давати ≥3:1 (WCAG 1.4.11).
-     Було #4A473C = 2.08:1 — провал. #767161 дає 3.96:1 на найтемнішому фоні. */
-  --border-strong: #767161;
+     Було #4A473C = 2.08:1 — провал. #7C7766 дає від 3.24:1 на найсвітлішій
+     поверхні до 4.31:1 на найтемнішій, тобто проходить на всіх чотирьох. */
+  --border-strong: #7C7766;
   --text-primary: #F3F1E8;
   --text-secondary: #B7B4A6;
-  --text-muted: #8C8977;
+  /* Пункт 21: #8C8977 давав 4.66:1 при нормі 4.5 — запас 3%, і саме цим
+     кольором набрано найдрібніший текст. #9A9784 дає 5.6:1. */
+  --text-muted: #9A9784;
 
   /* --- I6: семантичні кольори станів. Раніше зелений/жовтий/червоний були
      розсипані по коду як літерали (#2FBE93, rgba(47,190,147,0.16) тощо),
      тож зміна теми їх не підхоплювала. --- */
   --accent: #2FBE93;
   --accent-soft: rgba(47, 190, 147, 0.16);
+  /* Пункт 13: підсвітка за карткою тижня — окремий токен, щоб літерал
+     не осідав у правилі. */
+  --accent-glow: rgba(47, 190, 147, 0.07);
   --accent-text: #6EE7C0;
-  --warn: #F0B94D;
-  --warn-soft: rgba(240, 185, 77, 0.16);
-  --warn-text: #F0B94D;
+  /* Пункт 9: "у процесі" — нейтральний стан, він не мусить тривожити.
+     Раніше і він, і "відстаєш", і попередження були одним жовтим. */
+  --neutral-progress: #A8A292;
+  --neutral-progress-soft: rgba(168, 162, 146, 0.14);
+  --warn: #E8A93C;
+  --warn-soft: rgba(232, 169, 60, 0.16);
+  --warn-text: #E8A93C;
   --danger: #FF7A54;
   --focus: #1D9E75;
 
@@ -53,6 +67,13 @@
 
   /* --- I3: одна товщина рамки замість 0.5/1/1.5px. 0.5px на екранах з DPR 2
      округлюється непередбачувано і місцями не малюється взагалі. --- */
+  /* --- Пункт 3: двошарові тіні. Попередня мала лише 12% чорного і на майже
+     чорному фоні не давала жодного ефекту — типове значення зі світлої теми.
+     Перший шар окреслює край, другий дає розсіяну тінь. --- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-md: 0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg: 0 1px 2px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.65);
+
   --bw: 1px;
   /* акцентні смужки (ліва грань банера, верхня грань картки тижня) —
      не хейрлайн, а самостійний елемент, тому окремий токен */
@@ -71,6 +92,21 @@
   --fs-lg: 16px;
   --fs-xl: 22px;
   --fs-display: 42px;
+  --fs-h1: var(--fs-xl);
+
+  /* --- Пункт 4: шкала міжрядкових інтервалів. До цього скрізь стояло
+     line-height: normal, тобто ритм визначав браузер. Що більший кегль,
+     то щільніший інтервал. --- */
+  --lh-display: 1.05;
+  --lh-heading: 1.2;
+  --lh-body: 1.45;
+  --lh-caption: 1.5;
+
+  /* --- Пункт 12: трекінг. Було -0.01em однаково на заголовок і на число.
+     Великі кеглі потребують щільнішого, дрібні — навпаки, розрідженого. --- */
+  --tr-display: -0.03em;
+  --tr-heading: -0.015em;
+  --tr-caption: 0.01em;
 
   /* --- Шкала відступів на 4px-сітці. До цього у файлі було 26 різних значень:
      5px, 7px, 11px, плюс rem-и, що давали нецілі пікселі (1.1rem = 17.6px,
@@ -105,16 +141,36 @@
   border-radius: var(--r-xl);
   overflow-x: clip;
 }
-#tracker-root h1 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; }
-.section-label { font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 500; margin-bottom: var(--sp-3); }
+#tracker-root h1 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: var(--tr-heading); line-height: var(--lh-heading); }
+/* --- Пункт 4: базовий вертикальний ритм; окремі елементи перекривають своїм --- */
+#tracker-root { line-height: var(--lh-body); }
+/* --- Пункт 18: на десктопі рядок сягав ~90 символів при комфортних 60-75.
+   Обмежуємо саме текстові блоки, не контейнери з контролами. --- */
+#tracker-root p, #tracker-root .warn-text span { max-width: 68ch; }
+/* --- Пункт 11: Fraunces підключений як варіативний (opsz 9..144), але жодна
+   вісь не використовувалась. opsz auto дає правильні пропорції на різних
+   кеглях, SOFT згладжує кути, WONK вмикає характерні альтернативні форми. --- */
+#tracker-root h1, #tracker-root .hero-num, #tracker-root .section-label {
+  font-optical-sizing: auto;
+  font-variation-settings: 'SOFT' 20, 'WONK' 1;
+}
+.section-label { font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 500; line-height: var(--lh-heading); letter-spacing: var(--tr-heading); margin-bottom: var(--sp-3); }
 /* 3.1: раніше вся стрічка була одним SVG з viewBox 680px, який стискався під
    ширину картки — на iPhone кружечок виходив 14.6px, а цифра всередині 5.3px.
    Тепер це звичайні HTML-елементи фіксованого розміру 44px (мінімум Apple HIG),
    а якщо 12 штук не влазять — стрічка горизонтально прокручується. */
-.journey-strip { display: flex; gap: var(--sp-2); overflow-x: auto; padding: var(--sp-1) var(--sp-0) var(--sp-2); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+/* Пункт 19: єдиним натяком на прокрутку був обрізаний 12-й кружечок.
+   Градієнтна маска робить край явно "продовжуваним". */
+.journey-strip { display: flex; gap: var(--sp-2); overflow-x: auto; padding: var(--sp-1) var(--sp-0) var(--sp-2); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); }
 .journey-strip::-webkit-scrollbar { display: none; }
 .journey-cell { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
-.journey-dot { width: var(--tap); height: var(--tap); border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: var(--fs-md); font-weight: 700; color: #0F0E0A; font-variant-numeric: tabular-nums; transition: background 0.3s, box-shadow 0.2s, transform 0.1s; }
+.journey-dot { width: var(--tap); height: var(--tap); border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: var(--fs-md); font-weight: 700; color: var(--surface-0); font-variant-numeric: tabular-nums; transition: background 0.3s, box-shadow 0.2s, transform 0.1s, border-color 0.3s; }
+/* --- Пункт 6: одинадцять кружечків майбутніх тижнів були залиті насиченим
+   жовтим на повну і разом важили більше за єдину змістовну картку.
+   Порожній стан має мовчати: прозорий кружечок з обведенням. --- */
+.journey-dot.is-empty { background: transparent; border: var(--bw) solid var(--border-strong); color: var(--text-muted); font-weight: 500; }
 .journey-cell:active .journey-dot { transform: scale(0.92); }
 /* Позначка обраного тижня. Раніше тут був подвійний box-shadow: темний проміжок
    плюс кільце кольору --text-primary (найяскравішого в палітрі) — на темному тлі
@@ -126,24 +182,34 @@
 /* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
    тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
 .journey-cell.today .journey-num { color: var(--warn-text); font-weight: 700; }
-.card { background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-xl); padding: var(--sp-5); }
-.hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; transition: color 0.3s; }
+.card { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--shadow-sm); }
+.hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: var(--tr-display); line-height: var(--lh-display); transition: color 0.3s; }
 /* I7: усі індикатори стану — один патерн "пігулка". Відрізняються
    лише кольором (нейтральний / у графіку / відстає), не формою. */
 .chip, .badge, .today-pill { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); letter-spacing: 0.02em; white-space: nowrap; }
 .badge-ok, .today-pill { background: var(--accent-soft); color: var(--accent-text); }
 .badge-behind { background: var(--warn-soft); color: var(--warn-text); }
 .group-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: var(--sp-4); margin-bottom: var(--sp-2); }
-.metric-row { padding: var(--sp-3) var(--sp-4); background: var(--surface-1); border-radius: var(--r-md); margin-bottom: var(--sp-2); display: flex; gap: var(--sp-3); }
-.metric-accent { width: 4px; align-self: stretch; border-radius: var(--r-sm); flex-shrink: 0; }
+/* Пункт 14: три рівноправні сутності не відокремлювались — між рядками
+   було 8px, стільки ж, скільки всередині рядка. */
+.metric-row { padding: var(--sp-3) var(--sp-4); background: var(--surface-2); border-radius: var(--r-md); margin-bottom: var(--sp-4); display: flex; gap: var(--sp-3); }
+/* Пункт 15: була вертикальна смужка на всю висоту рядка (Material 2018).
+   Замінено на компактну крапку — менше шуму, той самий сигнал. */
+/* Крапка вирівнюється оптично по центру першого рядка підпису, тому
+   зсув задано в em — він прив’язаний до типографіки, а не до сітки відступів. */
+.metric-accent { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 0.42em; }
 .metric-body { flex: 1; min-width: 0; }
 .metric-top-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-2); }
 .metric-label { font-size: var(--fs-sm); color: var(--text-secondary); font-weight: 500; }
-.plan-note { font-size: var(--fs-sm); color: var(--text-muted); }
+.method-hint { width: 20px; height: 20px; border-radius: 50%; border: var(--bw) solid var(--border-strong); background: transparent; color: var(--text-muted); font-family: inherit; font-size: var(--fs-xs); line-height: 1; cursor: pointer; flex-shrink: 0; align-self: center; }
+.method-hint:hover { color: var(--text-primary); border-color: var(--text-muted); }
+.plan-note { font-size: var(--fs-sm); color: var(--text-muted); letter-spacing: var(--tr-caption); line-height: var(--lh-caption); }
 /* 3.7: поле + "підставити" + "копіювати" на вузькому екрані можуть не влізти
    в один рядок — дозволяємо перенос, щоб не виникало горизонтального скролу. */
 .metric-input-row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
-.fill-btn { display: inline-flex; align-items: center; gap: var(--sp-1); padding: var(--sp-2) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong); background: var(--surface-0); color: var(--text-secondary); font-family: inherit; font-size: var(--fs-sm); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+/* Пункт 5: заміряно в браузері — висота була 31px при заявленому мінімумі 44px,
+   а власний фон конфліктував із сусідньою прозорою .icon-btn. */
+.fill-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-1); min-height: var(--tap); padding: 0 var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong); background: transparent; color: var(--text-secondary); font-family: inherit; font-size: var(--fs-sm); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; }
 /* I5: явна ієрархія дій. Первинна — заливка, більший горизонтальний
    відступ, жирніший шрифт. Вторинна — без фону й рамки, приглушений колір,
    щоб не конкурувала за увагу. */
@@ -151,17 +217,27 @@
 .btn-primary { padding: var(--sp-3) var(--sp-5); border: none; background: var(--accent); color: var(--surface-0); font-weight: 600; }
 .btn-primary:hover { opacity: 0.88; }
 .btn-secondary { padding: var(--sp-3) var(--sp-4); border: none; background: transparent; color: var(--text-secondary); font-weight: 400; }
-.btn-secondary:hover { background: var(--surface-1); color: var(--text-primary); }
-.fill-btn:hover { background: var(--surface-2); color: var(--text-primary); border-color: var(--text-muted); }
+.btn-secondary:hover { background: var(--surface-2); color: var(--text-primary); }
+.fill-btn:hover { background: var(--surface-3); color: var(--text-primary); border-color: var(--text-muted); }
 .stepper { display: flex; align-items: center; gap: var(--sp-2); }
-.stepper { flex: 1; min-width: 0; }
-.stepper input { border: var(--bw) solid var(--border); border-radius: var(--r-md); width: 100%; box-sizing: border-box; height: var(--tap); padding: 0 var(--sp-3); text-align: left; font-size: var(--fs-lg); font-weight: 500; background: var(--surface-2); color: var(--text-primary); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
+/* --- Пункт 7: заміряно — поле займало близько 500px під три-чотири символи.
+   Велика порожня плита з крихітним числом у лівому краю. Тепер поле
+   компактне, число вирівняне праворуч, а одиниця виміру стоїть поруч
+   як окремий сірий суфікс. --- */
+.stepper { flex: 0 1 auto; min-width: 0; display: flex; align-items: center; gap: var(--sp-2); }
+.stepper-unit { font-size: var(--fs-sm); color: var(--text-muted); flex-shrink: 0; }
+.stepper input { border: var(--bw) solid var(--border-strong); border-radius: var(--r-md); width: 100%; max-width: 128px; box-sizing: border-box; height: var(--tap); padding: 0 var(--sp-3); text-align: right; font-size: var(--fs-lg); font-weight: 500; background: var(--surface-3); color: var(--text-primary); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
 .stepper input:focus { outline: none; border-color: var(--focus); }
 input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .icon-btn { width: var(--tap); height: var(--tap); padding: 0; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
-.icon-btn:hover { background: var(--surface-0); color: var(--text-primary); }
+.icon-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+/* --- Пункт 16: у застосунку було лише 2 active-стани, дотик не давав
+   тактильного відгуку — інтерфейс здавався неживим. --- */
+#tracker-root button:active, .btn:active, .day-square:active { transform: scale(0.97); }
+.journey-cell:active .journey-dot { transform: scale(0.94); }
+#tracker-root button, .btn { transition: transform 0.08s ease, background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s; }
 /* A7: єдиний видимий стиль фокуса для всього інтерактиву. Використовуємо
    outline з відступом — на відміну від border він не обрізається
    заокругленням і не змінює розміри елемента (тобто не зсуває layout). */
@@ -175,21 +251,26 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 #tracker-root .journey-cell:focus-visible .journey-dot { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 #tracker-root .journey-cell:focus-visible { outline: none; }
 .warn-text { font-size: var(--fs-sm); color: var(--warn-text); margin-top: var(--sp-2); display: flex; align-items: center; gap: var(--sp-1); }
-.habit-panel { background: var(--surface-1); border-radius: var(--r-md); padding: var(--sp-1) var(--sp-4); margin-bottom: var(--sp-2); }
+.habit-panel { background: var(--surface-2); border-radius: var(--r-md); padding: var(--sp-1) var(--sp-4); margin-bottom: var(--sp-2); }
 .habit-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) 0; font-size: var(--fs-md); cursor: pointer; }
 input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
-.daily-block { background: var(--surface-1); border-radius: var(--r-md); padding: var(--sp-3) var(--sp-4) var(--sp-4); margin-bottom: var(--sp-2); }
+.daily-block { background: var(--surface-2); border-radius: var(--r-md); padding: var(--sp-3) var(--sp-4) var(--sp-4); margin-bottom: var(--sp-2); }
 .daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: var(--sp-3); }
 .daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--sp-2); }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
-.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) dashed var(--border-strong); background: var(--surface-2); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
-.day-square:hover { border-color: var(--focus); background: var(--surface-0); }
+.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) dashed var(--border-strong); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square:hover { border-color: var(--focus); background: var(--surface-2); }
 .day-square:active { transform: scale(0.9); }
 .day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
 /* A3: квадратик дня тепер має role="checkbox" і потрапляє у Tab-послідовність */
 .day-square[aria-checked="true"] { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
 .day-cell-label { font-size: var(--fs-xs); color: var(--text-muted); }
-.hero-card { border-radius: var(--r-xl); padding: var(--sp-5); margin-bottom: var(--sp-5); background: var(--surface-2); border: var(--bw) solid var(--border); position: relative; overflow: hidden; }
+.hero-card { border-radius: var(--r-xl); padding: var(--sp-5); margin-bottom: var(--sp-5); background: var(--surface-1); border: var(--bw) solid var(--border); box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
+/* --- Пункт 13: у файлі було нуль градієнтів. Одна акуратна радіальна
+   підсвітка згори дає карті глибину, не перетворюючись на "ефект". --- */
+.hero-card::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 80% at 50% 0%, var(--accent-glow), transparent 62%); }
+.hero-card > * { position: relative; }
 .legend { display: flex; gap: var(--sp-4); flex-wrap: wrap; font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-3); }
 .legend span { display: inline-flex; align-items: center; gap: var(--sp-1); }
 .legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
@@ -200,17 +281,19 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .dashboard-line { display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-md); color: var(--text-secondary); flex-wrap: wrap; }
 .menu-wrap { position: relative; }
 .menu-btn { width: var(--tap); height: var(--tap); padding: 0; border-radius: 50%; border: var(--bw) solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.menu-btn:hover { background: var(--surface-1); }
-.menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-2); min-width: 180px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); z-index: 20; display: none; }
+.menu-btn:hover { background: var(--surface-3); }
+.menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-2); min-width: 180px; box-shadow: var(--shadow-lg); z-index: 20; display: none; backdrop-filter: blur(20px); }
 .menu-panel.open { display: block; }
 [data-icon] { display: inline-flex; align-items: center; flex-shrink: 0; }
 .menu-item { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-md); border-radius: var(--r-sm); cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
-.menu-item:hover { background: var(--surface-1); }
+.menu-item:hover { background: var(--surface-3); }
 .progress-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: var(--sp-0) 0; width: 100%; background: none; border: none; color: inherit; font-family: inherit; text-align: left; min-height: var(--tap); }
 .progress-collapsible { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
 .progress-collapsible.open { max-height: 3000px; }
 @keyframes celebratePulse { 0% { transform: scale(1); } 35% { transform: scale(1.15); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
 .celebrate { animation: celebratePulse 0.55s ease; }
+@keyframes weekEnter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.week-enter { animation: weekEnter 0.18s ease-out; }
 @keyframes chartDotPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.55; } }
 .chart-dot-live { animation: chartDotPulse 1.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
 @keyframes flashBg { 0% { background-color: #E1F5EE; } 100% { background-color: transparent; } }
@@ -228,7 +311,22 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   #stat-cards { grid-template-columns: 1fr 1fr !important; }
   .card { padding: var(--sp-4); }
   .hero-card { padding: var(--sp-4); }
-  .hero-num { font-size: var(--fs-xl) !important; }
+}
+
+/* Пункт 10: раніше .hero-num на мобільному падав до --fs-xl (22px) — рівно
+   стільки ж, скільки h1. Головна метрика не може важити стільки ж, скільки
+   назва застосунку. Перевизначаємо самі токени, а не перекриваємо елементи
+   через !important — так шкала лишається єдиним джерелом правди. */
+@media (max-width: 520px) {
+  :root { --fs-display: 34px; --fs-h1: 17px; }
+}
+
+/* Пункт 23: між 520px і 1440px не змінювалось рівно нічого — вся середня
+   зона діапазону була обділена. */
+@media (min-width: 900px) {
+  :root { --fs-display: 52px; }
+  .card, .hero-card { padding: var(--sp-6); }
+  #tracker-root { max-width: 780px; }
 }
 
 /* ≤460px — сім квадратиків по 44px перестають вміщатись.
@@ -273,7 +371,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         <path d="M4 30 L36 30" stroke="#34322B" stroke-width="1" stroke-dasharray="1,3"/>
       </svg>
       <div>
-        <h1 style="margin: 0 0 var(--sp-1); font-size: var(--fs-xl);">12 тижнів</h1>
+        <h1 style="margin: 0 0 var(--sp-1); font-size: var(--fs-h1);">12 тижнів</h1>
         <p style="color: var(--text-secondary); font-size: var(--fs-sm); margin: 0;">27 липня — 18 жовтня 2026 · крок до п'ятирічної мапи <span id="sync-badge" style="color: var(--text-muted); font-size: var(--fs-xs);"></span></p>
       </div>
     </div>
@@ -282,8 +380,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         <span data-icon="dots" data-icon-size="16"></span>
       </button>
       <div class="menu-panel" id="menu-panel">
-        <button class="menu-item" id="setup-goals"><span data-icon="target"></span>Налаштувати цілі (старт/ціль)</button>
-        <button class="menu-item" id="setup-sync"><span data-icon="sync"></span>Налаштувати синхронізацію</button>
+        <button class="menu-item" id="setup-goals"><span data-icon="target"></span>Налаштування</button>
         <button class="menu-item" id="export-json"><span data-icon="download"></span>Експорт JSON</button>
         <button class="menu-item" id="export-csv"><span data-icon="download"></span>Експорт CSV</button>
         <button class="menu-item" id="import-json"><span data-icon="upload"></span>Імпорт JSON</button>
@@ -331,14 +428,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v25 · spacing scale + tokens moved to :root</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v26 · design audit: all 24 items</div>
 </div>
 
-<div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
-  <div style="background:var(--surface-2, #221F19); border: var(--bw) solid var(--border, #34322B); border-radius: var(--r-lg); max-width:340px; width:100%; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+<div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
+  <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:340px; width:100%; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
     <div id="app-modal-message" style="font-size:var(--fs-md); line-height:1.5; margin-bottom:var(--sp-4);"></div>
     <div id="app-modal-input-wrap" style="display:none; margin-bottom:var(--sp-4);">
-      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
     <div style="display:flex; justify-content:flex-end; gap:var(--sp-2);">
       <button id="app-modal-cancel" type="button" class="btn btn-secondary">Скасувати</button>
@@ -347,30 +444,34 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   </div>
 </div>
 
-<div id="goals-overlay" role="dialog" aria-modal="true" aria-labelledby="goals-title" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
-  <div style="background:var(--surface-2, #221F19); border: var(--bw) solid var(--border, #34322B); border-radius: var(--r-lg); max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+<div id="goals-overlay" role="dialog" aria-modal="true" aria-labelledby="goals-title" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
+  <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
     <h2 id="goals-title" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600; margin:0 0 var(--sp-1);">Точка А і ціль</h2>
     <div style="font-size:var(--fs-sm); color:var(--text-secondary, #B7B4A6); margin-bottom:var(--sp-4);">Звідки стартуємо і куди прийти за 12 тижнів. Порожнє поле = без змін.</div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Вага, кг</div>
     <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-4);">
-      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
-      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Борг, $</div>
     <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-2);">
-      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
-      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
     <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Тут не залишок боргу, а СКІЛЬКИ ПЛАНУЄШ ВИПЛАТИТИ за 12 тижнів. Старт (А) зазвичай 0, ціль (Б) — сума всіх запланованих платежів (наприклад 0 → 1800).</div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Капітал, $</div>
     <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-2);">
-      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
-      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #767161); background:var(--surface-1, #1C1B15); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
     <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
+
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-bottom:var(--sp-2); padding-top:var(--sp-3); border-top:var(--bw) solid var(--border);">Синхронізація</div>
+    <input id="goal-sync-url" type="text" placeholder="URL Google Apps Script (порожньо — вимкнути)" style="width:100%; box-sizing:border-box; padding:var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+    <div style="font-size:var(--fs-xs); color:var(--text-muted); line-height:var(--lh-caption); margin:var(--sp-2) 0 var(--sp-5);" id="goal-sync-status"></div>
 
     <div style="display:flex; justify-content:flex-end; gap:var(--sp-2);">
       <button id="goals-cancel" type="button" class="btn btn-secondary">Скасувати</button>
@@ -385,8 +486,19 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   const WEEKS = 12;
   let GOALS = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800 };
   async function saveGoals(){ try { await storage.set('goals', JSON.stringify(GOALS)); } catch(e) {} }
-  const C_WEIGHT = '#9089E0', C_DEBT = '#5BA3E8', C_CAPITAL = '#2FBE93';
+  const C_WEIGHT = '#9089E0', C_DEBT = '#5BA3E8', C_CAPITAL = '#3BC4C4';
   const C_DONE = '#2FBE93', C_MISSED = '#FF7A54', C_CURRENT = '#F0B94D', C_FUTURE_FALLBACK = '#4A473C';
+  // Пункт 9: "у процесі" — нейтральний стан, він не мусить тривожити,
+  // тоді як "відстаєш" (C_MISSED) і попередження — мусять.
+  const C_NEUTRAL = '#A8A292';
+  // Чи є в тижні бодай якісь дані — щоб відрізнити "0% бо ще не почав"
+  // від "0% бо провалив".
+  function hasAnyData(n){
+    const st = state[n];
+    return !!(st.weight || st.debtAmt || st.capitalAmt ||
+      (st.checks && st.checks.w1) ||
+      (st.logDays || []).some(Boolean) || (st.calorieDays || []).some(Boolean));
+  }
   const DAY_LABELS = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
   // Повні назви — для aria-label. Скорочення "Пн"/"Вт" скрінрідер вимовляє
   // як беззмістовний набір літер.
@@ -545,6 +657,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // Дозволяє редагувати будь-який тиждень одним тапом по кружечку таймлайну,
   // замість "скрол вниз → розгорнути історію → знайти рядок → розгорнути".
   let selectedWeek = null;
+  // Пункт 17: памʼятаємо, який тиждень був намальований, щоб анімувати
+  // лише справжню зміну, а не кожну перемальовку після вводу цифри.
+  let lastRenderedWeek = null;
   function activeWeek(){
     const w = selectedWeek === null ? currentWeek() : selectedWeek;
     return Math.min(Math.max(w, 1), WEEKS);
@@ -558,6 +673,21 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
   // --- Сховище: localStorage (миттєвий локальний кеш) + опційна синхронізація
   // через Google Apps Script Web App (Google Таблиця як спільна база для всіх пристроїв). ---
+  // Пункт 8: рахуємо запуски, щоб знати, коли новачкові вже не потрібне
+  // пояснення методики під головним числом.
+  function launchCount(){
+    try {
+      const n = parseInt(localStorage.getItem('tracker:launches') || '0', 10) + 1;
+      return n;
+    } catch(e){ return 99; }
+  }
+  function bumpLaunchCount(){
+    try {
+      const n = parseInt(localStorage.getItem('tracker:launches') || '0', 10);
+      if (n < 10) localStorage.setItem('tracker:launches', String(n + 1));
+    } catch(e) {}
+  }
+
   function getWebAppUrl(){ try { return (localStorage.getItem('tracker:weburl') || '').trim(); } catch(e){ return ''; } }
   function setWebAppUrl(url){ try { localStorage.setItem('tracker:weburl', url || ''); } catch(e){} }
   function updateSyncStatusUI(){
@@ -618,6 +748,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function setSyncBadge(text){ const el = document.getElementById('sync-badge'); if (el) el.textContent = text || ''; }
 
   async function load(){
+    bumpLaunchCount();
     // Крок 1 — миттєво малюємо з локального кешу, БЕЗ мережі.
     // Користувач бачить трекер одразу, а не через 20 секунд.
     applyGoalsRaw(localGet('goals'));
@@ -849,8 +980,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       cell.setAttribute('aria-selected', i === sel ? 'true' : 'false');
       cell.setAttribute('aria-label', 'Тиждень ' + i + ', виконано ' + s + ' відсотків' + (i === cur ? ', поточний тиждень' : ''));
       const dot = document.createElement('span');
-      dot.className = 'journey-dot';
-      dot.style.background = s >= 85 ? C_DONE : C_CURRENT;
+      // Пункт 6: тиждень без жодних даних не заливаємо — він має мовчати.
+      // Заливка лишається тільки тижням, у яких щось відбувалось.
+      const isEmpty = s === 0 && !hasAnyData(i);
+      dot.className = 'journey-dot' + (isEmpty ? ' is-empty' : '');
+      if (!isEmpty) dot.style.background = s >= 85 ? C_DONE : (i < cur ? C_MISSED : C_NEUTRAL);
       dot.textContent = s;
       const num = document.createElement('span');
       num.className = 'journey-num';
@@ -1210,7 +1344,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // натискань на суму типу $133, а для ваги крок 0.1 кг — так само незручно
   // порівняно з прямим набором. Лишилось поле вводу висотою 44px (мінімум
   // Apple HIG) плюс кнопки "підставити"/"скопіювати" поруч.
-  function stepper(value, step, decimals, onLive, onCommit, min){
+  function stepper(value, step, decimals, onLive, onCommit, min, unit){
     if (min === undefined || min === null) min = 0;
     const wrap = document.createElement('div'); wrap.className = 'stepper';
     const input = document.createElement('input');
@@ -1228,6 +1362,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     };
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
     wrap.appendChild(input);
+    if (unit){
+      const u = document.createElement('span');
+      u.className = 'stepper-unit';
+      u.textContent = unit;
+      wrap.appendChild(u);
+    }
     wrap._input = input;
     return wrap;
   }
@@ -1280,8 +1420,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const wTarget = fmt1(expWeight(i));
     const wStep = stepper(state[i].weight, 0.1, 1,
       (v) => { state[i].weight = v; saveWeek(i); },
-      () => render());
-    frag.appendChild(metricRow('Вага, кг', C_WEIGHT, wStep, 'план ' + wTarget + ' кг', wWarn,
+      () => render(), 0, 'кг');
+    frag.appendChild(metricRow('Вага', C_WEIGHT, wStep, 'план ' + wTarget + ' кг', wWarn,
       prevW ? ('Скопіювати ' + fmt1(prevW) + ' кг з тижня ' + (i-1)) : null,
       prevW ? () => { state[i].weight = prevW; saveWeek(i); render(); } : null,
       wTarget + ' кг', () => { state[i].weight = wTarget; saveWeek(i); render(); }));
@@ -1292,7 +1432,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const dWarn = (state[i].debtAmt && state[i].debtAmt > planDebt * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
     const dStep = stepper(state[i].debtAmt, 5, 0,
       (v) => { state[i].debtAmt = v; saveWeek(i); },
-      () => render());
+      () => render(), 0, '$');
     frag.appendChild(metricRow('Борг · конверт готівкою', C_DEBT, dStep, planDebtNote, dWarn,
       prevDebt ? ('Скопіювати $' + prevDebt + ' з тижня ' + (i-1)) : null,
       prevDebt ? () => { state[i].debtAmt = prevDebt; saveWeek(i); render(); } : null,
@@ -1304,7 +1444,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const cWarn = (state[i].capitalAmt && state[i].capitalAmt > planCapital * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
     const cStep = stepper(state[i].capitalAmt, 5, 0,
       (v) => { state[i].capitalAmt = v; saveWeek(i); },
-      () => render());
+      () => render(), 0, '$');
     frag.appendChild(metricRow('Капітал · Моно $ / OKX', C_CAPITAL, cStep, planCapNote, cWarn,
       prevCap ? ('Скопіювати $' + prevCap + ' з тижня ' + (i-1)) : null,
       prevCap ? () => { state[i].capitalAmt = prevCap; saveWeek(i); render(); } : null,
@@ -1355,7 +1495,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const wrap = document.getElementById('hero-wrap');
     wrap.innerHTML = '';
     const card = document.createElement('div');
-    card.className = 'hero-card' + (wasCelebrated ? ' flash' : '');
+    // Пункт 17: перехід між тижнями був миттєвим — незрозуміло, що саме
+    // змінилось. Коротка поява знімає дезорієнтацію.
+    const weekChanged = lastRenderedWeek !== null && lastRenderedWeek !== i;
+    card.className = 'hero-card' + (wasCelebrated ? ' flash' : '') + (weekChanged ? ' week-enter' : '');
+    lastRenderedWeek = i;
     card.style.borderTop = 'var(--bw-accent) solid ' + accentColor;
 
     const header = document.createElement('div');
@@ -1436,11 +1580,28 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     scoreRow.appendChild(scoreLbl);
     card.appendChild(scoreRow);
 
+    // Пункт 8: пояснення методики на три рядки важило більше за саму метрику
+    // і показувалось щодня. Після трьох запусків згортаємо його в іконку "?",
+    // яка розкриває той самий текст на вимогу.
     const scoreCaption = document.createElement('div');
-    scoreCaption.style.cssText = 'font-size:var(--fs-xs); color:var(--text-muted); letter-spacing:0.02em; margin: 0 0 var(--sp-4);';
+    const showFull = launchCount() <= 3;
+    scoreCaption.style.cssText = 'font-size:var(--fs-xs); color:var(--text-muted); letter-spacing:var(--tr-caption); line-height:var(--lh-caption); margin: 0 0 var(--sp-4);';
     // A8: скрінрідер, налаштований на українську, вимовляє англійський термін
     // неправильно, якщо не позначити мову фрагмента.
-    scoreCaption.innerHTML = '<span lang="en">Weekly Execution Score</span> — 5 дій тижня: зважування, облік їжі, калорії, конверт на борг, переказ на капітал.';
+    const METHOD_TEXT = '<span lang="en">Weekly Execution Score</span> — 5 дій тижня: зважування, облік їжі, калорії, конверт на борг, переказ на капітал.';
+    if (showFull){
+      scoreCaption.innerHTML = METHOD_TEXT;
+    } else {
+      const hint = document.createElement('button');
+      hint.type = 'button';
+      hint.className = 'method-hint';
+      hint.textContent = '?';
+      hint.title = 'Як рахується відсоток';
+      hint.setAttribute('aria-label', 'Як рахується відсоток виконання тижня');
+      hint.onclick = () => showAppModal({ html: METHOD_TEXT, okLabel: 'Зрозуміло', hideCancel: true });
+      scoreRow.appendChild(hint);
+      scoreCaption.style.margin = '0 0 var(--sp-3)';
+    }
     card.appendChild(scoreCaption);
 
     card.appendChild(buildWeekBody(i, snap));
@@ -1481,15 +1642,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   if ($('export-csv')) $('export-csv').onclick = () => exportData('csv');
   if ($('import-json')) $('import-json').onclick = () => { if ($('import-file-input')) $('import-file-input').click(); };
   if ($('import-file-input')) $('import-file-input').onchange = (e) => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; };
-  if ($('setup-sync')) $('setup-sync').onclick = () => {
-    const current = getWebAppUrl();
-    showAppModal({
-      message: 'Встав URL Google Apps Script Web App для синхронізації (порожньо — вимкнути):',
-      showInput: true, inputValue: current, okLabel: 'Зберегти',
-      onOk: (url) => { setWebAppUrl((url || '').trim()); updateSyncStatusUI(); load(); }
-    });
-  };
   function openGoalsModal(){
+    // Пункт 20: синхронізація тепер живе в тому самому діалозі, що й цілі —
+    // це одне й те саме одноразове налаштування, а не дві різні дії.
+    if ($('goal-sync-url')) $('goal-sync-url').value = getWebAppUrl();
+    if ($('goal-sync-status')) $('goal-sync-status').textContent =
+      getWebAppUrl() ? 'Увімкнена — дані спільні на всіх пристроях.' : 'Вимкнена — дані лише в цьому браузері.';
     $('goal-weight-start').value = GOALS.weightStart;
     $('goal-weight-end').value = GOALS.weightEnd;
     $('goal-debt-start').value = GOALS.debtStart;
@@ -1536,6 +1694,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
     GOALS = Object.assign(GOALS, next);
     await saveGoals();
+    // Пункт 20: URL синхронізації зберігається разом із цілями
+    if ($('goal-sync-url')){
+      const url = ($('goal-sync-url').value || '').trim();
+      if (url !== getWebAppUrl()){
+        setWebAppUrl(url);
+        updateSyncStatusUI();
+        closeGoalsModal();
+        load();   // перечитуємо дані з нового джерела
+        return;
+      }
+    }
     closeGoalsModal();
     render();
   };
