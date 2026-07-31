@@ -176,8 +176,13 @@
    плюс кільце кольору --text-primary (найяскравішого в палітрі) — на темному тлі
    це читалось як приціл і перетягувало увагу з решти інтерфейсу. Тепер мʼякий
    ореол упритул до кружечка: помітно, але не кричить. */
-.journey-cell.selected .journey-dot { box-shadow: 0 0 0 3px rgba(243, 241, 232, 0.28); }
-.journey-cell.selected .journey-num { color: var(--text-secondary); font-weight: 600; }
+/* Обраний тиждень позначається розміром і повною яскравістю, а не світлом
+   навколо: на темному тлі будь-який ореол читається як забруднення. */
+/* Затемнювати решту кружечків не можна: порожні мають лише межу, і при
+   зниженій непрозорості вона провалюється нижче норми контрасту 3:1. */
+.journey-cell .journey-dot { transition: transform 0.2s, background 0.3s, border-color 0.3s; }
+.journey-cell.selected .journey-dot { transform: scale(1.09); }
+.journey-cell.selected .journey-num { color: var(--text-primary); font-weight: 600; }
 .journey-num { font-size: var(--fs-xs); color: var(--text-muted); }
 /* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
    тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
@@ -188,6 +193,10 @@
    лише кольором (нейтральний / у графіку / відстає), не формою. */
 .chip, .badge, .today-pill { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); letter-spacing: 0.02em; white-space: nowrap; }
 .badge-ok, .today-pill { background: var(--accent-soft); color: var(--accent-text); }
+/* Картка показника має право переносити слова — інакше довгі рядки
+   на кшталт "ціль $1,800" вилазять за її межі на вузькому екрані. */
+.stat-card { min-width: 0; overflow-wrap: anywhere; }
+.stat-card .badge { white-space: normal; }
 .badge-behind { background: var(--warn-soft); color: var(--warn-text); }
 .group-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: var(--sp-4); margin-bottom: var(--sp-2); }
 /* Пункт 14: три рівноправні сутності не відокремлювались — між рядками
@@ -335,7 +344,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
    Тут же ховаємо підписи сум над стовпчиками бар-чарта — дванадцять
    підписів на такій ширині перетворюються на кашу. */
 @media (max-width: 460px) {
-  .daily-grid { grid-template-columns: repeat(4, 1fr); gap: var(--sp-2); }
+  /* Сім днів лишаються в одному рядку — так тиждень читається як тиждень,
+     а не як дві розірвані групи. Квадратик звужується до ~37px, але висота
+     тримається на 44px, тож палець має повноцінну вертикальну ціль. */
+  .daily-grid { grid-template-columns: repeat(7, 1fr); gap: var(--sp-1); }
+  .day-square { aspect-ratio: auto; height: var(--tap); max-width: none; border-radius: var(--r-sm); }
   .bar-amt { display: none; }
 }
 
@@ -343,7 +356,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
    близько 130px на картку, чого замало для числа з підписом. */
 @media (max-width: 380px) {
   #stat-cards { grid-template-columns: 1fr !important; }
-  .daily-grid { grid-template-columns: repeat(3, 1fr); }
   .card { padding: var(--sp-3); }
   .hero-card { padding: var(--sp-3); }
   .metric-input-row { gap: var(--sp-2); }
@@ -428,7 +440,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v26 · design audit: all 24 items</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v27 · device feedback fixes</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -1011,12 +1023,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     return '<div class="delta ' + (good ? 'delta-good' : 'delta-bad') + '">' + sign + fmt1(diff) + unit + ' з мин. тижня</div>';
   }
   function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr){
+    // Вміст обрізався по горизонталі: у двох колонках на телефоні на картку
+    // припадає ~130px, а рядки на кшталт "ціль $1,800" і "без змін з мин.
+    // тижня" туди не вміщались і вилазили за край. Тепер картка може
+    // переносити слова, а бейдж стану переїхав під підпис, щоб не стискав його.
     let badge = '';
-    if (hasData) badge = '<span class="badge ' + (onTrack ? 'badge-ok' : 'badge-behind') + '">' + (ahead ? 'випереджає' : onTrack ? 'у графіку' : 'позаду') + '</span>';
-    return '<div class="card" style="padding: var(--sp-4) var(--sp-4); border-radius: var(--r-lg);">' +
-      '<div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:var(--sp-2); gap:var(--sp-2);">' +
-      '<div style="font-size: var(--fs-sm); color: var(--text-secondary);">' + label + '</div>' + badge + '</div>' +
-      '<div class="hero-num" style="font-size: var(--fs-xl); line-height: 1;">' + valueHtml + '</div>' +
+    if (hasData) badge = '<div style="margin-top:var(--sp-1);"><span class="badge ' + (onTrack ? 'badge-ok' : 'badge-behind') + '">' + (ahead ? 'випереджає' : onTrack ? 'у графіку' : 'позаду') + '</span></div>';
+    return '<div class="card stat-card" style="padding: var(--sp-4); border-radius: var(--r-lg);">' +
+      '<div style="font-size: var(--fs-sm); color: var(--text-secondary);">' + label + '</div>' + badge +
+      '<div class="hero-num" style="font-size: var(--fs-xl); line-height: 1; margin-top: var(--sp-2);">' + valueHtml + '</div>' +
       '<div style="font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1);">ціль ' + subLabel + '</div>' +
       (deltaHtmlStr || '') + '</div>';
   }
@@ -1182,8 +1197,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       if (!wt) continue;
       actPath += (!started ? 'M' : 'L') + x(i) + ',' + y(wt) + ' '; started = true;
       if (i === 0){
-        dots += '<circle cx="' + x(0) + '" cy="' + y(wt) + '" r="4" fill="' + cv('--surface-2','#221F19') + '" stroke="' + C_WEIGHT + '" stroke-width="2" />';
-        dots += '<text x="' + (x(0)+6) + '" y="' + (y(wt) - 8) + '" text-anchor="start" font-size="11" fill="' + mutedColor + '">Старт</text>';
+        // Мітка "Старт" перекривалась підписом значення першого тижня, а сама
+        // порожня точка на осі і так очевидно означає початок.
+        dots += '<circle cx="' + x(0) + '" cy="' + y(wt) + '" r="4" fill="' + cv('--surface-1','#1A1914') + '" stroke="' + C_WEIGHT + '" stroke-width="2" />';
       } else {
         dots += '<circle cx="' + x(i) + '" cy="' + y(wt) + '" r="4.5" fill="' + C_WEIGHT + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === cur ? 'chart-dot-live' : '') + '" />';
         lastPoint = { i: i, v: wt };
@@ -1263,8 +1279,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       const v = cumSeries[i];
       actPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(v) + ' ';
       if (i === 0){
-        dots += '<circle cx="' + x(0) + '" cy="' + y(v) + '" r="4" fill="' + cv('--surface-2','#221F19') + '" stroke="' + color + '" stroke-width="2" />';
-        dots += '<text x="' + (x(0)+6) + '" y="' + (y(v) - 8) + '" text-anchor="start" font-size="11" fill="' + mutedColor + '">Старт</text>';
+        dots += '<circle cx="' + x(0) + '" cy="' + y(v) + '" r="4" fill="' + cv('--surface-1','#1A1914') + '" stroke="' + color + '" stroke-width="2" />';
       } else if (state[i][amtKey]) {
         dots += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="4.5" fill="' + color + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === cur ? 'chart-dot-live' : '') + '" />';
         lastPoint = { i: i, v: v };
