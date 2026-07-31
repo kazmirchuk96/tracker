@@ -345,9 +345,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
    підписів на такій ширині перетворюються на кашу. */
 @media (max-width: 460px) {
   /* Сім днів лишаються в одному рядку — так тиждень читається як тиждень,
-     а не як дві розірвані групи. Квадратик звужується до ~37px, але висота
-     тримається на 44px, тож палець має повноцінну вертикальну ціль. */
-  .daily-grid { grid-template-columns: repeat(7, 1fr); gap: var(--sp-1); }
+     а не як дві розірвані групи. Щоб квадратик не став завузьким, на цій
+     ширині віддаємо йому простір за рахунок відступів блоку: заміряно, що
+     з дефолтними 16px по боках квадратик виходив 30.6px, зі стисненими — 37px.
+     Висота при цьому тримається на 44px, тож палець має повноцінну
+     вертикальну ціль навіть при вужчій горизонталі. */
+  .daily-grid { grid-template-columns: repeat(7, 1fr); gap: var(--sp-0); }
+  .daily-block { padding-left: var(--sp-2); padding-right: var(--sp-2); }
   .day-square { aspect-ratio: auto; height: var(--tap); max-width: none; border-radius: var(--r-sm); }
   .bar-amt { display: none; }
 }
