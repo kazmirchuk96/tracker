@@ -75,6 +75,8 @@
   --shadow-lg: 0 1px 2px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.65);
 
   --bw: 1px;
+  /* акцентна межа: підсвічує елемент, лишаючись межею (сьогоднішній день) */
+  --bw-emphasis: 2px;
   /* акцентні смужки (ліва грань банера, верхня грань картки тижня) —
      не хейрлайн, а самостійний елемент, тому окремий токен */
   --bw-accent: 3px;
@@ -267,12 +269,27 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: var(--sp-3); }
 .daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--sp-2); }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
-.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) dashed var(--border-strong); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .day-square:hover { border-color: var(--focus); background: var(--surface-2); }
 .day-square:active { transform: scale(0.9); }
 .day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
 /* A3: квадратик дня тепер має role="checkbox" і потрапляє у Tab-послідовність */
 .day-square[aria-checked="true"] { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
+
+/* №1: сьогоднішній день. Без цього щоразу доводилось згадувати, який
+   сьогодні день тижня, і шукати потрібну літеру серед семи однакових. */
+.day-square.is-today { border: var(--bw-emphasis) solid var(--accent); }
+.day-square.is-today[aria-checked="false"] { background: var(--surface-2); }
+.day-cell.is-today .day-cell-label { color: var(--text-primary); font-weight: 600; }
+
+/* №2: майбутні дні поточного тижня. Трекер не має дозволяти відмічати те,
+   чого ще не було — інакше можна закрити весь тиждень у понеділок. */
+.day-square.is-future { opacity: 0.3; pointer-events: none; }
+.day-cell.is-future .day-cell-label { opacity: 0.45; }
+
+/* №7: галочка з'являлась різко — перехід був заданий лише для фону й межі. */
+@keyframes checkPop { from { transform: scale(0.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.day-square[aria-checked="true"] svg { animation: checkPop 0.16s cubic-bezier(0.34, 1.4, 0.64, 1); }
 .day-cell-label { font-size: var(--fs-xs); color: var(--text-muted); }
 .hero-card { border-radius: var(--r-xl); padding: var(--sp-5); margin-bottom: var(--sp-5); background: var(--surface-1); border: var(--bw) solid var(--border); box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
 /* --- Пункт 13: у файлі було нуль градієнтів. Одна акуратна радіальна
@@ -350,7 +367,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
      з дефолтними 16px по боках квадратик виходив 30.6px, зі стисненими — 37px.
      Висота при цьому тримається на 44px, тож палець має повноцінну
      вертикальну ціль навіть при вужчій горизонталі. */
-  .daily-grid { grid-template-columns: repeat(7, 1fr); gap: var(--sp-0); }
+  /* Зазор 2px, який я поставив, щоб відвоювати ширину, дав побічний ефект:
+     чотири відмічені дні поспіль зливались в одну суцільну зелену смугу —
+     окремі дні переставали читатись. 4px відновлюють роздільність. */
+  .daily-grid { grid-template-columns: repeat(7, 1fr); gap: var(--sp-1); }
   .daily-block { padding-left: var(--sp-2); padding-right: var(--sp-2); }
   .day-square { aspect-ratio: auto; height: var(--tap); max-width: none; border-radius: var(--r-sm); }
   .bar-amt { display: none; }
@@ -444,7 +464,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v27 · device feedback fixes</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v28 · day buttons: today, future lock, cleaner states</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -1324,10 +1344,24 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         (snap.cur > 0 ? ' Залишилось $' + Math.round(remaining).toLocaleString() + '.' : '') + '</div>';
   }
 
+  // Індекс сьогоднішнього дня всередині тижня weekIdx (0 = Пн ... 6 = Нд).
+  // null, якщо переглядається не поточний тиждень — тоді ні підсвітки
+  // "сьогодні", ні блокування майбутніх днів не потрібно.
+  function todayIndexIn(weekIdx){
+    if (weekIdx !== currentWeek()) return null;
+    const now = new Date();
+    const start = weekStart(weekIdx);
+    const diff = Math.floor((now - start) / 86400000);
+    return diff >= 0 && diff <= 6 ? diff : null;
+  }
+
   function dailyToggle(state_key, weekIdx, label){
     const arr = state[weekIdx][state_key];
     const frac = dayFraction(arr), pct = Math.round(frac*100);
-    const color = pct >= 85 ? C_DONE : pct > 0 ? C_CURRENT : 'var(--text-muted)';
+    const todayIdx = todayIndexIn(weekIdx);
+    // Лічильник підсвічувався жовтим — тим самим кольором, що означає
+    // "відстаєш". Прогрес 57% не є попередженням, тому нейтральний тон.
+    const color = pct >= 85 ? C_DONE : pct > 0 ? C_NEUTRAL : 'var(--text-muted)';
     const wrap = document.createElement('div'); wrap.className = 'daily-block';
     const head = document.createElement('div'); head.className = 'daily-head';
     head.innerHTML = '<span>' + label + '</span><span style="color:' + color + '; font-weight:500;">' + arr.filter(Boolean).length + '/7 (' + pct + '%)</span>';
@@ -1340,13 +1374,31 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       // A3: раніше це був звичайний <div> з onclick — недосяжний з клавіатури
       // й невидимий для скрінрідера. Тепер повноцінний чекбокс: роль, стан,
       // місце у Tab-послідовності і реакція на Space/Enter.
-      const sq = document.createElement('div'); sq.className = 'day-square' + (val ? ' checked' : '');
+      // №1 і №2: день має знати своє місце в часі. todayIdx — 0-based індекс
+      // сьогоднішнього дня в межах ЦЬОГО тижня, або null якщо тиждень не поточний.
+      const isToday = todayIdx !== null && di === todayIdx;
+      const isFuture = todayIdx !== null && di > todayIdx;
+      if (isToday) cell.classList.add('is-today');
+      if (isFuture) cell.classList.add('is-future');
+
+      const sq = document.createElement('div');
+      sq.className = 'day-square' + (val ? ' checked' : '') + (isToday ? ' is-today' : '') + (isFuture ? ' is-future' : '');
       sq.setAttribute('role', 'checkbox');
       sq.setAttribute('aria-checked', val ? 'true' : 'false');
-      sq.setAttribute('tabindex', '0');
-      sq.setAttribute('aria-label', DAY_FULL[di] + ' — ' + label);
-      sq.innerHTML = icon(val ? 'check' : 'plus', 14);
-      const toggle = () => { state[weekIdx][state_key][di] = !state[weekIdx][state_key][di]; saveWeek(weekIdx); render(); };
+      sq.setAttribute('tabindex', isFuture ? '-1' : '0');
+      if (isFuture) sq.setAttribute('aria-disabled', 'true');
+      sq.setAttribute('aria-label', DAY_FULL[di] + ' — ' + label +
+        (isToday ? ', сьогодні' : '') + (isFuture ? ', ще не настав' : ''));
+      sq.title = DAY_FULL[di] + (isToday ? ' · сьогодні' : isFuture ? ' · ще не настав' : '');
+      // №3: плюс читався як "додати щось" — відкрити форму, ввести значення.
+      // Насправді це перемикач, тому порожній стан тепер саме порожній.
+      // №8: іконка 14px у 44-піксельній цілі — це 32% висоти, замало.
+      sq.innerHTML = val ? icon('check', 18) : '';
+      const toggle = () => {
+        if (isFuture) return;
+        state[weekIdx][state_key][di] = !state[weekIdx][state_key][di];
+        saveWeek(weekIdx); render();
+      };
       sq.onclick = toggle;
       sq.onkeydown = (e) => {
         if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggle(); }
