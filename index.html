@@ -464,7 +464,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v28 · day buttons: today, future lock, cleaner states</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v29 · fix: race condition losing checkbox taps during sync</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -521,7 +521,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   const START = new Date(2026, 6, 27);
   const WEEKS = 12;
   let GOALS = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800 };
-  async function saveGoals(){ try { await storage.set('goals', JSON.stringify(GOALS)); } catch(e) {} }
+  // Той самий захист, що і для тижнів (див. коментар біля load()): якщо
+  // цілі змінили, поки фонова синхронізація ще летить, позначаємо це,
+  // щоб застаріла відповідь їх не перезаписала.
+  async function saveGoals(){ if (syncInFlight) editedDuringSync.add('goals'); try { await storage.set('goals', JSON.stringify(GOALS)); } catch(e) {} }
   const C_WEIGHT = '#9089E0', C_DEBT = '#5BA3E8', C_CAPITAL = '#3BC4C4';
   const C_DONE = '#2FBE93', C_MISSED = '#FF7A54', C_CURRENT = '#F0B94D', C_FUTURE_FALLBACK = '#4A473C';
   // Пункт 9: "у процесі" — нейтральний стан, він не мусить тривожити,
@@ -783,6 +786,25 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function refreshPrevScores(){ for (let i = 1; i <= WEEKS; i++) prevScores[i] = score(i); }
   function setSyncBadge(text){ const el = document.getElementById('sync-badge'); if (el) el.textContent = text || ''; }
 
+  // БАГ (знайдено за відео користувача): галочка ставилась і за частку секунди
+  // сама зникала. Причина — гонка між фоновою синхронізацією при відкритті
+  // й дотиком користувача.
+  //
+  // load() запускає ОДИН пакетний GET одразу при старті (щоб не робити 13
+  // окремих запитів), але сторінка вже намальована й повністю клікабельна
+  // з локального кешу, поки цей GET летить. Якщо Apps Script відповідає
+  // повільно (холодний старт, читання всієї таблиці) — а в записаному відео
+  // це зайняло ~6 секунд — користувач встигає натиснути чекбокс ДО того, як
+  // відповідь прийде. GET летів із застарілим знімком (без щойно поставленої
+  // галочки), і коли він нарешті приходить, load() безумовно перезаписував
+  // ним стан тижня — свіжий локальний дотик зникав.
+  //
+  // syncInFlight + editedDuringSync — прапорець і список тижнів, змінених
+  // ПОКИ той самий запит ще летів. При мержі результату такі тижні
+  // пропускаються: локальна зміна свіжіша за відповідь, що її наздогнала.
+  let syncInFlight = false;
+  const editedDuringSync = new Set();
+
   async function load(){
     bumpLaunchCount();
     // Крок 1 — миттєво малюємо з локального кешу, БЕЗ мережі.
@@ -797,10 +819,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const url = getWebAppUrl();
     if (!url) return;
     setSyncBadge('синхронізація…');
+    syncInFlight = true;
+    editedDuringSync.clear();
     const remote = await remoteFetchAll(url);
+    syncInFlight = false;
     if (!remote){ setSyncBadge('офлайн'); return; }
-    if (remote['goals']){ localSet('goals', remote['goals']); applyGoalsRaw(remote['goals']); }
+    if (remote['goals'] && !editedDuringSync.has('goals')){ localSet('goals', remote['goals']); applyGoalsRaw(remote['goals']); }
     for (let i = 1; i <= WEEKS; i++){
+      if (editedDuringSync.has(i)) continue; // саме тут гасився дотик користувача — тепер пропускаємо
       const raw = remote['week:' + i];
       if (raw){ localSet('week:' + i, raw); applyWeekRaw(i, raw); }
     }
@@ -809,6 +835,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     render();
   }
   async function saveWeek(n){
+    // Позначаємо тиждень як "живо змінений" ДО збереження — сам факт виклику
+    // saveWeek означає, що користувач щойно щось відмітив/ввів, і це має
+    // пережити будь-яку паралельну синхронізацію, що вже летить.
+    if (syncInFlight) editedDuringSync.add(n);
     showSaveStatus('Збереження…');
     const ok = await storage.set('week:' + n, JSON.stringify(state[n]));
     if (ok) showSaveStatus('Збережено ✓');
