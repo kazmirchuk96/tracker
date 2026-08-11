@@ -15,6 +15,7 @@
 </style>
 </head>
 <body>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
 :root {
@@ -209,6 +210,14 @@
 /* Крапка вирівнюється оптично по центру першого рядка підпису, тому
    зсув задано в em — він прив’язаний до типографіки, а не до сітки відступів. */
 .metric-accent { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 0.42em; }
+.goal-dot { display: inline-block; border-radius: 50%; flex-shrink: 0; vertical-align: middle; margin-right: var(--sp-1); }
+.goal-badge { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill); white-space: nowrap; flex-shrink: 0; }
+/* Клікабельна версія плашки — у списку налаштувань, де мітку можна
+   міняти. appearance навмисно НЕ прибираю: нативна стрілка select-а —
+   безкоштовний і однозначний сигнал "тут можна натиснути й обрати", який
+   довелось би вигадувати заново кастомним значком. */
+.goal-select { font-size: var(--fs-xs); font-weight: 600; font-family: inherit; border: none; border-radius: var(--r-pill); padding: var(--sp-0) var(--sp-1) var(--sp-0) var(--sp-2); flex-shrink: 0; cursor: pointer; }
+.goal-select:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 .metric-body { flex: 1; min-width: 0; }
 .metric-top-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-2); }
 .metric-label { font-size: var(--fs-sm); color: var(--text-secondary); font-weight: 500; }
@@ -228,6 +237,18 @@
 .btn-primary { padding: var(--sp-3) var(--sp-5); border: none; background: var(--accent); color: var(--surface-0); font-weight: 600; }
 .btn-primary:hover { opacity: 0.88; }
 .btn-secondary { padding: var(--sp-3) var(--sp-4); border: none; background: transparent; color: var(--text-secondary); font-weight: 400; }
+/* Перемикач типу нової дії (Щодня / Раз на тиждень) — btn-secondary за
+   замовчуванням прозорий, тож обраний варіант позначаємо рамкою. */
+.btn-secondary[aria-pressed="true"] { background: var(--surface-3); border: var(--bw) solid var(--accent); color: var(--text-primary); font-weight: 600; }
+.tactic-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) 0; border-bottom: var(--bw) solid var(--border); }
+.tactic-row:last-child { border-bottom: none; }
+/* Фікс 3 критичного огляду: вертикальний відступ поля був лише 4px —
+   набагато нижче 44-піксельного мінімуму, який цей-таки трекер послідовно
+   тримає всюди. */
+.tactic-label-input { flex: 1; min-width: 0; min-height: var(--tap); background: transparent; border: none; color: var(--text-primary); font-size: var(--fs-md); font-family: inherit; padding: 0; }
+.tactic-label-input:focus { outline: none; }
+.tactic-label-input.archived { color: var(--text-muted); text-decoration: line-through; }
+.tactic-type-badge { font-size: var(--fs-xs); color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
 .btn-secondary:hover { background: var(--surface-2); color: var(--text-primary); }
 .fill-btn:hover { background: var(--surface-3); color: var(--text-primary); border-color: var(--text-muted); }
 .stepper { display: flex; align-items: center; gap: var(--sp-2); }
@@ -464,7 +485,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v29 · fix: race condition losing checkbox taps during sync</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v33 · goal label is editable from settings (select)</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -505,6 +526,21 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
     <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
 
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-bottom:var(--sp-2); padding-top:var(--sp-3); border-top:var(--bw) solid var(--border);">Дії тижня</div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted); line-height:1.4; margin-bottom:var(--sp-3);">Кожна дія важить порівну у відсотку виконання тижня. Нова дія стосується тижнів починаючи з цього — минулі тижні не постраждають.</div>
+    <div id="tactics-list" style="margin-bottom:var(--sp-3);"></div>
+    <input id="tactic-new-label" type="text" placeholder="Напр. Білок 120г щодня" maxlength="80" style="width:100%; box-sizing:border-box; padding:var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg); margin-bottom:var(--sp-2);">
+    <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-2);">
+      <button type="button" id="tactic-type-daily" class="btn btn-secondary" style="flex:1; justify-content:center;" aria-pressed="true">Щодня</button>
+      <button type="button" id="tactic-type-weekly" class="btn btn-secondary" style="flex:1; justify-content:center;" aria-pressed="false">Раз на тиждень</button>
+    </div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted); margin-bottom:var(--sp-1);">Стосується:</div>
+    <!-- Заповнюється через JS із GOAL_META — кольори беруться з того самого
+         об'єкта, що й крапки в самій картці тижня, щоб hex-значення не
+         розповзлись окремо в розмітці й окремо в JS. -->
+    <div id="tactic-goal-selector" style="display:flex; gap:var(--sp-1); margin-bottom:var(--sp-3); flex-wrap:wrap;"></div>
+    <button type="button" id="tactic-add-btn" class="btn btn-primary" style="width:100%; justify-content:center; margin-bottom:var(--sp-4);">+ Додати дію</button>
+
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-bottom:var(--sp-2); padding-top:var(--sp-3); border-top:var(--bw) solid var(--border);">Синхронізація</div>
     <input id="goal-sync-url" type="text" placeholder="URL Google Apps Script (порожньо — вимкнути)" style="width:100%; box-sizing:border-box; padding:var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     <div style="font-size:var(--fs-xs); color:var(--text-muted); line-height:var(--lh-caption); margin:var(--sp-2) 0 var(--sp-5);" id="goal-sync-status"></div>
@@ -530,6 +566,40 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // Пункт 9: "у процесі" — нейтральний стан, він не мусить тривожити,
   // тоді як "відстаєш" (C_MISSED) і попередження — мусять.
   const C_NEUTRAL = '#A8A292';
+  // Мітка "до якої цілі стосується дія". Єдине джерело кольору й назви —
+  // і форма додавання, і список налаштувань, і сама картка тижня читають
+  // звідси, щоб hex-значення кольорів не розповзлись у трьох місцях.
+  // "general" — для дій без конкретної цілі (як-от "Аналіз тижня").
+  const GOAL_META = {
+    weight: { label: 'Вага', color: C_WEIGHT, soft: 'rgba(144,137,224,0.16)' },
+    debt: { label: 'Борг', color: C_DEBT, soft: 'rgba(91,163,232,0.16)' },
+    capital: { label: 'Капітал', color: C_CAPITAL, soft: 'rgba(59,196,196,0.16)' },
+    general: { label: 'Загальне', color: 'var(--text-muted)', soft: 'rgba(154,151,132,0.16)' }
+  };
+  // Крапка — лишається лише для перемикача у формі додавання (там вона
+  // всередині кнопки поруч із власним текстом кнопки).
+  function goalDot(goal, size){
+    const meta = GOAL_META[goal] || GOAL_META.general;
+    size = size || 7;
+    // aria-hidden: колір тут не єдиний спосіб дізнатись мітку — у списку
+    // налаштувань поруч завжди йде текстова назва; у картці тижня є title.
+    return '<span class="goal-dot" style="width:' + size + 'px; height:' + size + 'px; background:' + meta.color + ';" title="Стосується: ' + meta.label + '" aria-hidden="true"></span>';
+  }
+  // Варіант A з макета (goal-label-variants.html): м'яка кольорова плашка —
+  // 16% фону кольором цілі + текст повним кольором. Та сама мова, що вже
+  // в бейджах "у графіку"/"позаду" і пілюлі "Сьогодні", тож нічого нового
+  // не вигадуємо. Контраст тексту перевірено на кожній поверхні, де плашка
+  // з'являється (surface-1/2/3): мінімум 4.73:1 при нормі 4.5:1.
+  function goalBadge(goal){
+    const meta = GOAL_META[goal] || GOAL_META.general;
+    return '<span class="goal-badge" style="background:' + meta.soft + '; color:' + meta.color + ';">' + meta.label + '</span>';
+  }
+  // Назва дії — вільний текст від користувача. Кілька місць підставляють її
+  // через innerHTML (кольорова крапка перед назвою, прев'ю скидання) — без
+  // екранування назва на кшталт "Пити <2л води" зламала б розмітку.
+  function escHtml(s){
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
   // Чи є в тижні бодай якісь дані — щоб відрізнити "0% бо ще не почав"
   // від "0% бо провалив".
   function hasAnyData(n){
@@ -549,9 +619,91 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // за планом — за це окремо попереджає індикатор "незвично велика/мала сума").
   // Прогрес до самих грошових цілей (борг $X, капітал $X) рахується окремо —
   // дивись пейс-бейджі "у графіку" / "позаду" / "випереджає".
-  const WEIGHTS = { weighIn: 1, logDays: 1, calorieDays: 1, debtAction: 1, capitalAction: 1 };
-  const WEIGHT_TOTAL = WEIGHTS.weighIn + WEIGHTS.logDays + WEIGHTS.calorieDays + WEIGHTS.debtAction + WEIGHTS.capitalAction;
-  const WEEKLY_TACTICS = [{ id: 'w1', label: 'Зважування в понеділок зранку' }];
+  // Ваги більше не фіксовані константою: кожна дія, що застосовується до
+  // конкретного тижня (див. tacticAppliesTo нижче), важить порівну — і
+  // вбудовані, і додані користувачем. Формула в score().
+
+  // --- Дії тижня (TACTICS) ---
+  // Раніше тут був WEEKLY_TACTICS — жорстко зашитий масив з ОДНИМ пунктом
+  // ("Зважування"), плюс два окремі виклики dailyToggle('logDays', ...) /
+  // dailyToggle('calorieDays', ...) прямо в buildWeekBody. Тепер це єдиний
+  // динамічний реєстр: користувач може додавати власні дії (щоденні або
+  // щотижневі), перейменовувати й архівувати — і вбудовані три пункти, і свої.
+  //
+  // Ключова проблема, яку тут треба було вирішити: якщо додати дію
+  // "Білок 120г" у тиждень 5, тижні 1-4 не повинні заднім числом вважатись
+  // "проваленими" через дію, якої тоді ще не існувало. І навпаки — якщо
+  // архівувати дію в тиждень 8, тижні 1-8 мають зберегти її в підрахунку
+  // (вона реально трекалась), а тижні 9+ — ні.
+  //
+  // Рішення: кожна дія має createdWeek (з якого тижня рахується) і
+  // archivedWeek (з якого тижня НЕ рахується, або null — усе ще активна).
+  // tacticAppliesTo() — єдина функція, яку використовують і рендер, і
+  // рахунок відсотка, тож показане завжди збігається з порахованим.
+  function defaultTactics(){
+    return [
+      { id: 'w1', label: 'Зважування в понеділок зранку', type: 'weekly', goal: 'weight', createdWeek: 1, archivedWeek: null, builtin: true },
+      { id: 'logDays', label: 'Облік їжі кожного дня', type: 'daily', goal: 'weight', createdWeek: 1, archivedWeek: null, builtin: true },
+      { id: 'calorieDays', label: 'Не більше 2000 ккал/день', type: 'daily', goal: 'weight', createdWeek: 1, archivedWeek: null, builtin: true }
+    ];
+  }
+  let TACTICS = defaultTactics();
+
+  function tacticAppliesTo(t, n){
+    if (t.createdWeek > n) return false;
+    // Тиждень, у якому дію архівували, ще зараховується — архівація діє
+    // з НАСТУПНОГО тижня, а не заднім числом стирає вже зроблене цього тижня.
+    if (t.archivedWeek !== null && n > t.archivedWeek) return false;
+    return true;
+  }
+
+  // Уніфікований доступ до значення дії — приховує різницю між вбудованими
+  // полями (checks.w1, logDays, calorieDays лишились фіксованими полями
+  // стану заради нульового ризику для вже синхронізованих даних) і новими
+  // користувацькими діями (живуть у state[i].custom{}).
+  function tacticGetWeekly(i, t){
+    if (t.id === 'w1') return !!state[i].checks.w1;
+    return !!(state[i].custom && state[i].custom[t.id]);
+  }
+  function tacticSetWeekly(i, t, val){
+    if (t.id === 'w1'){ state[i].checks.w1 = val; return; }
+    if (!state[i].custom) state[i].custom = {};
+    state[i].custom[t.id] = val;
+  }
+  function tacticGetDailyArr(i, t){
+    if (t.id === 'logDays') return state[i].logDays;
+    if (t.id === 'calorieDays') return state[i].calorieDays;
+    if (!state[i].custom) state[i].custom = {};
+    if (!Array.isArray(state[i].custom[t.id])) state[i].custom[t.id] = [false,false,false,false,false,false,false];
+    return state[i].custom[t.id];
+  }
+  // Чи є в цієї дії бодай якісь дані хоч у якомусь тижні — визначає, чи
+  // можна її просто видалити (типо, помилка при створенні), чи треба
+  // архівувати (щоб не загубити реальну історію).
+  function tacticHasAnyData(t){
+    for (let i = 1; i <= WEEKS; i++){
+      if (t.type === 'weekly'){ if (tacticGetWeekly(i, t)) return true; }
+      else { if (tacticGetDailyArr(i, t).some(Boolean)) return true; }
+    }
+    return false;
+  }
+  function applyTacticsRaw(raw){
+    try {
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(parsed) && parsed.length){
+        // Зворотна сумісність: дії, збережені до появи міток цілей, не мають
+        // поля goal — трактуємо їх як "Загальне", а не ламаємо рендер чи
+        // не показуємо взагалі нічого замість кольорової крапки.
+        TACTICS = parsed.map(t => Object.assign({ goal: 'general' }, t));
+      }
+    } catch(e) {}
+  }
+  async function saveTactics(){
+    if (syncInFlight) editedDuringSync.add('tactics');
+    try { await storage.set('tactics', JSON.stringify(TACTICS)); } catch(e) {}
+  }
+  function genTacticId(){ return 'a_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
 
   const ICONS = {
     check: '<path d="M4 8.5l3 3 5.5-6.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -570,7 +722,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     fill: '<path d="M8 2v9m0 0l-3.2-3.2M8 11l3.2-3.2M3 14h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     chevronLeft: '<path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     chevronRight: '<path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
-    chevronDown: '<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    chevronDown: '<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    archive: '<rect x="2.5" y="3" width="11" height="3" rx="0.8" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3.5 6v6a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V6M6.5 9h3" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
+    trash: '<path d="M3 4.5h10M6.3 4.5V3.2a1 1 0 0 1 1-1h1.4a1 1 0 0 1 1 1v1.3M4.3 4.5l.5 8a1 1 0 0 0 1 .9h4.4a1 1 0 0 0 1-.9l.5-8" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
   };
   function icon(name, size, extraStyle){ size = size || 14; return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 16 16" style="display:block;' + (extraStyle||'') + '">' + ICONS[name] + '</svg>'; }
 
@@ -622,6 +776,18 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   }
 
   function closeModal(overlay){
+    // Явно знімаємо фокус із будь-якого поля всередині модалки ПЕРЕД
+    // закриттям. Раніше на це покладались опосередковано: виклик
+    // restoreTo.focus() нижче іноді спричиняв blur поточного поля як
+    // побічний ефект — але тільки якщо restoreTo сам був справді
+    // фокусованим елементом. Якщо ні (наприклад, <body> без tabindex),
+    // .focus() на ньому — просто no-op, і поле всередині модалки НІКОЛИ
+    // не втрачало фокус: логіка onblur (зокрема збереження перейменування
+    // дії) могла тихо не спрацювати. Явний .blur() тут гарантує
+    // детерміновану поведінку незалежно від того, чим виявиться restoreTo.
+    if (document.activeElement && overlay.contains(document.activeElement)){
+      document.activeElement.blur();
+    }
     overlay.style.display = 'none';
     const idx = modalStack.map(m => m.overlay).lastIndexOf(overlay);
     if (idx === -1) return;
@@ -686,7 +852,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function expCapital(i){ return GOALS.capitalStart + (GOALS.capitalEnd - GOALS.capitalStart) * i / WEEKS; }
   function fmt1(n){ return Math.round(n * 10) / 10; }
 
-  function emptyWeek(){ return { weight: null, debtAmt: null, capitalAmt: null, checks: {}, logDays: [false,false,false,false,false,false,false], calorieDays: [false,false,false,false,false,false,false] }; }
+  function emptyWeek(){ return { weight: null, debtAmt: null, capitalAmt: null, checks: {}, logDays: [false,false,false,false,false,false,false], calorieDays: [false,false,false,false,false,false,false], custom: {} }; }
 
   let state = {};
   for (let i = 1; i <= WEEKS; i++) state[i] = emptyWeek();
@@ -739,7 +905,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function localGet(key){ try { return localStorage.getItem('tracker:' + key); } catch(e){ return null; } }
   function localSet(key, value){ try { localStorage.setItem('tracker:' + key, value); } catch(e) {} }
 
-  const ALL_KEYS = (function(){ const k = ['goals']; for (let i = 1; i <= WEEKS; i++) k.push('week:' + i); return k; })();
+  const ALL_KEYS = (function(){ const k = ['goals', 'tactics']; for (let i = 1; i <= WEEKS; i++) k.push('week:' + i); return k; })();
 
   // Забирає ВСІ ключі одним запитом (action=getall). Якщо бекенд старої
   // версії такої дії не знає — падає на паралельні запити. Раніше тут було
@@ -810,6 +976,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     // Крок 1 — миттєво малюємо з локального кешу, БЕЗ мережі.
     // Користувач бачить трекер одразу, а не через 20 секунд.
     applyGoalsRaw(localGet('goals'));
+    applyTacticsRaw(localGet('tactics'));
     for (let i = 1; i <= WEEKS; i++) applyWeekRaw(i, localGet('week:' + i));
     refreshPrevScores();
     updateSyncStatusUI();
@@ -825,6 +992,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     syncInFlight = false;
     if (!remote){ setSyncBadge('офлайн'); return; }
     if (remote['goals'] && !editedDuringSync.has('goals')){ localSet('goals', remote['goals']); applyGoalsRaw(remote['goals']); }
+    if (remote['tactics'] && !editedDuringSync.has('tactics')){ localSet('tactics', remote['tactics']); applyTacticsRaw(remote['tactics']); }
     for (let i = 1; i <= WEEKS; i++){
       if (editedDuringSync.has(i)) continue; // саме тут гасився дотик користувача — тепер пропускаємо
       const raw = remote['week:' + i];
@@ -870,6 +1038,22 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       if (Array.isArray(raw[key]) && raw[key].length === 7) clean[key] = raw[key].map(Boolean);
       else skipped.push(key);
     });
+    // Користувацькі дії: структурна перевірка без прив'язки до конкретного
+    // реєстру TACTICS (файл могли експортувати до перейменування/архівації
+    // дії) — кожне значення має бути або boolean (щотижнева дія), або масив
+    // рівно з 7 елементів (щоденна). Усе інше відкидається поіменно.
+    if (raw.custom && typeof raw.custom === 'object' && !Array.isArray(raw.custom)){
+      const cleanCustom = {};
+      let customSkipped = 0;
+      Object.keys(raw.custom).forEach(k => {
+        const v = raw.custom[k];
+        if (typeof v === 'boolean') cleanCustom[k] = v;
+        else if (Array.isArray(v) && v.length === 7) cleanCustom[k] = v.map(Boolean);
+        else customSkipped++;
+      });
+      clean.custom = cleanCustom;
+      if (customSkipped) skipped.push('custom(' + customSkipped + ')');
+    } else if (raw.custom !== undefined) skipped.push('custom');
     if (typeof raw.notes === 'string') clean.notes = raw.notes.slice(0, 2000);
     else if (raw.notes !== undefined) skipped.push('notes');
     return { clean: clean, skipped: skipped };
@@ -906,16 +1090,43 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     } catch(err){ showAppAlert('Не вдалося прочитати файл: ' + (err && err.message ? err.message : err)); }
   }
 
+  // Українська плюралізація: 1 дія, 2-4 дії, 0/5-20 дій, і той самий
+  // цикл далі (21 дія, 22-24 дії, 25 дій...).
+  function pluralUk(n, one, few, many){
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+    return many;
+  }
+  // Текст підказки під відсотком — раніше був жорстко "5 дій тижня: ...",
+  // тепер будується з реального переліку дій, застосовних до тижня n.
+  function scoreCaptionText(n){
+    const parts = ['конверт на борг', 'переказ на капітал'];
+    TACTICS.forEach(t => { if (tacticAppliesTo(t, n)) parts.push(t.label.toLowerCase()); });
+    const count = parts.length;
+    // Критичний огляд, пункт 5: з великою кількістю кастомних дій речення
+    // ставало нескінченним. Показуємо перші 6, решту — одним числом.
+    const CAP = 6;
+    const shown = parts.length > CAP ? parts.slice(0, CAP).concat(['ще ' + (parts.length - CAP)]) : parts;
+    return count + ' ' + pluralUk(count, 'дія', 'дії', 'дій') + ' тижня: ' + shown.join(', ') + '.';
+  }
+
   function dayFraction(arr){ return arr.filter(Boolean).length / 7; }
   function score(n){
-    const st = state[n];
-    let done = 0;
-    if (st.checks.w1) done += WEIGHTS.weighIn;
-    done += dayFraction(st.logDays) * WEIGHTS.logDays;
-    done += dayFraction(st.calorieDays) * WEIGHTS.calorieDays;
-    done += actionFraction_(n, 'debtAmt', GOALS.debtStart, GOALS.debtEnd) * WEIGHTS.debtAction;
-    done += actionFraction_(n, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd) * WEIGHTS.capitalAction;
-    return Math.round((done / WEIGHT_TOTAL) * 100);
+    let done = 0, total = 0;
+    // Гроші рахуються завжди, поза реєстром дій — вони не архівуються.
+    total += 1; done += actionFraction_(n, 'debtAmt', GOALS.debtStart, GOALS.debtEnd);
+    total += 1; done += actionFraction_(n, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd);
+    // Кожна дія, що діяла в тиждень n (див. tacticAppliesTo), важить порівну.
+    // Для тижнів без жодної кастомної дії це рівно те саме, що й раніше:
+    // 2 (гроші) + 3 (вбудовані) = 5, по 20% кожна.
+    TACTICS.forEach(t => {
+      if (!tacticAppliesTo(t, n)) return;
+      total += 1;
+      if (t.type === 'weekly'){ if (tacticGetWeekly(n, t)) done += 1; }
+      else { done += dayFraction(tacticGetDailyArr(n, t)); }
+    });
+    return total > 0 ? Math.round((done / total) * 100) : 0;
   }
   function weekStatus(n){
     const now = new Date();
@@ -1385,8 +1596,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     return diff >= 0 && diff <= 6 ? diff : null;
   }
 
-  function dailyToggle(state_key, weekIdx, label){
-    const arr = state[weekIdx][state_key];
+  function dailyToggle(weekIdx, label, getArr, goal){
+    const arr = getArr();
     const frac = dayFraction(arr), pct = Math.round(frac*100);
     const todayIdx = todayIndexIn(weekIdx);
     // Лічильник підсвічувався жовтим — тим самим кольором, що означає
@@ -1394,7 +1605,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const color = pct >= 85 ? C_DONE : pct > 0 ? C_NEUTRAL : 'var(--text-muted)';
     const wrap = document.createElement('div'); wrap.className = 'daily-block';
     const head = document.createElement('div'); head.className = 'daily-head';
-    head.innerHTML = '<span>' + label + '</span><span style="color:' + color + '; font-weight:500;">' + arr.filter(Boolean).length + '/7 (' + pct + '%)</span>';
+    head.innerHTML = '<span style="display:inline-flex; align-items:center; gap:var(--sp-1); min-width:0;">' + (goal ? goalBadge(goal) : '') + '<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escHtml(label) + '</span></span><span style="color:' + color + '; font-weight:500; flex-shrink:0;">' + arr.filter(Boolean).length + '/7 (' + pct + '%)</span>';
     wrap.appendChild(head);
     const grid = document.createElement('div'); grid.className = 'daily-grid';
     grid.setAttribute('role', 'group');
@@ -1426,7 +1637,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       sq.innerHTML = val ? icon('check', 18) : '';
       const toggle = () => {
         if (isFuture) return;
-        state[weekIdx][state_key][di] = !state[weekIdx][state_key][di];
+        const a = getArr();
+        a[di] = !a[di];
         saveWeek(weekIdx); render();
       };
       sq.onclick = toggle;
@@ -1551,20 +1763,32 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       prevCap ? () => { state[i].capitalAmt = prevCap; saveWeek(i); render(); } : null,
       '$' + planCapital, () => { state[i].capitalAmt = planCapital; saveWeek(i); render(); }));
 
-    const habitLabel = document.createElement('div'); habitLabel.className = 'group-label'; habitLabel.textContent = 'Схуднення';
-    frag.appendChild(habitLabel);
-    const habitPanel = document.createElement('div'); habitPanel.className = 'habit-panel';
-    WEEKLY_TACTICS.forEach(t => {
-      const row = document.createElement('label'); row.className = 'habit-row';
-      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!state[i].checks[t.id];
-      cb.onchange = (e) => { state[i].checks[t.id] = e.target.checked; saveWeek(i); render(); };
-      row.appendChild(cb);
-      const span = document.createElement('span'); span.textContent = t.label; row.appendChild(span);
-      habitPanel.appendChild(row);
+    // Дії тижня: гейтимо за tacticAppliesTo, щоб показане завжди збігалось
+    // із порахованим у score(). Секцію (і навіть заголовок) не малюємо
+    // взагалі, якщо для цього тижня немає жодної застосовної дії — щоб не
+    // лишати порожню рамку, якщо все заархівовано.
+    const weeklyTactics = TACTICS.filter(t => t.type === 'weekly' && tacticAppliesTo(t, i));
+    const dailyTactics = TACTICS.filter(t => t.type === 'daily' && tacticAppliesTo(t, i));
+    if (weeklyTactics.length || dailyTactics.length){
+      const habitLabel = document.createElement('div'); habitLabel.className = 'group-label'; habitLabel.textContent = 'Дії тижня';
+      frag.appendChild(habitLabel);
+    }
+    if (weeklyTactics.length){
+      const habitPanel = document.createElement('div'); habitPanel.className = 'habit-panel';
+      weeklyTactics.forEach(t => {
+        const row = document.createElement('label'); row.className = 'habit-row';
+        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = tacticGetWeekly(i, t);
+        cb.onchange = (e) => { tacticSetWeekly(i, t, e.target.checked); saveWeek(i); render(); };
+        row.appendChild(cb);
+        row.insertAdjacentHTML('beforeend', goalBadge(t.goal));
+        const span = document.createElement('span'); span.textContent = t.label; row.appendChild(span);
+        habitPanel.appendChild(row);
+      });
+      frag.appendChild(habitPanel);
+    }
+    dailyTactics.forEach(t => {
+      frag.appendChild(dailyToggle(i, t.label, () => tacticGetDailyArr(i, t), t.goal));
     });
-    frag.appendChild(habitPanel);
-    frag.appendChild(dailyToggle('logDays', i, 'Облік їжі кожного дня'));
-    frag.appendChild(dailyToggle('calorieDays', i, 'Не більше 2000 ккал/день'));
     return frag;
   }
 
@@ -1576,12 +1800,16 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     if (st.weight) items.push('Вага: <b>' + fmt1(st.weight) + ' кг</b>');
     if (st.debtAmt) items.push('Борг: <b>$' + Number(st.debtAmt).toLocaleString() + '</b>');
     if (st.capitalAmt) items.push('Капітал: <b>$' + Number(st.capitalAmt).toLocaleString() + '</b>');
-    const weighed = !!(st.checks && st.checks.w1);
-    if (weighed) items.push('Зважування: <b>відмічено</b>');
-    const logDone = (st.logDays || []).filter(Boolean).length;
-    if (logDone) items.push('Облік їжі: <b>' + logDone + '/7 днів</b>');
-    const calDone = (st.calorieDays || []).filter(Boolean).length;
-    if (calDone) items.push('Калорії: <b>' + calDone + '/7 днів</b>');
+    // Динамічно, а не жорстко "зважування/облік їжі/калорії" — інакше
+    // користувацькі дії тихо зникали б без попередження при скиданні.
+    TACTICS.forEach(t => {
+      if (t.type === 'weekly'){
+        if (tacticGetWeekly(i, t)) items.push(escHtml(t.label) + ': <b>відмічено</b>');
+      } else {
+        const n = tacticGetDailyArr(i, t).filter(Boolean).length;
+        if (n) items.push(escHtml(t.label) + ': <b>' + n + '/7 днів</b>');
+      }
+    });
     if (st.notes) items.push('Нотатки: <b>є текст</b>');
     return items;
   }
@@ -1689,7 +1917,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     scoreCaption.style.cssText = 'font-size:var(--fs-xs); color:var(--text-muted); letter-spacing:var(--tr-caption); line-height:var(--lh-caption); margin: 0 0 var(--sp-4);';
     // A8: скрінрідер, налаштований на українську, вимовляє англійський термін
     // неправильно, якщо не позначити мову фрагмента.
-    const METHOD_TEXT = '<span lang="en">Weekly Execution Score</span> — 5 дій тижня: зважування, облік їжі, калорії, конверт на борг, переказ на капітал.';
+    // Раніше текст був жорстко "5 дій тижня: зважування, облік їжі, калорії,
+    // конверт на борг, переказ на капітал" — з появою користувацьких дій
+    // список і кількість більше не сталі, тому будуємо його з TACTICS.
+    const METHOD_TEXT = '<span lang="en">Weekly Execution Score</span> — ' + scoreCaptionText(i);
     if (showFull){
       scoreCaption.innerHTML = METHOD_TEXT;
     } else {
@@ -1710,16 +1941,30 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     prevScores[i] = s;
   }
 
+  // Кома чи лапки в назві користувацької дії зламали б CSV — екрануємо
+  // тільки заголовки (значення в рядках даних завжди прості числа).
+  function csvEscape(v){ v = String(v); return /[,"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
   function exportData(format){
     let content, mime, filename;
     if (format === 'json'){
       const data = {}; for (let i = 1; i <= WEEKS; i++) data['week' + i] = state[i];
       content = JSON.stringify(data, null, 2); mime = 'application/json'; filename = '12-week-tracker.json';
     } else {
-      const rows = ['week,dates,weight,debtAmt,capitalAmt,logDaysDone,calorieDaysDone,weighIn,score'];
+      // Колонка на кожну дію з реєстру — і вбудовану, і користувацьку, і
+      // архівовану (щоб експорт лишався повним знімком історії, а не тільки
+      // того, що активне зараз). Раніше тут було 3 жорстко закодовані
+      // колонки (logDaysDone/calorieDaysDone/weighIn) — тепер стільки,
+      // скільки дій колись існувало.
+      const tacticCols = TACTICS.map(t => t.label + (t.type === 'daily' ? ' (днів)' : ''));
+      const header = ['week', 'dates', 'weight', 'debtAmt', 'capitalAmt'].concat(tacticCols).concat(['score']);
+      const rows = [header.map(csvEscape).join(',')];
       for (let i = 1; i <= WEEKS; i++){
         const st = state[i];
-        rows.push([i, weekDates(i), st.weight || '', st.debtAmt || '', st.capitalAmt || '', st.logDays.filter(Boolean).length, st.calorieDays.filter(Boolean).length, st.checks.w1 ? 1 : 0, score(i)].join(','));
+        const tacticVals = TACTICS.map(t => {
+          if (!tacticAppliesTo(t, i)) return '';
+          return t.type === 'weekly' ? (tacticGetWeekly(i, t) ? 1 : 0) : tacticGetDailyArr(i, t).filter(Boolean).length;
+        });
+        rows.push([i, weekDates(i), st.weight || '', st.debtAmt || '', st.capitalAmt || ''].concat(tacticVals).concat([score(i)]).join(','));
       }
       content = rows.join('\n'); mime = 'text/csv'; filename = '12-week-tracker.csv';
     }
@@ -1743,6 +1988,187 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   if ($('export-csv')) $('export-csv').onclick = () => exportData('csv');
   if ($('import-json')) $('import-json').onclick = () => { if ($('import-file-input')) $('import-file-input').click(); };
   if ($('import-file-input')) $('import-file-input').onchange = (e) => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; };
+  // --- Налаштування дій тижня (у тій самій модалці, що й цілі) ---
+  // Дію можна повністю ВИДАЛИТИ, лише якщо по ній ще нема жодних даних
+  // (типова ситуація — щойно створив із друкарською помилкою). Якщо хоч
+  // раз щось відмічено — тільки архівувати: історія тижнів, коли дія
+  // реально трекалась, не повинна зникати заднім числом.
+  function renderTacticsSettings(){
+    const box = $('tactics-list');
+    if (!box) return;
+    box.innerHTML = '';
+    const active = TACTICS.filter(t => t.archivedWeek === null);
+    const archived = TACTICS.filter(t => t.archivedWeek !== null);
+
+    function buildRow(t, isArchived){
+      const row = document.createElement('div'); row.className = 'tactic-row';
+      // Мітка цілі тепер не просто плашка для показу, а справжній
+      // селектор — можна змінити "Загальне" на "Вага" і так далі прямо
+      // тут, без видалення й повторного створення дії. <select> замість
+      // кастомної випадашки: безкоштовно отримуємо клавіатурну навігацію,
+      // читання скрінрідером і на iPhone — нативний колесо-пікер, який
+      // не довелось би вигадувати самотужки. Стилізуємо під ту саму
+      // плашку (варіант A), яку вже бачиш у картці тижня.
+      const goalSelect = document.createElement('select');
+      goalSelect.className = 'goal-select';
+      goalSelect.setAttribute('aria-label', 'До якої цілі стосується дія «' + t.label + '»');
+      GOAL_ORDER.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g; opt.textContent = GOAL_META[g].label;
+        if (g === (t.goal || 'general')) opt.selected = true;
+        goalSelect.appendChild(opt);
+      });
+      function paintGoalSelect(){
+        const meta = GOAL_META[t.goal] || GOAL_META.general;
+        goalSelect.style.background = meta.soft;
+        goalSelect.style.color = meta.color;
+      }
+      paintGoalSelect();
+      goalSelect.onchange = () => {
+        // Це чисто організаційна мітка — не зачіпає жодних записаних
+        // значень і не впливає на score(), тож підтвердження не потрібне,
+        // так само як і для перейменування.
+        t.goal = goalSelect.value;
+        paintGoalSelect();
+        saveTactics();
+        render(); // якщо ця дія показана в поточному тижні — оновить і там
+      };
+      row.appendChild(goalSelect);
+
+      const input = document.createElement('input');
+      input.type = 'text'; input.value = t.label; input.maxLength = 80;
+      input.className = 'tactic-label-input' + (isArchived ? ' archived' : '');
+      input.setAttribute('aria-label', 'Назва дії');
+      input.onblur = () => {
+        // Критичний огляд, пункт 2 (і виявлена при його фіксі друга проблема):
+        // це поле втрачає фокус не лише коли людина свідомо клікає деінде,
+        // а й ЯК ПОБІЧНИЙ ЕФЕКT closeModal() для батьківської модалки —
+        // той викликає restoreTo.focus(), що синхронно блурить це поле
+        // ПОСЕРЕД ЩЕ НЕ завершеного закриття. Відкривати іншу модалку
+        // (алерт про дублікат) синхронно просто тут — це стан гонки з
+        // модалкою, яка й досі закривається. setTimeout(0) переносить усю
+        // логіку на наступний тік, коли стек викликів уже розмотався.
+        setTimeout(() => {
+          const v = input.value.trim();
+          if (!v || v === t.label){ input.value = t.label; return; }
+          const dup = TACTICS.some(o => o !== t && o.archivedWeek === null && o.label.toLowerCase() === v.toLowerCase());
+          if (dup){ showAppAlert('Дія з такою назвою вже є серед активних.'); input.value = t.label; return; }
+          t.label = v; saveTactics(); render();
+        }, 0);
+      };
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+      row.appendChild(input);
+
+      const badge = document.createElement('span'); badge.className = 'tactic-type-badge';
+      // Критичний огляд, пункт 4: було "раз/тиждень" — виглядало як
+      // недороблений переклад поруч із повним текстом кнопок форми.
+      badge.textContent = t.type === 'daily' ? 'щодня' : 'щотижня';
+      row.appendChild(badge);
+
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'icon-btn'; btn.style.flexShrink = '0';
+      if (isArchived){
+        btn.title = 'Відновити'; btn.setAttribute('aria-label', 'Відновити дію «' + t.label + '»');
+        btn.innerHTML = icon('sync', 15);
+        btn.onclick = () => { t.archivedWeek = null; saveTactics(); renderTacticsSettings(); render(); };
+      } else {
+        // Критичний огляд, пункт 1: видалення дії без історії раніше
+        // спрацьовувало одним тапом без жодного підтвердження — єдине
+        // місце в застосунку, де незворотна дія не питала "ти впевнений?".
+        // Навіть "нема чого втрачати" не привід відходити від власного ж
+        // правила (порівняй зі "Скинути тиждень", яке завжди показує прев'ю).
+        const hasData = tacticHasAnyData(t);
+        btn.title = hasData ? 'Архівувати' : 'Видалити';
+        btn.setAttribute('aria-label', (hasData ? 'Архівувати' : 'Видалити') + ' дію «' + t.label + '»');
+        btn.innerHTML = icon(hasData ? 'archive' : 'trash', 15);
+        btn.onclick = () => {
+          if (hasData){
+            showAppModal({
+              message: 'Архівувати «' + t.label + '»? Тижні до цього моменту збережуть історію — вона нікуди не зникне. Нові тижні більше не питатимуть про цю дію.',
+              okLabel: 'Архівувати',
+              onOk: () => { t.archivedWeek = currentWeek(); saveTactics(); renderTacticsSettings(); render(); }
+            });
+          } else {
+            showAppModal({
+              message: 'Видалити «' + t.label + '»? Дію ще ніхто не позначав, тож видалення остаточне.',
+              okLabel: 'Видалити',
+              onOk: () => {
+                const idx = TACTICS.indexOf(t);
+                if (idx > -1) TACTICS.splice(idx, 1);
+                saveTactics(); renderTacticsSettings(); render();
+              }
+            });
+          }
+        };
+      }
+      row.appendChild(btn);
+      return row;
+    }
+
+    if (!active.length && !archived.length){
+      const empty = document.createElement('div');
+      empty.style.cssText = 'font-size:var(--fs-sm); color:var(--text-muted); padding:var(--sp-2) 0;';
+      empty.textContent = 'Дій ще немає — додай нижче.';
+      box.appendChild(empty);
+    }
+    active.forEach(t => box.appendChild(buildRow(t, false)));
+    if (archived.length){
+      const hdr = document.createElement('div');
+      hdr.style.cssText = 'font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-top:var(--sp-3); padding-top:var(--sp-2); border-top:var(--bw) solid var(--border);';
+      hdr.textContent = 'Архівовані';
+      box.appendChild(hdr);
+      archived.forEach(t => box.appendChild(buildRow(t, true)));
+    }
+  }
+
+  let newTacticType = 'daily';
+  function setNewTacticType(type){
+    newTacticType = type;
+    if ($('tactic-type-daily')) $('tactic-type-daily').setAttribute('aria-pressed', type === 'daily' ? 'true' : 'false');
+    if ($('tactic-type-weekly')) $('tactic-type-weekly').setAttribute('aria-pressed', type === 'weekly' ? 'true' : 'false');
+  }
+  if ($('tactic-type-daily')) $('tactic-type-daily').onclick = () => setNewTacticType('daily');
+  if ($('tactic-type-weekly')) $('tactic-type-weekly').onclick = () => setNewTacticType('weekly');
+
+  // Перемикач "до якої цілі стосується" нова дія. Кнопки будуються з
+  // GOAL_META, а не прописані в розмітці, — колір і назва йдуть з того
+  // самого об'єкта, що й крапки в картці тижня, тож нізвідки не розійдуться.
+  let newTacticGoal = 'general';
+  const GOAL_ORDER = ['weight', 'debt', 'capital', 'general'];
+  function buildGoalSelector(){
+    const box = $('tactic-goal-selector');
+    if (!box || box.children.length) return; // будуємо один раз, далі лише перемикаємо стан
+    GOAL_ORDER.forEach(g => {
+      const meta = GOAL_META[g];
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.id = 'tactic-goal-' + g; btn.className = 'btn btn-secondary tactic-goal-btn';
+      btn.setAttribute('aria-pressed', g === newTacticGoal ? 'true' : 'false');
+      btn.innerHTML = goalDot(g) + meta.label;
+      btn.onclick = () => setNewTacticGoal(g);
+      box.appendChild(btn);
+    });
+  }
+  function setNewTacticGoal(goal){
+    newTacticGoal = goal;
+    GOAL_ORDER.forEach(g => { const btn = $('tactic-goal-' + g); if (btn) btn.setAttribute('aria-pressed', g === goal ? 'true' : 'false'); });
+  }
+
+  if ($('tactic-add-btn')) $('tactic-add-btn').onclick = () => {
+    const input = $('tactic-new-label');
+    const label = (input.value || '').trim();
+    if (!label){ showAppAlert('Вкажи назву дії.'); return; }
+    if (label.length > 80){ showAppAlert('Занадто довга назва — до 80 символів.'); return; }
+    const dup = TACTICS.some(t => t.archivedWeek === null && t.label.toLowerCase() === label.toLowerCase());
+    if (dup){ showAppAlert('Дія з такою назвою вже є серед активних.'); return; }
+    TACTICS.push({ id: genTacticId(), label: label, type: newTacticType, goal: newTacticGoal, createdWeek: currentWeek(), archivedWeek: null, builtin: false });
+    saveTactics();
+    input.value = '';
+    setNewTacticType('daily');
+    setNewTacticGoal('general');
+    renderTacticsSettings();
+    render();
+  };
+
   function openGoalsModal(){
     // Пункт 20: синхронізація тепер живе в тому самому діалозі, що й цілі —
     // це одне й те саме одноразове налаштування, а не дві різні дії.
@@ -1755,6 +2181,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     $('goal-debt-end').value = GOALS.debtEnd;
     $('goal-capital-start').value = GOALS.capitalStart;
     $('goal-capital-end').value = GOALS.capitalEnd;
+    if ($('tactic-new-label')) $('tactic-new-label').value = '';
+    buildGoalSelector();
+    setNewTacticType('daily');
+    setNewTacticGoal('general');
+    renderTacticsSettings();
     if ($('goals-overlay')) openModal($('goals-overlay'));
   }
   function closeGoalsModal(){ if ($('goals-overlay')) closeModal($('goals-overlay')); }
