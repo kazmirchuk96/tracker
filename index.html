@@ -47,6 +47,15 @@
      не осідав у правилі. */
   --accent-glow: rgba(47, 190, 147, 0.07);
   --accent-text: #6EE7C0;
+  /* Редизайн під референс: теплий кораловий — ДРУГИЙ акцент, не заміна
+     зеленого. Зелений лишається "виконано/успіх" (галочки, score>=85%,
+     badge-ok) — це вже перевірений контрастом семантичний колір, чіпати
+     його ризиковано. Кораловий — окремий "бренд/дія" акцент: основні
+     кнопки, підсвітка "сьогодні", активні перемикачі. Контраст перевірено
+     на всіх чотирьох поверхнях: мінімум 5.28:1 при нормі 4.5:1. */
+  --brand: #FF6B7A;
+  --brand-soft: rgba(255, 107, 122, 0.16);
+  --brand-text: #FF6B7A;
   /* Пункт 9: "у процесі" — нейтральний стан, він не мусить тривожити.
      Раніше і він, і "відстаєш", і попередження були одним жовтим. */
   --neutral-progress: #A8A292;
@@ -62,8 +71,8 @@
      lg — внутрішні панелі, xl — зовнішні картки. --- */
   --r-sm: 8px;
   --r-md: 12px;
-  --r-lg: 16px;
-  --r-xl: 20px;
+  --r-lg: 18px;
+  --r-xl: 24px;
   --r-pill: 999px;
 
   /* --- I3: одна товщина рамки замість 0.5/1/1.5px. 0.5px на екранах з DPR 2
@@ -169,33 +178,33 @@
   mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); }
 .journey-strip::-webkit-scrollbar { display: none; }
 .journey-cell { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
-.journey-dot { width: var(--tap); height: var(--tap); border-radius: 50%; box-sizing: border-box; display: flex; align-items: center; justify-content: center; font-size: var(--fs-md); font-weight: 700; color: var(--surface-0); font-variant-numeric: tabular-nums; transition: background 0.3s, box-shadow 0.2s, transform 0.1s, border-color 0.3s; }
+.journey-dot { position: relative; width: var(--tap); height: var(--tap); box-sizing: border-box; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+.journey-ring { position: absolute; inset: 0; }
+.journey-num-inner { position: relative; font-size: var(--fs-md); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
 /* --- Пункт 6: одинадцять кружечків майбутніх тижнів були залиті насиченим
    жовтим на повну і разом важили більше за єдину змістовну картку.
-   Порожній стан має мовчати: прозорий кружечок з обведенням. --- */
-.journey-dot.is-empty { background: transparent; border: var(--bw) solid var(--border-strong); color: var(--text-muted); font-weight: 500; }
+   Порожній стан має мовчати: сама дуга просто відсутня (лишається тільки
+   тьмяне коло-трек), число теж приглушене. --- */
+.journey-dot.is-empty .journey-num-inner { color: var(--text-muted); font-weight: 500; }
 .journey-cell:active .journey-dot { transform: scale(0.92); }
-/* Позначка обраного тижня. Раніше тут був подвійний box-shadow: темний проміжок
-   плюс кільце кольору --text-primary (найяскравішого в палітрі) — на темному тлі
-   це читалось як приціл і перетягувало увагу з решти інтерфейсу. Тепер мʼякий
-   ореол упритул до кружечка: помітно, але не кричить. */
-/* Обраний тиждень позначається розміром і повною яскравістю, а не світлом
-   навколо: на темному тлі будь-який ореол читається як забруднення. */
-/* Затемнювати решту кружечків не можна: порожні мають лише межу, і при
-   зниженій непрозорості вона провалюється нижче норми контрасту 3:1. */
-.journey-cell .journey-dot { transition: transform 0.2s, background 0.3s, border-color 0.3s; }
+/* Позначка обраного тижня — розміром, а не світлом навколо: на темному
+   тлі будь-який ореол читається як забруднення, не акцент. */
 .journey-cell.selected .journey-dot { transform: scale(1.09); }
 .journey-cell.selected .journey-num { color: var(--text-primary); font-weight: 600; }
 .journey-num { font-size: var(--fs-xs); color: var(--text-muted); }
 /* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
    тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
-.journey-cell.today .journey-num { color: var(--warn-text); font-weight: 700; }
+.journey-cell.today .journey-num { color: var(--brand-text); font-weight: 700; }
+/* Кораловий контур навколо кільця "сьогодні" — окремий від дуги прогресу
+   сигнал, той самий принцип, що й обведення дня "сьогодні" в референсі. */
+.journey-cell.today .journey-dot::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: var(--bw-emphasis) solid var(--brand); pointer-events: none; }
 .card { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--shadow-sm); }
 .hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: var(--tr-display); line-height: var(--lh-display); transition: color 0.3s; }
 /* I7: усі індикатори стану — один патерн "пігулка". Відрізняються
    лише кольором (нейтральний / у графіку / відстає), не формою. */
 .chip, .badge, .today-pill { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); letter-spacing: 0.02em; white-space: nowrap; }
-.badge-ok, .today-pill { background: var(--accent-soft); color: var(--accent-text); }
+.badge-ok { background: var(--accent-soft); color: var(--accent-text); }
+.today-pill { background: var(--brand-soft); color: var(--brand-text); }
 /* Картка показника має право переносити слова — інакше довгі рядки
    на кшталт "ціль $1,800" вилазять за її межі на вузькому екрані. */
 .stat-card { min-width: 0; overflow-wrap: anywhere; }
@@ -208,7 +217,7 @@
 .group-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: var(--sp-4); margin-bottom: var(--sp-2); }
 /* Пункт 14: три рівноправні сутності не відокремлювались — між рядками
    було 8px, стільки ж, скільки всередині рядка. */
-.metric-row { padding: var(--sp-3) var(--sp-4); background: var(--surface-2); border-radius: var(--r-md); margin-bottom: var(--sp-4); display: flex; gap: var(--sp-3); }
+.metric-row { padding: var(--sp-3) var(--sp-4); border: var(--bw) solid transparent; border-radius: var(--r-lg); margin-bottom: var(--sp-4); display: flex; gap: var(--sp-3); transition: background 0.2s, border-color 0.2s; }
 /* Пункт 15: була вертикальна смужка на всю висоту рядка (Material 2018).
    Замінено на компактну крапку — менше шуму, той самий сигнал. */
 /* Крапка вирівнюється оптично по центру першого рядка підпису, тому
@@ -237,13 +246,13 @@
 /* I5: явна ієрархія дій. Первинна — заливка, більший горизонтальний
    відступ, жирніший шрифт. Вторинна — без фону й рамки, приглушений колір,
    щоб не конкурувала за увагу. */
-.btn { min-height: var(--tap); border-radius: var(--r-md); font-family: inherit; font-size: var(--fs-md); cursor: pointer; transition: background 0.15s, color 0.15s, opacity 0.15s; }
-.btn-primary { padding: var(--sp-3) var(--sp-5); border: none; background: var(--accent); color: var(--surface-0); font-weight: 600; }
+.btn { min-height: var(--tap); border-radius: var(--r-pill); font-family: inherit; font-size: var(--fs-md); cursor: pointer; transition: background 0.15s, color 0.15s, opacity 0.15s; }
+.btn-primary { padding: var(--sp-3) var(--sp-5); border: none; background: var(--brand); color: var(--surface-0); font-weight: 600; }
 .btn-primary:hover { opacity: 0.88; }
 .btn-secondary { padding: var(--sp-3) var(--sp-4); border: none; background: transparent; color: var(--text-secondary); font-weight: 400; }
 /* Перемикач типу нової дії (Щодня / Раз на тиждень) — btn-secondary за
    замовчуванням прозорий, тож обраний варіант позначаємо рамкою. */
-.btn-secondary[aria-pressed="true"] { background: var(--surface-3); border: var(--bw) solid var(--accent); color: var(--text-primary); font-weight: 600; }
+.btn-secondary[aria-pressed="true"] { background: var(--surface-3); border: var(--bw) solid var(--brand); color: var(--text-primary); font-weight: 600; }
 .tactic-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) 0; border-bottom: var(--bw) solid var(--border); }
 .tactic-row:last-child { border-bottom: none; }
 /* Фікс 3 критичного огляду: вертикальний відступ поля був лише 4px —
@@ -287,14 +296,22 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 #tracker-root .journey-cell:focus-visible .journey-dot { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 #tracker-root .journey-cell:focus-visible { outline: none; }
 .warn-text { font-size: var(--fs-sm); color: var(--warn-text); margin-top: var(--sp-2); display: flex; align-items: center; gap: var(--sp-1); }
-.habit-panel { background: var(--surface-2); border-radius: var(--r-md); padding: var(--sp-1) var(--sp-4); margin-bottom: var(--sp-2); }
-.habit-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) 0; font-size: var(--fs-md); cursor: pointer; }
+.habit-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: var(--bw) solid transparent; border-radius: var(--r-lg); margin-bottom: var(--sp-2); font-size: var(--fs-md); transition: background 0.2s, border-color 0.2s; }
+.habit-label { flex: 1; min-width: 0; }
+/* Кругова кнопка-галочка замість нативного чекбокса — той самий патерн,
+   що й у щоденній сітці (day-square), лишень трохи менша, бо тут вона
+   одна в рядку, а не серед семи. */
+.week-check { width: var(--tap); height: var(--tap); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: var(--bw) solid var(--border-strong); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.week-check:hover { border-color: var(--focus); }
+.week-check:active { transform: scale(0.9); }
+.week-check.checked, .week-check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface-0); }
+.week-check[aria-checked="true"] svg { animation: checkPop 0.16s cubic-bezier(0.34, 1.4, 0.64, 1); }
 input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
-.daily-block { background: var(--surface-2); border-radius: var(--r-md); padding: var(--sp-3) var(--sp-4) var(--sp-4); margin-bottom: var(--sp-2); }
+.daily-block { border: var(--bw) solid transparent; border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4) var(--sp-4); margin-bottom: var(--sp-2); transition: background 0.2s, border-color 0.2s; }
 .daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: var(--sp-3); }
 .daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--sp-2); }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
-.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .day-square:hover { border-color: var(--focus); background: var(--surface-2); }
 .day-square:active { transform: scale(0.9); }
 .day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
@@ -303,7 +320,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
 /* №1: сьогоднішній день. Без цього щоразу доводилось згадувати, який
    сьогодні день тижня, і шукати потрібну літеру серед семи однакових. */
-.day-square.is-today { border: var(--bw-emphasis) solid var(--accent); }
+.day-square.is-today { border: var(--bw-emphasis) solid var(--brand); }
 .day-square.is-today[aria-checked="false"] { background: var(--surface-2); }
 .day-cell.is-today .day-cell-label { color: var(--text-primary); font-weight: 600; }
 
@@ -489,7 +506,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v37 · goal closure fully reactive, no reopen button</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v38 · visual redesign: coral accent, tinted cards, arc rings</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -1274,6 +1291,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     strip.className = 'journey-strip';
     strip.setAttribute('role', 'tablist');
     strip.setAttribute('aria-label', 'Тижні програми');
+    // Дугове кільце замість суцільної заливки — референс користувача показує
+    // прогрес саме так на календарних клітинках. r=19 лишає 3px на товщину
+    // дуги в межах 44px кола (var(--tap)); довжина дуги = відсоток виконання.
+    const R = 19, CIRC = 2 * Math.PI * R;
     for (let i = 1; i <= WEEKS; i++){
       const s = score(i);
       const cell = document.createElement('button');
@@ -1283,13 +1304,22 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       cell.setAttribute('role', 'tab');
       cell.setAttribute('aria-selected', i === sel ? 'true' : 'false');
       cell.setAttribute('aria-label', 'Тиждень ' + i + ', виконано ' + s + ' відсотків' + (i === cur ? ', поточний тиждень' : ''));
-      const dot = document.createElement('span');
       // Пункт 6: тиждень без жодних даних не заливаємо — він має мовчати.
-      // Заливка лишається тільки тижням, у яких щось відбувалось.
+      // Дуга з'являється тільки тижням, у яких щось відбувалось.
       const isEmpty = s === 0 && !hasAnyData(i);
+      const arcColor = s >= 85 ? C_DONE : (i < cur ? C_MISSED : C_NEUTRAL);
+      const offset = CIRC * (1 - (isEmpty ? 0 : s) / 100);
+      const dot = document.createElement('span');
       dot.className = 'journey-dot' + (isEmpty ? ' is-empty' : '');
-      if (!isEmpty) dot.style.background = s >= 85 ? C_DONE : (i < cur ? C_MISSED : C_NEUTRAL);
-      dot.textContent = s;
+      dot.innerHTML =
+        '<svg class="journey-ring" width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">' +
+          '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="var(--surface-3)" stroke-width="3"/>' +
+          (isEmpty ? '' :
+            '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="' + arcColor + '" stroke-width="3" ' +
+            'stroke-linecap="round" stroke-dasharray="' + CIRC.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" ' +
+            'transform="rotate(-90 22 22)"/>') +
+        '</svg>' +
+        '<span class="journey-num-inner">' + s + '</span>';
       const num = document.createElement('span');
       num.className = 'journey-num';
       num.textContent = i;
@@ -1314,7 +1344,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const sign = diff > 0 ? '+' : '';
     return '<div class="delta ' + (good ? 'delta-good' : 'delta-bad') + '">' + sign + fmt1(diff) + unit + ' з мин. тижня</div>';
   }
-  function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr, closedWeek){
+  function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr, closedWeek, color){
     // Вміст обрізався по горизонталі: у двох колонках на телефоні на картку
     // припадає ~130px, а рядки на кшталт "ціль $1,800" і "без змін з мин.
     // тижня" туди не вміщались і вилазили за край. Тепер картка може
@@ -1332,7 +1362,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     } else {
       if (hasData) badge = '<div style="margin-top:var(--sp-1);"><span class="badge ' + (onTrack ? 'badge-ok' : 'badge-behind') + '">' + (ahead ? 'випереджає' : onTrack ? 'у графіку' : 'позаду') + '</span></div>';
     }
-    return '<div class="card stat-card" style="padding: var(--sp-4); border-radius: var(--r-lg);">' +
+    // Той самий принцип тонування — картка кольором своєї категорії.
+    const bgStyle = color ? ' background:' + hexToRgba(color, 0.16) + '; border-color:' + hexToRgba(color, 0.3) + ';' : '';
+    return '<div class="card stat-card" style="padding: var(--sp-4); border-radius: var(--r-lg);' + bgStyle + '">' +
       '<div style="font-size: var(--fs-sm); color: var(--text-secondary);">' + label + '</div>' + badge +
       '<div class="hero-num" style="font-size: var(--fs-xl); line-height: 1; margin-top: var(--sp-2);">' + valueHtml + '</div>' +
       '<div style="font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1);">ціль ' + subLabel + '</div>' +
@@ -1438,9 +1470,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const thisWeekDebt = snap.cur > 0 ? state[snap.cur].debtAmt : null;
     const thisWeekCap = snap.cur > 0 ? state[snap.cur].capitalAmt : null;
     document.getElementById('stat-cards').innerHTML =
-      statCard('Вага', fmt1(snap.lastWeight) + ' кг', GOALS.weightEnd + ' кг', snap.weightOnTrack, snap.weightAhead, hasData, prevWeight !== null && snap.cur > 1 ? deltaHtml(snap.lastWeight, prevWeight, true, ' кг') : '', GOALS.weightClosedWeek) +
-      statCard('Борг виплачено', '$' + Math.round(snap.debtCurrent).toLocaleString(), '$' + GOALS.debtEnd.toLocaleString(), snap.debtOnTrack, snap.debtAhead, hasData, thisWeekDebt && prevDebtAmt ? deltaHtml(thisWeekDebt, prevDebtAmt, false, '') : '', GOALS.debtClosedWeek) +
-      statCard('Капітал (внески)', '$' + Math.round(snap.capitalCurrent).toLocaleString(), '$' + GOALS.capitalEnd.toLocaleString(), snap.capitalOnTrack, snap.capitalAhead, hasData, thisWeekCap && prevCapAmt ? deltaHtml(thisWeekCap, prevCapAmt, false, '') : '', GOALS.capitalClosedWeek);
+      statCard('Вага', fmt1(snap.lastWeight) + ' кг', GOALS.weightEnd + ' кг', snap.weightOnTrack, snap.weightAhead, hasData, prevWeight !== null && snap.cur > 1 ? deltaHtml(snap.lastWeight, prevWeight, true, ' кг') : '', GOALS.weightClosedWeek, C_WEIGHT) +
+      statCard('Борг виплачено', '$' + Math.round(snap.debtCurrent).toLocaleString(), '$' + GOALS.debtEnd.toLocaleString(), snap.debtOnTrack, snap.debtAhead, hasData, thisWeekDebt && prevDebtAmt ? deltaHtml(thisWeekDebt, prevDebtAmt, false, '') : '', GOALS.debtClosedWeek, C_DEBT) +
+      statCard('Капітал (внески)', '$' + Math.round(snap.capitalCurrent).toLocaleString(), '$' + GOALS.capitalEnd.toLocaleString(), snap.capitalOnTrack, snap.capitalAhead, hasData, thisWeekCap && prevCapAmt ? deltaHtml(thisWeekCap, prevCapAmt, false, '') : '', GOALS.capitalClosedWeek, C_CAPITAL);
 
     const banner = document.getElementById('pace-banner');
     const behind = [];
@@ -1690,6 +1722,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     // "відстаєш". Прогрес 57% не є попередженням, тому нейтральний тон.
     const color = pct >= 85 ? C_DONE : pct > 0 ? C_NEUTRAL : 'var(--text-muted)';
     const wrap = document.createElement('div'); wrap.className = 'daily-block';
+    // Той самий принцип тонування, що й metric-row/habit-row — картка
+    // забарвлена кольором своєї цілі, а не однорідним сірим.
+    const meta = GOAL_META[goal] || GOAL_META.general;
+    wrap.style.background = meta.soft;
+    wrap.style.borderColor = meta.color.startsWith('var(') ? 'var(--border)' : hexToRgba(meta.color, 0.3);
     const head = document.createElement('div'); head.className = 'daily-head';
     head.innerHTML = '<span style="display:inline-flex; align-items:center; gap:var(--sp-1); min-width:0;">' + (goal ? goalBadge(goal) : '') + '<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escHtml(label) + '</span></span><span style="color:' + color + '; font-weight:500; flex-shrink:0;">' + arr.filter(Boolean).length + '/7 (' + pct + '%)</span>';
     wrap.appendChild(head);
@@ -1774,10 +1811,21 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // поруч з іконкою копіювання, і обидва читались як однакові дрібні контроли.
   // Тепер: план — просто інформаційний текст угорі; дії — окремі кнопки під полем,
   // де "підставити" має видиму рамку й підпис, а "копіювати" лишається іконкою.
+  // Для м'якого тонування фону карток кольором категорії (редизайн під
+  // референс) — перетворює C_WEIGHT/C_DEBT/... чи будь-який hex у rgba
+  // з потрібною прозорістю.
+  function hexToRgba(hex, alpha){
+    const h = hex.replace('#', '');
+    const r = parseInt(h.slice(0,2), 16), g = parseInt(h.slice(2,4), 16), b = parseInt(h.slice(4,6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
   function metricRow(label, color, inputEl, planText, warnText, copyTitle, onCopy, fillLabel, onFill){
     const row = document.createElement('div'); row.className = 'metric-row';
-    const accent = document.createElement('div'); accent.className = 'metric-accent'; accent.style.background = color;
-    row.appendChild(accent);
+    // Референс тонує фон кожної картки власним кольором замість маленької
+    // крапки-акценту збоку — того самого кольору тепер досить, щоб рядок
+    // читався як "цей про вагу/борг/капітал" з першого погляду.
+    row.style.background = hexToRgba(color, 0.16);
+    row.style.borderColor = hexToRgba(color, 0.3);
     const body = document.createElement('div'); body.className = 'metric-body';
     const top = document.createElement('div'); top.className = 'metric-top-row';
     const lbl = document.createElement('span'); lbl.className = 'metric-label'; lbl.textContent = label; top.appendChild(lbl);
@@ -1820,8 +1868,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // всі попередні лишаються повністю редаговуваними — це реальна історія.
   function closedMetricNote(label, color, closedWeek){
     const row = document.createElement('div'); row.className = 'metric-row';
-    const accent = document.createElement('div'); accent.className = 'metric-accent'; accent.style.background = color;
-    row.appendChild(accent);
+    row.style.background = hexToRgba(color, 0.16);
+    row.style.borderColor = hexToRgba(color, 0.3);
     const body = document.createElement('div'); body.className = 'metric-body';
     const top = document.createElement('div'); top.className = 'metric-top-row';
     const lbl = document.createElement('span'); lbl.className = 'metric-label'; lbl.textContent = label; top.appendChild(lbl);
@@ -1890,17 +1938,32 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       frag.appendChild(habitLabel);
     }
     if (weeklyTactics.length){
-      const habitPanel = document.createElement('div'); habitPanel.className = 'habit-panel';
       weeklyTactics.forEach(t => {
-        const row = document.createElement('label'); row.className = 'habit-row';
-        const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = tacticGetWeekly(i, t);
-        cb.onchange = (e) => { tacticSetWeekly(i, t, e.target.checked); saveWeek(i); render(); };
-        row.appendChild(cb);
+        const checked = tacticGetWeekly(i, t);
+        const meta = GOAL_META[t.goal] || GOAL_META.general;
+        // Кожна дія — своя тонована картка, як і metric-row вище: та сама
+        // мова "картка кольору своєї категорії" застосована послідовно.
+        const row = document.createElement('div'); row.className = 'habit-row';
+        row.style.background = meta.soft;
+        row.style.borderColor = meta.color.startsWith('var(') ? 'var(--border)' : hexToRgba(meta.color, 0.3);
         row.insertAdjacentHTML('beforeend', goalBadge(t.goal));
-        const span = document.createElement('span'); span.textContent = t.label; row.appendChild(span);
-        habitPanel.appendChild(row);
+        const span = document.createElement('span'); span.className = 'habit-label'; span.textContent = t.label;
+        row.appendChild(span);
+        // Той самий доступний чекбокс-патерн, що й у щоденній сітці —
+        // роль, стан, Tab-послідовність, Space/Enter — замість нативного
+        // <input> ліворуч. Тепер кнопка кругла й праворуч, як у референсі.
+        const btn = document.createElement('div'); btn.className = 'week-check' + (checked ? ' checked' : '');
+        btn.setAttribute('role', 'checkbox');
+        btn.setAttribute('aria-checked', checked ? 'true' : 'false');
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('aria-label', t.label);
+        btn.innerHTML = checked ? icon('check', 18) : '';
+        const toggle = () => { tacticSetWeekly(i, t, !tacticGetWeekly(i, t)); saveWeek(i); render(); };
+        btn.onclick = toggle;
+        btn.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggle(); } };
+        row.appendChild(btn);
+        frag.appendChild(row);
       });
-      frag.appendChild(habitPanel);
     }
     dailyTactics.forEach(t => {
       frag.appendChild(dailyToggle(i, t.label, () => tacticGetDailyArr(i, t), t.goal));
