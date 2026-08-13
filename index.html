@@ -201,6 +201,10 @@
 .stat-card { min-width: 0; overflow-wrap: anywhere; }
 .stat-card .badge { white-space: normal; }
 .badge-behind { background: var(--warn-soft); color: var(--warn-text); }
+/* Другорядна дія на картці прогресу — навмисно легша за .btn, щоб не
+   конкурувати за увагу з головним числом і бейджем стану над нею. */
+.goal-close-link { background: none; border: none; padding: 0; font-size: var(--fs-xs); color: var(--text-muted); font-family: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; min-height: var(--tap); display: inline-flex; align-items: center; }
+.goal-close-link:hover { color: var(--text-secondary); }
 .group-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: var(--sp-4); margin-bottom: var(--sp-2); }
 /* Пункт 14: три рівноправні сутності не відокремлювались — між рядками
    було 8px, стільки ж, скільки всередині рядка. */
@@ -485,7 +489,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v33 · goal label is editable from settings (select)</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v36 · device feedback: no close button, hide paid-off fields, fix goal defaults</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -556,7 +560,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 (function(){
   const START = new Date(2026, 6, 27);
   const WEEKS = 12;
-  let GOALS = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800 };
+  let GOALS = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800,
+    // Дострокове закриття цілі: номер тижня, у якому закрито, або null —
+    // ще відкрита. "76 кг можна досягнути раніше за 12 тижнів" — без цього
+    // довелось би або далі імітувати прогрес до кінця циклу, або дивитись
+    // на застарілий орієнтир, який уже неактуальний. Повністю автоматичне:
+    // жодної ручної кнопки закриття немає ніде — орієнтир суто на дані.
+    weightClosedWeek: null, debtClosedWeek: null, capitalClosedWeek: null };
+  const GOAL_CARD_LABEL = { weight: 'Вага', debt: 'Борг', capital: 'Капітал' };
+  const GOAL_CLOSED_FIELD = { weight: 'weightClosedWeek', debt: 'debtClosedWeek', capital: 'capitalClosedWeek' };
   // Той самий захист, що і для тижнів (див. коментар біля load()): якщо
   // цілі змінили, поки фонова синхронізація ще летить, позначаємо це,
   // щоб застаріла відповідь їх не перезаписала.
@@ -687,14 +699,20 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     }
     return false;
   }
+  // Три вбудовані дії ЗАВЖДИ стосуються ваги — це знаємо напевно, на
+  // відміну від довільних користувацьких дій, для яких немає способу
+  // вгадати ціль заднім числом.
+  const BUILTIN_GOAL_BY_ID = { w1: 'weight', logDays: 'weight', calorieDays: 'weight' };
   function applyTacticsRaw(raw){
     try {
       const parsed = raw ? JSON.parse(raw) : null;
       if (Array.isArray(parsed) && parsed.length){
         // Зворотна сумісність: дії, збережені до появи міток цілей, не мають
-        // поля goal — трактуємо їх як "Загальне", а не ламаємо рендер чи
-        // не показуємо взагалі нічого замість кольорової крапки.
-        TACTICS = parsed.map(t => Object.assign({ goal: 'general' }, t));
+        // поля goal. Раніше ВСІ такі дії — включно з вбудованими — тихо
+        // ставали "Загальне", хоча для трьох вбудованих ми точно знаємо
+        // правильну відповідь (Вага). Довільні користувацькі дії й далі
+        // йдуть у "Загальне" — вгадати їхню ціль заднім числом нема як.
+        TACTICS = parsed.map(t => Object.assign({ goal: BUILTIN_GOAL_BY_ID[t.id] || 'general' }, t));
       }
     } catch(e) {}
   }
@@ -1115,8 +1133,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function score(n){
     let done = 0, total = 0;
     // Гроші рахуються завжди, поза реєстром дій — вони не архівуються.
-    total += 1; done += actionFraction_(n, 'debtAmt', GOALS.debtStart, GOALS.debtEnd);
-    total += 1; done += actionFraction_(n, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd);
+    // closedWeek передається, щоб actionFraction_ не вимагав імітувати
+    // внески в тижні після того, як ціль уже достроково закрита.
+    total += 1; done += actionFraction_(n, 'debtAmt', GOALS.debtStart, GOALS.debtEnd, GOALS.debtClosedWeek);
+    total += 1; done += actionFraction_(n, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd, GOALS.capitalClosedWeek);
     // Кожна дія, що діяла в тиждень n (див. tacticAppliesTo), важить порівну.
     // Для тижнів без жодної кастомної дії це рівно те саме, що й раніше:
     // 2 (гроші) + 3 (вбудовані) = 5, по 20% кожна.
@@ -1195,7 +1215,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       capitalOnTrack: capitalCurrent >= expCapital(paceWeekCapital) - 5,
       weightAhead: lastWeight < expWeight(paceWeekWeight) - 0.3,
       debtAhead: debtCurrent > expDebtPaid(paceWeekDebt) + 50,
-      capitalAhead: capitalCurrent > expCapital(paceWeekCapital) + 50
+      capitalAhead: capitalCurrent > expCapital(paceWeekCapital) + 50,
+      // Закрита ціль — окремий стан, що переважає onTrack/ahead скрізь у
+      // рендері (бейджі карток, банер відставання/випередження, підпис
+      // під графіком).
+      weightClosed: GOALS.weightClosedWeek != null,
+      debtClosed: GOALS.debtClosedWeek != null,
+      capitalClosed: GOALS.capitalClosedWeek != null
     };
   }
 
@@ -1229,8 +1255,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // Частка виконання грошової дії цього тижня: 0, якщо нічого не внесено;
   // інакше — скільки внесено відносно плану (максимум 100%, переплата не дає
   // бонусу). Якщо план уже <= 0 (ціль випереджена наперед) — будь-яка сума
-  // рахується як повністю виконана дія.
-  function actionFraction_(n, amtKey, start, end){
+  // рахується як повністю виконана дія. Якщо ціль ЗАКРИТА достроково (closedWeek)
+  // і тиждень n настав ПІСЛЯ закриття — дія теж повністю виконана без жодного
+  // запису: без цього довелось би або вносити символічний $1 щотижня заради
+  // бала, або дивитись, як бал падає за те, що вже нема чого доплачувати.
+  function actionFraction_(n, amtKey, start, end, closedWeek){
+    if (closedWeek != null && n > closedWeek) return 1;
     const amt = state[n][amtKey];
     if (!amt || amt <= 0) return 0;
     const plan = planFor_(n, amtKey, start, end);
@@ -1287,18 +1317,33 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const sign = diff > 0 ? '+' : '';
     return '<div class="delta ' + (good ? 'delta-good' : 'delta-bad') + '">' + sign + fmt1(diff) + unit + ' з мин. тижня</div>';
   }
-  function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr){
+  function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr, goalKey, closedWeek){
     // Вміст обрізався по горизонталі: у двох колонках на телефоні на картку
     // припадає ~130px, а рядки на кшталт "ціль $1,800" і "без змін з мин.
     // тижня" туди не вміщались і вилазили за край. Тепер картка може
     // переносити слова, а бейдж стану переїхав під підпис, щоб не стискав його.
-    let badge = '';
-    if (hasData) badge = '<div style="margin-top:var(--sp-1);"><span class="badge ' + (onTrack ? 'badge-ok' : 'badge-behind') + '">' + (ahead ? 'випереджає' : onTrack ? 'у графіку' : 'позаду') + '</span></div>';
+    let badge = '', action = '';
+    if (closedWeek != null){
+      // Дострокове закриття повністю автоматичне — досяг цифри, закрилось
+      // само. Жодної кнопки "закрити" немає НІДЕ, навіть у рідкісних
+      // випадках: користувач явно попросив орієнтуватись лише на число.
+      // "Відкрити знову" — єдина ручна дія, і вона одразу веде в
+      // налаштування: якщо просто скинути стан без нової цілі, число й
+      // так усе ще відповідає умові, і автоматика закриє знову на
+      // наступному рендері — кнопка виявилась би марною без цього.
+      badge = '<div style="margin-top:var(--sp-1);"><span class="badge badge-ok">✓ закрито у тижні ' + closedWeek + '</span></div>';
+      action = '<button type="button" id="reopen-goal-' + goalKey + '" class="goal-close-link">Відкрити знову</button>';
+      // Пункт 4: "без змін з мин. тижня" для закритої цілі не мало сенсу —
+      // порівняння з минулим тижнем нерелевантне, коли вносити вже нічого.
+      deltaHtmlStr = '';
+    } else {
+      if (hasData) badge = '<div style="margin-top:var(--sp-1);"><span class="badge ' + (onTrack ? 'badge-ok' : 'badge-behind') + '">' + (ahead ? 'випереджає' : onTrack ? 'у графіку' : 'позаду') + '</span></div>';
+    }
     return '<div class="card stat-card" style="padding: var(--sp-4); border-radius: var(--r-lg);">' +
       '<div style="font-size: var(--fs-sm); color: var(--text-secondary);">' + label + '</div>' + badge +
       '<div class="hero-num" style="font-size: var(--fs-xl); line-height: 1; margin-top: var(--sp-2);">' + valueHtml + '</div>' +
       '<div style="font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1);">ціль ' + subLabel + '</div>' +
-      (deltaHtmlStr || '') + '</div>';
+      (deltaHtmlStr || '') + (action ? '<div style="margin-top:var(--sp-2);">' + action + '</div>' : '') + '</div>';
   }
   // --- Helpers для оновлених графіків: % прогресу, підсумок-речення людською
   // мовою, підписи тижнів на осі, і бар-спарклайн тижневих внесків. ---
@@ -1320,6 +1365,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   }
   function chartSummary_(kind, snap){
     if (kind === 'weight'){
+      if (snap.weightClosed) return '🎯 Ціль закрита достроково в тижні ' + GOALS.weightClosedWeek + ' з ' + WEEKS + '.';
       if (snap.cur === 0) return 'Ще немає замірів — внеси вагу за перший тиждень.';
       if (snap.weightAhead) return 'Випереджаєш темп схуднення — можна ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень до кінця.';
       if (!snap.weightOnTrack) return 'Темп відстає — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень, щоб встигнути.';
@@ -1328,8 +1374,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const isDebt = kind === 'debt';
     const ahead = isDebt ? snap.debtAhead : snap.capitalAhead;
     const onTrack = isDebt ? snap.debtOnTrack : snap.capitalOnTrack;
+    const closed = isDebt ? snap.debtClosed : snap.capitalClosed;
+    const closedWeek = isDebt ? GOALS.debtClosedWeek : GOALS.capitalClosedWeek;
     const needed = isDebt ? snap.neededWeeklyDebt : snap.neededWeeklyCapital;
     const noun = isDebt ? 'виплат боргу' : 'внесків капіталу';
+    if (closed) return '🎯 Ціль закрита достроково в тижні ' + closedWeek + ' з ' + WEEKS + '.';
     if (snap.cur === 0) return 'Ще немає внесків — почни з першого тижня.';
     if (ahead) return 'Випереджаєш план ' + noun + ' — можна ~$' + Math.max(Math.round(needed),0) + '/тиждень.';
     if (!onTrack) return 'Темп відстає — потрібно ~$' + Math.round(needed) + '/тиждень ' + noun + ', щоб встигнути.';
@@ -1396,19 +1445,27 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const thisWeekDebt = snap.cur > 0 ? state[snap.cur].debtAmt : null;
     const thisWeekCap = snap.cur > 0 ? state[snap.cur].capitalAmt : null;
     document.getElementById('stat-cards').innerHTML =
-      statCard('Вага', fmt1(snap.lastWeight) + ' кг', GOALS.weightEnd + ' кг', snap.weightOnTrack, snap.weightAhead, hasData, prevWeight !== null && snap.cur > 1 ? deltaHtml(snap.lastWeight, prevWeight, true, ' кг') : '') +
-      statCard('Борг виплачено', '$' + Math.round(snap.debtCurrent).toLocaleString(), '$' + GOALS.debtEnd.toLocaleString(), snap.debtOnTrack, snap.debtAhead, hasData, thisWeekDebt && prevDebtAmt ? deltaHtml(thisWeekDebt, prevDebtAmt, false, '') : '') +
-      statCard('Капітал (внески)', '$' + Math.round(snap.capitalCurrent).toLocaleString(), '$' + GOALS.capitalEnd.toLocaleString(), snap.capitalOnTrack, snap.capitalAhead, hasData, thisWeekCap && prevCapAmt ? deltaHtml(thisWeekCap, prevCapAmt, false, '') : '');
+      statCard('Вага', fmt1(snap.lastWeight) + ' кг', GOALS.weightEnd + ' кг', snap.weightOnTrack, snap.weightAhead, hasData, prevWeight !== null && snap.cur > 1 ? deltaHtml(snap.lastWeight, prevWeight, true, ' кг') : '', 'weight', GOALS.weightClosedWeek) +
+      statCard('Борг виплачено', '$' + Math.round(snap.debtCurrent).toLocaleString(), '$' + GOALS.debtEnd.toLocaleString(), snap.debtOnTrack, snap.debtAhead, hasData, thisWeekDebt && prevDebtAmt ? deltaHtml(thisWeekDebt, prevDebtAmt, false, '') : '', 'debt', GOALS.debtClosedWeek) +
+      statCard('Капітал (внески)', '$' + Math.round(snap.capitalCurrent).toLocaleString(), '$' + GOALS.capitalEnd.toLocaleString(), snap.capitalOnTrack, snap.capitalAhead, hasData, thisWeekCap && prevCapAmt ? deltaHtml(thisWeekCap, prevCapAmt, false, '') : '', 'capital', GOALS.capitalClosedWeek);
+    // Кнопка "Відкрити знову" народжується з innerHTML вище (лише коли ціль
+    // закрита) — підключається тут.
+    ['weight', 'debt', 'capital'].forEach(key => {
+      const reopenBtn = document.getElementById('reopen-goal-' + key);
+      if (reopenBtn) reopenBtn.onclick = () => reopenGoal(key);
+    });
 
     const banner = document.getElementById('pace-banner');
     const behind = [];
-    if (!snap.weightOnTrack) behind.push(['Вага', '~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень до кінця']);
-    if (!snap.debtOnTrack) behind.push(['Борг', '~$' + Math.round(snap.neededWeeklyDebt) + '/тиждень до кінця']);
-    if (!snap.capitalOnTrack) behind.push(['Капітал', '~$' + Math.round(snap.neededWeeklyCapital) + '/тиждень до кінця']);
+    // Закриті цілі ніколи не потрапляють у "відстає" чи "випереджає" — вони
+    // вже поза шкалою темпу, обидва повідомлення для них позбавлені сенсу.
+    if (!snap.weightClosed && !snap.weightOnTrack) behind.push(['Вага', '~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень до кінця']);
+    if (!snap.debtClosed && !snap.debtOnTrack) behind.push(['Борг', '~$' + Math.round(snap.neededWeeklyDebt) + '/тиждень до кінця']);
+    if (!snap.capitalClosed && !snap.capitalOnTrack) behind.push(['Капітал', '~$' + Math.round(snap.neededWeeklyCapital) + '/тиждень до кінця']);
     const ahead = [];
-    if (snap.weightAhead) ahead.push(['Вага', 'можна ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень']);
-    if (snap.debtAhead) ahead.push(['Борг', 'можна ~$' + Math.max(Math.round(snap.neededWeeklyDebt),0) + '/тиждень']);
-    if (snap.capitalAhead) ahead.push(['Капітал', 'можна ~$' + Math.max(Math.round(snap.neededWeeklyCapital),0) + '/тиждень']);
+    if (!snap.weightClosed && snap.weightAhead) ahead.push(['Вага', 'можна ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень']);
+    if (!snap.debtClosed && snap.debtAhead) ahead.push(['Борг', 'можна ~$' + Math.max(Math.round(snap.neededWeeklyDebt),0) + '/тиждень']);
+    if (!snap.capitalClosed && snap.capitalAhead) ahead.push(['Капітал', 'можна ~$' + Math.max(Math.round(snap.neededWeeklyCapital),0) + '/тиждень']);
     if (!hasData || (behind.length === 0 && ahead.length === 0)){
       banner.innerHTML = '';
     } else if (behind.length > 0){
@@ -1418,6 +1475,55 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       const rows = ahead.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:var(--fs-md); padding:var(--sp-1) 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
       banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_DONE + '; border-radius: var(--r-lg); padding: var(--sp-4);"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: var(--sp-2);">🎉 Випереджаєш план</div>' + rows + '</div>';
     }
+  }
+
+  // Автоматичне дострокове закриття цілей. Викликається з render() — тобто
+  // ПІСЛЯ коміту значення (blur/Enter/дії "заповнити"/"скопіювати"), НІКОЛИ
+  // на кожне натискання клавіші під час живого набору: інакше "80" по цифрі
+  // "8" миттєво закрило б ціль на недописаному значенні "8 кг".
+  //
+  // Скануємо всі тижні хронологічно й закриваємо в НАЙРАНІШОМУ тижні, де
+  // умова вже виконана, — а не обов'язково в тому, який зараз редагується:
+  // якщо людина заднім числом виправляє старі тижні чи імпортує дані,
+  // "момент досягнення" має бути тим самим тижнем, коли це реально сталось.
+  //
+  // Вага — спадна ціль (закриваємо, коли значення <= ціль); борг і капітал —
+  // зростаюча кумулятивна сума (закриваємо, коли сумарно внесено >= ціль).
+  //
+  // Жодної кнопки "закрити" немає ніде, навіть у рідкісних випадках —
+  // орієнтир суто на дані, як і було попрошено.
+  function autoCloseCheck(){
+    let changed = false;
+    if (GOALS.weightClosedWeek == null){
+      for (let i = 1; i <= WEEKS; i++){
+        if (state[i].weight && state[i].weight <= GOALS.weightEnd){ GOALS.weightClosedWeek = i; changed = true; break; }
+      }
+    }
+    if (GOALS.debtClosedWeek == null || GOALS.capitalClosedWeek == null){
+      let debtSum = 0, capSum = 0;
+      for (let i = 1; i <= WEEKS; i++){
+        if (state[i].debtAmt) debtSum += Number(state[i].debtAmt);
+        if (state[i].capitalAmt) capSum += Number(state[i].capitalAmt);
+        if (GOALS.debtClosedWeek == null && GOALS.debtStart + debtSum >= GOALS.debtEnd){ GOALS.debtClosedWeek = i; changed = true; }
+        if (GOALS.capitalClosedWeek == null && GOALS.capitalStart + capSum >= GOALS.capitalEnd){ GOALS.capitalClosedWeek = i; changed = true; }
+      }
+    }
+    if (changed) saveGoals();
+    return changed;
+  }
+
+  // "Відкрити знову" — єдина ручна дія в усьому механізмі закриття, і вона
+  // не деструктивна (нічого не видаляється), тому без підтвердження. Одразу
+  // відкриває налаштування: якщо просто скинути закриття без нової цілі,
+  // число все ще відповідає старій умові, і автоматика закриє знову на
+  // наступному рендері — це очікувано (орієнтир суто на дані), а не баг.
+  // Щоб "відкрити знову" мало видимий сенс, тут одразу пропонується
+  // ввести НОВИЙ орієнтир (наприклад, дальшу ціль для схуднення).
+  function reopenGoal(key){
+    GOALS[GOAL_CLOSED_FIELD[key]] = null;
+    saveGoals();
+    render();
+    openGoalsModal();
   }
 
   // 3.2: підганяє систему координат SVG під реальну ширину контейнера.
@@ -1502,7 +1608,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       '</svg>' +
       // 6 і 10. Підсумок людською мовою + скільки лишилось прямо під графіком.
       '<div style="font-size:var(--fs-sm); color:var(--text-secondary); margin-top:var(--sp-2); line-height:1.4;">' + chartSummary_('weight', snap) +
-        (snap.cur > 0 ? ' Залишилось ' + fmt1(remainingKg) + ' кг.' : '') + '</div>';
+        (snap.cur > 0 && !snap.weightClosed ? ' Залишилось ' + fmt1(remainingKg) + ' кг.' : '') + '</div>';
   }
 
   function renderMoneyChart(containerId, expFn, amtKey, start, end, color, kind, snap){
@@ -1582,7 +1688,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       weeklyBarsHtml_(amtKey, color) +
       // 6 і 10. Підсумок людською мовою + скільки лишилось.
       '<div style="font-size:var(--fs-sm); color:var(--text-secondary); margin-top:var(--sp-2); line-height:1.4;">' + chartSummary_(kind, snap) +
-        (snap.cur > 0 ? ' Залишилось $' + Math.round(remaining).toLocaleString() + '.' : '') + '</div>';
+        (snap.cur > 0 && !(isDebt ? snap.debtClosed : snap.capitalClosed) ? ' Залишилось $' + Math.round(remaining).toLocaleString() + '.' : '') + '</div>';
   }
 
   // Індекс сьогоднішнього дня всередині тижня weekIdx (0 = Пн ... 6 = Нд).
@@ -1726,6 +1832,28 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     return row;
   }
 
+  // Компактна заміна metricRow для тижнів СТРОГО ПІСЛЯ закриття грошової
+  // цілі. Без цього поле вводу з "план $0" і кнопками заповнити/скопіювати
+  // лишалось видимим і після того, як платити вже нема чого — це і викликало
+  // сплутане "для чого ці поля" (скрін користувача) та безглузде "без змін
+  // з мин. тижня" в картці прогресу. Тиждень закриття (i === closedWeek) і
+  // всі попередні лишаються повністю редаговуваними — це реальна історія.
+  function closedMetricNote(label, color, closedWeek){
+    const row = document.createElement('div'); row.className = 'metric-row';
+    const accent = document.createElement('div'); accent.className = 'metric-accent'; accent.style.background = color;
+    row.appendChild(accent);
+    const body = document.createElement('div'); body.className = 'metric-body';
+    const top = document.createElement('div'); top.className = 'metric-top-row';
+    const lbl = document.createElement('span'); lbl.className = 'metric-label'; lbl.textContent = label; top.appendChild(lbl);
+    body.appendChild(top);
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:var(--fs-sm); color:var(--accent-text); margin-top:var(--sp-1);';
+    note.textContent = '✓ Ціль досягнута достроково в тижні ' + closedWeek + ' — платити більше нічого.';
+    body.appendChild(note);
+    row.appendChild(body);
+    return row;
+  }
+
   function buildWeekBody(i, snap){
     const frag = document.createDocumentFragment();
     const prevW = i > 1 ? state[i-1].weight : null;
@@ -1739,29 +1867,37 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       prevW ? () => { state[i].weight = prevW; saveWeek(i); render(); } : null,
       wTarget + ' кг', () => { state[i].weight = wTarget; saveWeek(i); render(); }));
 
-    const planDebt = planFor_(i, 'debtAmt', GOALS.debtStart, GOALS.debtEnd);
-    const planDebtNote = 'план $' + planDebt;
-    const prevDebt = i > 1 ? state[i-1].debtAmt : null;
-    const dWarn = (state[i].debtAmt && state[i].debtAmt > planDebt * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
-    const dStep = stepper(state[i].debtAmt, 5, 0,
-      (v) => { state[i].debtAmt = v; saveWeek(i); },
-      () => render(), 0, '$');
-    frag.appendChild(metricRow('Борг · конверт готівкою', C_DEBT, dStep, planDebtNote, dWarn,
-      prevDebt ? ('Скопіювати $' + prevDebt + ' з тижня ' + (i-1)) : null,
-      prevDebt ? () => { state[i].debtAmt = prevDebt; saveWeek(i); render(); } : null,
-      '$' + planDebt, () => { state[i].debtAmt = planDebt; saveWeek(i); render(); }));
+    if (GOALS.debtClosedWeek != null && i > GOALS.debtClosedWeek){
+      frag.appendChild(closedMetricNote('Борг · конверт готівкою', C_DEBT, GOALS.debtClosedWeek));
+    } else {
+      const planDebt = planFor_(i, 'debtAmt', GOALS.debtStart, GOALS.debtEnd);
+      const planDebtNote = 'план $' + planDebt;
+      const prevDebt = i > 1 ? state[i-1].debtAmt : null;
+      const dWarn = (state[i].debtAmt && state[i].debtAmt > planDebt * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
+      const dStep = stepper(state[i].debtAmt, 5, 0,
+        (v) => { state[i].debtAmt = v; saveWeek(i); },
+        () => render(), 0, '$');
+      frag.appendChild(metricRow('Борг · конверт готівкою', C_DEBT, dStep, planDebtNote, dWarn,
+        prevDebt ? ('Скопіювати $' + prevDebt + ' з тижня ' + (i-1)) : null,
+        prevDebt ? () => { state[i].debtAmt = prevDebt; saveWeek(i); render(); } : null,
+        '$' + planDebt, () => { state[i].debtAmt = planDebt; saveWeek(i); render(); }));
+    }
 
-    const planCapital = planFor_(i, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd);
-    const planCapNote = 'план $' + planCapital;
-    const prevCap = i > 1 ? state[i-1].capitalAmt : null;
-    const cWarn = (state[i].capitalAmt && state[i].capitalAmt > planCapital * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
-    const cStep = stepper(state[i].capitalAmt, 5, 0,
-      (v) => { state[i].capitalAmt = v; saveWeek(i); },
-      () => render(), 0, '$');
-    frag.appendChild(metricRow('Капітал · Моно $ / OKX', C_CAPITAL, cStep, planCapNote, cWarn,
-      prevCap ? ('Скопіювати $' + prevCap + ' з тижня ' + (i-1)) : null,
-      prevCap ? () => { state[i].capitalAmt = prevCap; saveWeek(i); render(); } : null,
-      '$' + planCapital, () => { state[i].capitalAmt = planCapital; saveWeek(i); render(); }));
+    if (GOALS.capitalClosedWeek != null && i > GOALS.capitalClosedWeek){
+      frag.appendChild(closedMetricNote('Капітал · Моно $ / OKX', C_CAPITAL, GOALS.capitalClosedWeek));
+    } else {
+      const planCapital = planFor_(i, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd);
+      const planCapNote = 'план $' + planCapital;
+      const prevCap = i > 1 ? state[i-1].capitalAmt : null;
+      const cWarn = (state[i].capitalAmt && state[i].capitalAmt > planCapital * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
+      const cStep = stepper(state[i].capitalAmt, 5, 0,
+        (v) => { state[i].capitalAmt = v; saveWeek(i); },
+        () => render(), 0, '$');
+      frag.appendChild(metricRow('Капітал · Моно $ / OKX', C_CAPITAL, cStep, planCapNote, cWarn,
+        prevCap ? ('Скопіювати $' + prevCap + ' з тижня ' + (i-1)) : null,
+        prevCap ? () => { state[i].capitalAmt = prevCap; saveWeek(i); render(); } : null,
+        '$' + planCapital, () => { state[i].capitalAmt = planCapital; saveWeek(i); render(); }));
+    }
 
     // Дії тижня: гейтимо за tacticAppliesTo, щоб показане завжди збігалось
     // із порахованим у score(). Секцію (і навіть заголовок) не малюємо
@@ -2224,6 +2360,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       return;
     }
 
+    // Нове цільове число — нова спроба автовизначення: якщо weightEnd/
+    // debtEnd/capitalEnd реально змінюється, а ціль була закрита під
+    // СТАРИМ числом, скидаємо закриття — інакше бейдж "закрито" лишався б
+    // висіти під числом, якому вже не відповідає.
+    [['weight', 'weightEnd'], ['debt', 'debtEnd'], ['capital', 'capitalEnd']].forEach(([key, endField]) => {
+      if (next[endField] !== GOALS[endField]) GOALS[GOAL_CLOSED_FIELD[key]] = null;
+    });
     GOALS = Object.assign(GOALS, next);
     await saveGoals();
     // Пункт 20: URL синхронізації зберігається разом із цілями
@@ -2252,6 +2395,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
   function render(){
     try {
+      // Автоматичне закриття цілей перевіряється ПЕРЕД снапшотом, щоб той
+      // самий прохід рендеру вже показав свіжозакриту ціль, а не з
+      // запізненням на один цикл.
+      autoCloseCheck();
       const snap = computeSnapshot();
       renderDashboardLine(snap);
       renderJourney();
