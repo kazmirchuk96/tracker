@@ -11,7 +11,6 @@
 <meta name="robots" content="noindex, nofollow">
 <style>
   html, body { margin: 0; padding: 0; background: #0F0E0A; }
-  body { padding: var(--sp-5) var(--sp-3); }
 </style>
 </head>
 <body>
@@ -158,7 +157,7 @@
 #tracker-root { line-height: var(--lh-body); }
 /* --- Пункт 18: на десктопі рядок сягав ~90 символів при комфортних 60-75.
    Обмежуємо саме текстові блоки, не контейнери з контролами. --- */
-#tracker-root p, #tracker-root .warn-text span { max-width: 68ch; }
+#tracker-root p { max-width: 68ch; }
 /* --- Пункт 11: Fraunces підключений як варіативний (opsz 9..144), але жодна
    вісь не використовувалась. opsz auto дає правильні пропорції на різних
    кеглях, SOFT згладжує кути, WONK вмикає характерні альтернативні форми. --- */
@@ -194,17 +193,20 @@
 .journey-num { font-size: var(--fs-xs); color: var(--text-muted); }
 /* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
    тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
-.journey-cell.today .journey-num { color: var(--brand-text); font-weight: 700; }
+.journey-cell.today .journey-num { color: var(--accent-text); font-weight: 700; }
 /* Кораловий контур навколо кільця "сьогодні" — окремий від дуги прогресу
    сигнал, той самий принцип, що й обведення дня "сьогодні" в референсі. */
-.journey-cell.today .journey-dot::after { content: ''; position: absolute; inset: -3px; border-radius: 50%; border: var(--bw-emphasis) solid var(--brand); pointer-events: none; }
+/* Варіант C: два кільця майже впритул (внутрішня дуга прогресу + зовнішнє
+   обведення "сьогодні") на 44px колі зливались у нечитабельну пляму —
+   користувач це помітив на реальному скріншоті. Тепер "сьогодні" сигналізує
+   тонований трек самого прогрес-кільця (див. JS, arcColor/trackColor),
+   без жодного другого шару геометрії. */
 .card { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--shadow-sm); }
 .hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: var(--tr-display); line-height: var(--lh-display); transition: color 0.3s; }
 /* I7: усі індикатори стану — один патерн "пігулка". Відрізняються
    лише кольором (нейтральний / у графіку / відстає), не формою. */
 .chip, .badge, .today-pill { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); letter-spacing: 0.02em; white-space: nowrap; }
-.badge-ok { background: var(--accent-soft); color: var(--accent-text); }
-.today-pill { background: var(--brand-soft); color: var(--brand-text); }
+.badge-ok, .today-pill { background: var(--accent-soft); color: var(--accent-text); }
 /* Картка показника має право переносити слова — інакше довгі рядки
    на кшталт "ціль $1,800" вилазять за її межі на вузькому екрані. */
 .stat-card { min-width: 0; overflow-wrap: anywhere; }
@@ -295,13 +297,12 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 }
 #tracker-root .journey-cell:focus-visible .journey-dot { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 #tracker-root .journey-cell:focus-visible { outline: none; }
-.warn-text { font-size: var(--fs-sm); color: var(--warn-text); margin-top: var(--sp-2); display: flex; align-items: center; gap: var(--sp-1); }
 .habit-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: var(--bw) solid transparent; border-radius: var(--r-lg); margin-bottom: var(--sp-2); font-size: var(--fs-md); transition: background 0.2s, border-color 0.2s; }
 .habit-label { flex: 1; min-width: 0; }
 /* Кругова кнопка-галочка замість нативного чекбокса — той самий патерн,
    що й у щоденній сітці (day-square), лишень трохи менша, бо тут вона
    одна в рядку, а не серед семи. */
-.week-check { width: var(--tap); height: var(--tap); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: var(--bw) solid var(--border-strong); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.week-check { width: var(--tap); height: var(--tap); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: var(--bw) solid var(--border-strong); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .week-check:hover { border-color: var(--focus); }
 .week-check:active { transform: scale(0.9); }
 .week-check.checked, .week-check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface-0); }
@@ -311,7 +312,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: var(--sp-3); }
 .daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--sp-2); }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
-.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .day-square:hover { border-color: var(--focus); background: var(--surface-2); }
 .day-square:active { transform: scale(0.9); }
 .day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
@@ -320,7 +321,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
 /* №1: сьогоднішній день. Без цього щоразу доводилось згадувати, який
    сьогодні день тижня, і шукати потрібну літеру серед семи однакових. */
-.day-square.is-today { border: var(--bw-emphasis) solid var(--brand); }
+.day-square.is-today { border: var(--bw-emphasis) solid var(--accent); }
 .day-square.is-today[aria-checked="false"] { background: var(--surface-2); }
 .day-cell.is-today .day-cell-label { color: var(--text-primary); font-weight: 600; }
 
@@ -379,6 +380,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   #stat-cards { grid-template-columns: 1fr 1fr !important; }
   .card { padding: var(--sp-4); }
   .hero-card { padding: var(--sp-4); }
+  /* Скріншот показав явно видимий "мертвий" простір фону обабіч контенту —
+     два накладені шари відступу (зовнішня обгортка body + власний padding
+     кореня) разом давали 36px з кожного боку. Тут звужуємо ВЛАСНИЙ відступ
+     кореня з 24px до 12px саме на мобільних; safe-area-inset (виїмка,
+     індикатор жесту) все одно бере максимум із двох значень, тож на
+     пристроях з вирізом менше не стане. */
+  #tracker-root { padding-left: max(var(--sp-3), env(safe-area-inset-left)); padding-right: max(var(--sp-3), env(safe-area-inset-right)); }
 }
 
 /* Пункт 10: раніше .hero-num на мобільному падав до --fs-xl (22px) — рівно
@@ -450,7 +458,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </svg>
       <div>
         <h1 style="margin: 0 0 var(--sp-1); font-size: var(--fs-h1);">12 тижнів</h1>
-        <p style="color: var(--text-secondary); font-size: var(--fs-sm); margin: 0;">27 липня — 18 жовтня 2026 · крок до п'ятирічної мапи <span id="sync-badge" style="color: var(--text-muted); font-size: var(--fs-xs);"></span></p>
+        <p style="color: var(--text-secondary); font-size: var(--fs-sm); margin: 0;">27 липня — 18 жовтня 2026 <span id="sync-badge" style="color: var(--text-muted); font-size: var(--fs-xs);"></span></p>
       </div>
     </div>
     <div class="menu-wrap">
@@ -506,7 +514,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v38 · visual redesign: coral accent, tinted cards, arc rings</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v46 · checkboxes: rounded square instead of circle</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -743,8 +751,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     plus: '<path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
     minus: '<path d="M3 8h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
     reset: '<path d="M3.5 8a4.5 4.5 0 1 1 1.3 3.2M3.5 8V4.3M3.5 8h3.7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
-    copy: '<rect x="5.5" y="5.5" width="7" height="7" rx="1.3" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3.3 9.5V4.3A1.3 1.3 0 0 1 4.6 3H9.8" stroke="currentColor" stroke-width="1.4" fill="none"/>',
-    warn: '<path d="M8 2.5l6.5 11.5h-13z" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linejoin="round"/><path d="M8 6.5v3.5M8 12v.1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>',
     // I8: перенесено сюди з інлайнових <svg> у розмітці — одне джерело правди
     dots: '<circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/>',
     target: '<circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/>',
@@ -1309,11 +1315,16 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       const isEmpty = s === 0 && !hasAnyData(i);
       const arcColor = s >= 85 ? C_DONE : (i < cur ? C_MISSED : C_NEUTRAL);
       const offset = CIRC * (1 - (isEmpty ? 0 : s) / 100);
+      // Варіант C: замість другого кільця навколо (яке на 44px зливалось із
+      // дугою прогресу в пляму — див. коментар у CSS) "сьогодні" сигналізує
+      // сам ФОН кільця: трек тонується м'яким зеленим замість сірого. Одне
+      // й те саме кільце, ніякого додаткового шару геометрії.
+      const trackColor = i === cur ? hexToRgba(C_DONE, 0.28) : 'var(--surface-3)';
       const dot = document.createElement('span');
       dot.className = 'journey-dot' + (isEmpty ? ' is-empty' : '');
       dot.innerHTML =
         '<svg class="journey-ring" width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">' +
-          '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="var(--surface-3)" stroke-width="3"/>' +
+          '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="' + trackColor + '" stroke-width="3"/>' +
           (isEmpty ? '' :
             '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="' + arcColor + '" stroke-width="3" ' +
             'stroke-linecap="round" stroke-dasharray="' + CIRC.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" ' +
@@ -1339,7 +1350,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function deltaHtml(current, previous, betterWhenLower, unit){
     if (previous === null || previous === undefined) return '';
     const diff = current - previous;
-    if (Math.abs(diff) < 0.05) return '<div class="delta" style="color:var(--text-muted);">без змін з мин. тижня</div>';
+    // Було: підпис "без змін з мин. тижня" при різниці < 0.05. Для боргу й
+    // капіталу це порівнює суму ЦЬОГО тижня із сумою МИНУЛОГО, а не
+    // загальний прогрес — людина на стабільному плані внесків (щотижня
+    // рівно $150) бачила б цей підпис щоразу, і він читався як застій,
+    // хоча насправді все йшло за планом. Тепер за відсутності помітної
+    // зміни просто нічого не показуємо; реальна зміна ("+50", "-2.9 кг")
+    // і далі відображається — вона однозначна.
+    if (Math.abs(diff) < 0.05) return '';
     const good = betterWhenLower ? diff < 0 : diff > 0;
     const sign = diff > 0 ? '+' : '';
     return '<div class="delta ' + (good ? 'delta-good' : 'delta-bad') + '">' + sign + fmt1(diff) + unit + ' з мин. тижня</div>';
@@ -1465,8 +1483,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function renderStats(snap){
     const hasData = snap.cur > 0;
     const prevWeight = snap.cur > 1 ? findPrevWeight(snap.cur) : null;
-    const prevDebtAmt = snap.cur > 0 ? findPrevAmt(snap.cur + 1, 'debtAmt') : null;
-    const prevCapAmt = snap.cur > 0 ? findPrevAmt(snap.cur + 1, 'capitalAmt') : null;
+    // Було snap.cur + 1 — через -1 усередині findPrevAmt це фактично
+    // означало "почни пошук із самого snap.cur", тож функція одразу
+    // знаходила значення ЦЬОГО Ж тижня (адже snap.cur за визначенням має
+    // дані) й порівнювала суму сама з собою. Різниця виходила 0 завжди,
+    // незалежно від того, скільки реально вносили тижнем раніше — тому
+    // дельта для боргу й капіталу ніколи не могла показати справжню зміну.
+    const prevDebtAmt = snap.cur > 0 ? findPrevAmt(snap.cur, 'debtAmt') : null;
+    const prevCapAmt = snap.cur > 0 ? findPrevAmt(snap.cur, 'capitalAmt') : null;
     const thisWeekDebt = snap.cur > 0 ? state[snap.cur].debtAmt : null;
     const thisWeekCap = snap.cur > 0 ? state[snap.cur].capitalAmt : null;
     document.getElementById('stat-cards').innerHTML =
@@ -1819,7 +1843,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const r = parseInt(h.slice(0,2), 16), g = parseInt(h.slice(2,4), 16), b = parseInt(h.slice(4,6), 16);
     return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
   }
-  function metricRow(label, color, inputEl, planText, warnText, copyTitle, onCopy, fillLabel, onFill){
+  function metricRow(label, color, inputEl, planText, fillLabel, onFill){
     const row = document.createElement('div'); row.className = 'metric-row';
     // Референс тонує фон кожної картки власним кольором замість маленької
     // крапки-акценту збоку — того самого кольору тепер досить, щоб рядок
@@ -1844,18 +1868,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       fillBtn.onclick = onFill;
       inputRow.appendChild(fillBtn);
     }
-    if (onCopy){
-      const cb = document.createElement('button'); cb.className = 'icon-btn'; cb.type = 'button'; cb.title = copyTitle;
-      cb.setAttribute('aria-label', copyTitle); cb.innerHTML = icon('copy', 14);
-      cb.onclick = onCopy;
-      inputRow.appendChild(cb);
-    }
     body.appendChild(inputRow);
-    if (warnText){
-      const warn = document.createElement('div'); warn.className = 'warn-text';
-      warn.innerHTML = icon('warn', 13) + '<span>' + warnText + '</span>';
-      body.appendChild(warn);
-    }
     row.appendChild(body);
     return row;
   }
@@ -1884,15 +1897,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
   function buildWeekBody(i, snap){
     const frag = document.createDocumentFragment();
-    const prevW = i > 1 ? state[i-1].weight : null;
-    const wWarn = (state[i].weight && Math.abs(state[i].weight - findPrevWeight(i)) > 2) ? 'Велика зміна від минулого тижня (' + fmt1(findPrevWeight(i)) + ' кг)' : null;
     const wTarget = fmt1(expWeight(i));
     const wStep = stepper(state[i].weight, 0.1, 1,
       (v) => { state[i].weight = v; saveWeek(i); },
       () => render(), 0, 'кг');
-    frag.appendChild(metricRow('Вага', C_WEIGHT, wStep, 'план ' + wTarget + ' кг', wWarn,
-      prevW ? ('Скопіювати ' + fmt1(prevW) + ' кг з тижня ' + (i-1)) : null,
-      prevW ? () => { state[i].weight = prevW; saveWeek(i); render(); } : null,
+    frag.appendChild(metricRow('Вага', C_WEIGHT, wStep, 'план ' + wTarget + ' кг',
       wTarget + ' кг', () => { state[i].weight = wTarget; saveWeek(i); render(); }));
 
     if (GOALS.debtClosedWeek != null && i > GOALS.debtClosedWeek){
@@ -1900,14 +1909,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     } else {
       const planDebt = planFor_(i, 'debtAmt', GOALS.debtStart, GOALS.debtEnd);
       const planDebtNote = 'план $' + planDebt;
-      const prevDebt = i > 1 ? state[i-1].debtAmt : null;
-      const dWarn = (state[i].debtAmt && state[i].debtAmt > planDebt * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
       const dStep = stepper(state[i].debtAmt, 5, 0,
         (v) => { state[i].debtAmt = v; saveWeek(i); },
         () => render(), 0, '$');
-      frag.appendChild(metricRow('Борг · конверт готівкою', C_DEBT, dStep, planDebtNote, dWarn,
-        prevDebt ? ('Скопіювати $' + prevDebt + ' з тижня ' + (i-1)) : null,
-        prevDebt ? () => { state[i].debtAmt = prevDebt; saveWeek(i); render(); } : null,
+      frag.appendChild(metricRow('Борг · конверт готівкою', C_DEBT, dStep, planDebtNote,
         '$' + planDebt, () => { state[i].debtAmt = planDebt; saveWeek(i); render(); }));
     }
 
@@ -1916,14 +1921,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     } else {
       const planCapital = planFor_(i, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd);
       const planCapNote = 'план $' + planCapital;
-      const prevCap = i > 1 ? state[i-1].capitalAmt : null;
-      const cWarn = (state[i].capitalAmt && state[i].capitalAmt > planCapital * 2.5) ? 'Незвично велика сума порівняно з планом' : null;
       const cStep = stepper(state[i].capitalAmt, 5, 0,
         (v) => { state[i].capitalAmt = v; saveWeek(i); },
         () => render(), 0, '$');
-      frag.appendChild(metricRow('Капітал · Моно $ / OKX', C_CAPITAL, cStep, planCapNote, cWarn,
-        prevCap ? ('Скопіювати $' + prevCap + ' з тижня ' + (i-1)) : null,
-        prevCap ? () => { state[i].capitalAmt = prevCap; saveWeek(i); render(); } : null,
+      frag.appendChild(metricRow('Капітал · Моно $ / OKX', C_CAPITAL, cStep, planCapNote,
         '$' + planCapital, () => { state[i].capitalAmt = planCapital; saveWeek(i); render(); }));
     }
 
