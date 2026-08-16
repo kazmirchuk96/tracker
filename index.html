@@ -92,7 +92,7 @@
   /* За конкретним проханням: чекбокси дій (щотижневі й щоденні) трохи
      менші за загальний мінімум --tap. Не займаю сам --tap — він і далі
      мінімум для решти кнопок застосунку, де про це не просили. */
-  --tap-sm: 38px;
+  --tap-sm: 32px;
 
   /* --- I4: шкала розмірів тексту. Було 14 різних значень, стало 6.
      Нижня межа 11.5px — Apple HIG не радить опускатись нижче 11pt
@@ -317,9 +317,9 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
 .daily-block { border: var(--bw) solid transparent; border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4) var(--sp-4); margin-bottom: var(--sp-2); transition: background 0.2s, border-color 0.2s; }
 .daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: var(--sp-3); }
-.daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--sp-2); }
+.daily-grid { display: flex; justify-content: space-between; }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
-.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap-sm); max-width: 48px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square { width: var(--tap-sm); height: var(--tap-sm); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .day-square:hover { border-color: var(--focus); background: var(--surface-2); }
 .day-square:active { transform: scale(0.9); }
 .day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
@@ -418,18 +418,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
    Тут же ховаємо підписи сум над стовпчиками бар-чарта — дванадцять
    підписів на такій ширині перетворюються на кашу. */
 @media (max-width: 460px) {
-  /* Сім днів лишаються в одному рядку — так тиждень читається як тиждень,
-     а не як дві розірвані групи. Щоб квадратик не став завузьким, на цій
-     ширині віддаємо йому простір за рахунок відступів блоку: заміряно, що
-     з дефолтними 16px по боках квадратик виходив 30.6px, зі стисненими — 37px.
-     Висота при цьому тримається на 44px, тож палець має повноцінну
-     вертикальну ціль навіть при вужчій горизонталі. */
-  /* Зазор 2px, який я поставив, щоб відвоювати ширину, дав побічний ефект:
-     чотири відмічені дні поспіль зливались в одну суцільну зелену смугу —
-     окремі дні переставали читатись. 4px відновлюють роздільність. */
-  .daily-grid { grid-template-columns: repeat(7, 1fr); gap: var(--sp-1); }
-  .daily-block { padding-left: var(--sp-2); padding-right: var(--sp-2); }
-  .day-square { aspect-ratio: auto; height: var(--tap-sm); max-width: none; border-radius: var(--r-sm); }
   .bar-amt { display: none; }
 }
 
@@ -521,7 +509,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v48 · action row rebuilt: full label, editable type, labeled buttons, permanent delete</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v49 · checkboxes: fixed size, always square, smaller, unified</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
