@@ -363,9 +363,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 [data-icon] { display: inline-flex; align-items: center; flex-shrink: 0; }
 .menu-item { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-md); border-radius: var(--r-sm); cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
 .menu-item:hover { background: var(--surface-3); }
-.progress-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; padding: var(--sp-0) 0; width: 100%; background: none; border: none; color: inherit; font-family: inherit; text-align: left; min-height: var(--tap); }
-.progress-collapsible { max-height: 0; overflow: hidden; transition: max-height 0.35s ease; }
-.progress-collapsible.open { max-height: 3000px; }
 @keyframes celebratePulse { 0% { transform: scale(1); } 35% { transform: scale(1.15); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
 .celebrate { animation: celebratePulse 0.55s ease; }
 @keyframes weekEnter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
@@ -477,19 +474,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   <div id="hero-wrap"></div>
 
   <div class="card" style="margin-bottom: var(--sp-5); padding: var(--sp-4) var(--sp-5);">
-    <button class="progress-toggle" id="progress-toggle" type="button" aria-expanded="true" aria-controls="progress-collapsible">
-      <span style="font-size:var(--fs-md); font-weight:500;">Прогрес і графіки</span>
-      <span id="progress-chevron" data-icon="chevronDown" data-icon-size="16" style="display:flex; transition: transform 0.25s; transform: rotate(180deg);"></span>
-    </button>
-    <div class="progress-collapsible open" id="progress-collapsible">
-      <div id="dashboard-line" class="dashboard-line" style="margin: var(--sp-4) 0 var(--sp-3);"></div>
-      <div id="stat-cards" style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--sp-3); margin-bottom: var(--sp-3);"></div>
-      <div id="pace-banner" style="margin-bottom: var(--sp-3);"></div>
-      <div style="margin-bottom: var(--sp-4);">
-        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-0);">
-          <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Вага за 12 тижнів</div>
-          <span id="chart-weight-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
-        </div>
+    <div style="font-size:var(--fs-md); font-weight:500; margin-bottom:var(--sp-4);">Прогрес і графіки</div>
+    <div id="dashboard-line" class="dashboard-line" style="margin: 0 0 var(--sp-3);"></div>
+    <div id="stat-cards" style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--sp-3); margin-bottom: var(--sp-3);"></div>
+    <div id="pace-banner" style="margin-bottom: var(--sp-3);"></div>
+    <div style="margin-bottom: var(--sp-4);">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-0);">
+        <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Вага за 12 тижнів</div>
+        <span id="chart-weight-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
+      </div>
         <div id="chart-weight"></div>
       </div>
       <div style="margin-bottom: var(--sp-4);">
@@ -506,10 +499,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         </div>
         <div id="chart-capital"></div>
       </div>
-    </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v49 · checkboxes: fixed size, always square, smaller, unified</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v50 · $ in delta, no collapse, better wording, fixed dot animation</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -887,7 +879,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   let state = {};
   for (let i = 1; i <= WEEKS; i++) state[i] = emptyWeek();
   let prevScores = {};
-  let progressOpen = true;  // U3: аналітика — друга за важливістю секція, не ховаємо її
   // U1/U2: який тиждень зараз відкритий у головній картці. null = поточний.
   // Дозволяє редагувати будь-який тиждень одним тапом по кружечку таймлайну,
   // замість "скрол вниз → розгорнути історію → знайти рядок → розгорнути".
@@ -1373,7 +1364,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     }
   }
 
-  function deltaHtml(current, previous, betterWhenLower, unit){
+  // Раніше приймала лише "unit"-суфікс (" кг"), що додавався ПІСЛЯ числа —
+  // для грошей це не працює (потрібен префікс "$" ПЕРЕД числом, і символ
+  // узагалі бракував: "+944" замість "+$944"). Тепер приймає функцію
+  // форматування — кожна ціль сама вирішує, як показати своє значення
+  // (префікс, суфікс, відсотки тощо), і додавати новий тип цілі в
+  // майбутньому не доведеться змінювати саму deltaHtml.
+  function deltaHtml(current, previous, betterWhenLower, formatFn){
     if (previous === null || previous === undefined) return '';
     const diff = current - previous;
     // Було: підпис "без змін з мин. тижня" при різниці < 0.05. Для боргу й
@@ -1385,8 +1382,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     // і далі відображається — вона однозначна.
     if (Math.abs(diff) < 0.05) return '';
     const good = betterWhenLower ? diff < 0 : diff > 0;
-    const sign = diff > 0 ? '+' : '';
-    return '<div class="delta ' + (good ? 'delta-good' : 'delta-bad') + '">' + sign + fmt1(diff) + unit + ' з мин. тижня</div>';
+    // Раніше "-" бралось невимушено з того, що само число diff було
+    // відʼємним при конкатенації в рядок. Тепер formatFn отримує
+    // Math.abs(diff) (щоб "$"-префікс і "кг"-суфікс могли працювати
+    // однаково для обох напрямків) — тож знак треба ставити явно для
+    // ОБОХ випадків, інакше втрата ваги показувалась би без мінуса.
+    const sign = diff > 0 ? '+' : '-';
+    return '<div class="delta ' + (good ? 'delta-good' : 'delta-bad') + '">' + sign + formatFn(Math.abs(diff)) + ' з мин. тижня</div>';
   }
   function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr, closedWeek, color){
     // Вміст обрізався по горизонталі: у двох колонках на телефоні на картку
@@ -1436,7 +1438,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     if (kind === 'weight'){
       if (snap.weightClosed) return '🎯 Ціль закрита достроково в тижні ' + GOALS.weightClosedWeek + ' з ' + WEEKS + '.';
       if (snap.cur === 0) return 'Ще немає замірів — внеси вагу за перший тиждень.';
-      if (snap.weightAhead) return 'Випереджаєш темп схуднення — можна ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень до кінця.';
+      if (snap.weightAhead) return 'Випереджаєш темп схуднення — вистачить ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень до кінця.';
       if (!snap.weightOnTrack) return 'Темп відстає — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень, щоб встигнути.';
       return 'У графіку — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень.';
     }
@@ -1449,7 +1451,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const noun = isDebt ? 'виплат боргу' : 'внесків капіталу';
     if (closed) return '🎯 Ціль закрита достроково в тижні ' + closedWeek + ' з ' + WEEKS + '.';
     if (snap.cur === 0) return 'Ще немає внесків — почни з першого тижня.';
-    if (ahead) return 'Випереджаєш план ' + noun + ' — можна ~$' + Math.max(Math.round(needed),0) + '/тиждень.';
+    if (ahead) return 'Випереджаєш план ' + noun + ' — вистачить ~$' + Math.max(Math.round(needed),0) + '/тиждень.';
     if (!onTrack) return 'Темп відстає — потрібно ~$' + Math.round(needed) + '/тиждень ' + noun + ', щоб встигнути.';
     return 'У графіку — тримай ~$' + Math.round(needed) + '/тиждень.';
   }
@@ -1520,9 +1522,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const thisWeekDebt = snap.cur > 0 ? state[snap.cur].debtAmt : null;
     const thisWeekCap = snap.cur > 0 ? state[snap.cur].capitalAmt : null;
     document.getElementById('stat-cards').innerHTML =
-      statCard('Вага', fmt1(snap.lastWeight) + ' кг', GOALS.weightEnd + ' кг', snap.weightOnTrack, snap.weightAhead, hasData, prevWeight !== null && snap.cur > 1 ? deltaHtml(snap.lastWeight, prevWeight, true, ' кг') : '', GOALS.weightClosedWeek, C_WEIGHT) +
-      statCard('Борг виплачено', '$' + Math.round(snap.debtCurrent).toLocaleString(), '$' + GOALS.debtEnd.toLocaleString(), snap.debtOnTrack, snap.debtAhead, hasData, thisWeekDebt && prevDebtAmt ? deltaHtml(thisWeekDebt, prevDebtAmt, false, '') : '', GOALS.debtClosedWeek, C_DEBT) +
-      statCard('Капітал (внески)', '$' + Math.round(snap.capitalCurrent).toLocaleString(), '$' + GOALS.capitalEnd.toLocaleString(), snap.capitalOnTrack, snap.capitalAhead, hasData, thisWeekCap && prevCapAmt ? deltaHtml(thisWeekCap, prevCapAmt, false, '') : '', GOALS.capitalClosedWeek, C_CAPITAL);
+      statCard('Вага', fmt1(snap.lastWeight) + ' кг', GOALS.weightEnd + ' кг', snap.weightOnTrack, snap.weightAhead, hasData, prevWeight !== null && snap.cur > 1 ? deltaHtml(snap.lastWeight, prevWeight, true, v => fmt1(v) + ' кг') : '', GOALS.weightClosedWeek, C_WEIGHT) +
+      statCard('Борг виплачено', '$' + Math.round(snap.debtCurrent).toLocaleString(), '$' + GOALS.debtEnd.toLocaleString(), snap.debtOnTrack, snap.debtAhead, hasData, thisWeekDebt && prevDebtAmt ? deltaHtml(thisWeekDebt, prevDebtAmt, false, v => '$' + Math.round(v).toLocaleString()) : '', GOALS.debtClosedWeek, C_DEBT) +
+      statCard('Капітал (внески)', '$' + Math.round(snap.capitalCurrent).toLocaleString(), '$' + GOALS.capitalEnd.toLocaleString(), snap.capitalOnTrack, snap.capitalAhead, hasData, thisWeekCap && prevCapAmt ? deltaHtml(thisWeekCap, prevCapAmt, false, v => '$' + Math.round(v).toLocaleString()) : '', GOALS.capitalClosedWeek, C_CAPITAL);
 
     const banner = document.getElementById('pace-banner');
     const behind = [];
@@ -1532,9 +1534,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     if (!snap.debtClosed && !snap.debtOnTrack) behind.push(['Борг', '~$' + Math.round(snap.neededWeeklyDebt) + '/тиждень до кінця']);
     if (!snap.capitalClosed && !snap.capitalOnTrack) behind.push(['Капітал', '~$' + Math.round(snap.neededWeeklyCapital) + '/тиждень до кінця']);
     const ahead = [];
-    if (!snap.weightClosed && snap.weightAhead) ahead.push(['Вага', 'можна ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень']);
-    if (!snap.debtClosed && snap.debtAhead) ahead.push(['Борг', 'можна ~$' + Math.max(Math.round(snap.neededWeeklyDebt),0) + '/тиждень']);
-    if (!snap.capitalClosed && snap.capitalAhead) ahead.push(['Капітал', 'можна ~$' + Math.max(Math.round(snap.neededWeeklyCapital),0) + '/тиждень']);
+    if (!snap.weightClosed && snap.weightAhead) ahead.push(['Вага', 'вистачить ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень']);
+    if (!snap.debtClosed && snap.debtAhead) ahead.push(['Борг', 'вистачить ~$' + Math.max(Math.round(snap.neededWeeklyDebt),0) + '/тиждень']);
+    if (!snap.capitalClosed && snap.capitalAhead) ahead.push(['Капітал', 'вистачить ~$' + Math.max(Math.round(snap.neededWeeklyCapital),0) + '/тиждень']);
     if (!hasData || (behind.length === 0 && ahead.length === 0)){
       banner.innerHTML = '';
     } else if (behind.length > 0){
@@ -1624,6 +1626,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     let expPath = ''; for (let i = 0; i <= WEEKS; i++) expPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(expWeight(i)) + ' ';
 
     // 1. Старт — окремий порожній маркер із підписом "Старт", не плутається з реальними замірами.
+    // Анімація "живої" точки раніше перевіряла i === cur (буквально поточний
+    // календарний тиждень) — якщо цей тиждень ще не заповнений (типова
+    // ситуація на початку тижня), точка з анімацією просто не малювалась
+    // узагалі, хоча на грошових графіках вона показувалась (там для цього
+    // тижня вже був запис). Тепер орієнтуємось на ОСТАННІЙ тиждень із
+    // реальним заміром — так само, як уже зроблено для грошових графіків.
+    let lastWeightWeek = 0;
+    for (let i = 1; i <= WEEKS; i++) if (state[i] && state[i].weight) lastWeightWeek = i;
     let actPath = '', dots = '', started = false, lastPoint = null;
     for (let i = 0; i <= WEEKS; i++){
       const wt = i === 0 ? GOALS.weightStart : (state[i] && state[i].weight);
@@ -1634,7 +1644,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         // порожня точка на осі і так очевидно означає початок.
         dots += '<circle cx="' + x(0) + '" cy="' + y(wt) + '" r="4" fill="' + cv('--surface-1','#1A1914') + '" stroke="' + C_WEIGHT + '" stroke-width="2" />';
       } else {
-        dots += '<circle cx="' + x(i) + '" cy="' + y(wt) + '" r="4.5" fill="' + C_WEIGHT + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === cur ? 'chart-dot-live' : '') + '" />';
+        dots += '<circle cx="' + x(i) + '" cy="' + y(wt) + '" r="4.5" fill="' + C_WEIGHT + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === lastWeightWeek ? 'chart-dot-live' : '') + '" />';
         lastPoint = { i: i, v: wt };
       }
     }
@@ -1723,7 +1733,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       if (i === 0){
         dots += '<circle cx="' + x(0) + '" cy="' + y(v) + '" r="4" fill="' + cv('--surface-1','#1A1914') + '" stroke="' + color + '" stroke-width="2" />';
       } else if (state[i][amtKey]) {
-        dots += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="4.5" fill="' + color + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === cur ? 'chart-dot-live' : '') + '" />';
+        dots += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="4.5" fill="' + color + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === lastDataWeek ? 'chart-dot-live' : '') + '" />';
         lastPoint = { i: i, v: v };
       }
     }
@@ -2517,15 +2527,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     }
     closeGoalsModal();
     render();
-  };
-  if ($('progress-toggle')) $('progress-toggle').onclick = () => {
-    progressOpen = !progressOpen;
-    if ($('progress-collapsible')) $('progress-collapsible').classList.toggle('open', progressOpen);
-    if ($('progress-chevron')) $('progress-chevron').style.transform = progressOpen ? 'rotate(180deg)' : 'rotate(0deg)';
-    $('progress-toggle').setAttribute('aria-expanded', progressOpen ? 'true' : 'false');
-    // Графіки малюються під виміряну ширину — доки секція згорнута, вона
-    // нульової висоти, тому після розгортання їх треба перерахувати.
-    if (progressOpen) setTimeout(render, 260);
   };
 
   function render(){
