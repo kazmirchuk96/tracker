@@ -46,15 +46,11 @@
      не осідав у правилі. */
   --accent-glow: rgba(47, 190, 147, 0.07);
   --accent-text: #6EE7C0;
-  /* Редизайн під референс: теплий кораловий — ДРУГИЙ акцент, не заміна
-     зеленого. Зелений лишається "виконано/успіх" (галочки, score>=85%,
-     badge-ok) — це вже перевірений контрастом семантичний колір, чіпати
-     його ризиковано. Кораловий — окремий "бренд/дія" акцент: основні
-     кнопки, підсвітка "сьогодні", активні перемикачі. Контраст перевірено
-     на всіх чотирьох поверхнях: мінімум 5.28:1 при нормі 4.5:1. */
-  --brand: #FF6B7A;
-  --brand-soft: rgba(255, 107, 122, 0.16);
-  --brand-text: #FF6B7A;
+  /* Кораловий "бренд"-акцент, доданий під час редизайну під референс,
+     прибрано повністю: після кількох раундів фідбека ("сьогодні" читалось
+     як заперечення, потім те саме про кнопки й перемикачі) жодне місце
+     в застосунку більше його не використовує. Двоакцентна система не
+     прижилась на практиці — єдиний зелений скрізь, як і до редизайну. */
   /* Пункт 9: "у процесі" — нейтральний стан, він не мусить тривожити.
      Раніше і він, і "відстаєш", і попередження були одним жовтим. */
   --neutral-progress: #A8A292;
@@ -93,6 +89,10 @@
   /* --- I2: один розмір для всіх круглих кнопок-іконок і тап-цілей.
      Було чотири різні (30/28/34/36px) без жодної причини. --- */
   --tap: 44px;
+  /* За конкретним проханням: чекбокси дій (щотижневі й щоденні) трохи
+     менші за загальний мінімум --tap. Не займаю сам --tap — він і далі
+     мінімум для решти кнопок застосунку, де про це не просили. */
+  --tap-sm: 38px;
 
   /* --- I4: шкала розмірів тексту. Було 14 різних значень, стало 6.
      Нижня межа 11.5px — Apple HIG не радить опускатись нижче 11pt
@@ -193,7 +193,7 @@
 .journey-num { font-size: var(--fs-xs); color: var(--text-muted); }
 /* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
    тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
-.journey-cell.today .journey-num { color: var(--accent-text); font-weight: 700; }
+.journey-cell.today .journey-num { color: var(--text-primary); font-weight: 700; }
 /* Кораловий контур навколо кільця "сьогодні" — окремий від дуги прогресу
    сигнал, той самий принцип, що й обведення дня "сьогодні" в референсі. */
 /* Варіант C: два кільця майже впритул (внутрішня дуга прогресу + зовнішнє
@@ -249,21 +249,28 @@
    відступ, жирніший шрифт. Вторинна — без фону й рамки, приглушений колір,
    щоб не конкурувала за увагу. */
 .btn { min-height: var(--tap); border-radius: var(--r-pill); font-family: inherit; font-size: var(--fs-md); cursor: pointer; transition: background 0.15s, color 0.15s, opacity 0.15s; }
-.btn-primary { padding: var(--sp-3) var(--sp-5); border: none; background: var(--brand); color: var(--surface-0); font-weight: 600; }
+.btn-primary { padding: var(--sp-3) var(--sp-5); border: none; background: var(--accent); color: var(--surface-0); font-weight: 600; }
 .btn-primary:hover { opacity: 0.88; }
 .btn-secondary { padding: var(--sp-3) var(--sp-4); border: none; background: transparent; color: var(--text-secondary); font-weight: 400; }
 /* Перемикач типу нової дії (Щодня / Раз на тиждень) — btn-secondary за
    замовчуванням прозорий, тож обраний варіант позначаємо рамкою. */
-.btn-secondary[aria-pressed="true"] { background: var(--surface-3); border: var(--bw) solid var(--brand); color: var(--text-primary); font-weight: 600; }
-.tactic-row { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) 0; border-bottom: var(--bw) solid var(--border); }
+.btn-secondary[aria-pressed="true"] { background: var(--surface-3); border: var(--bw) solid var(--accent); color: var(--text-primary); font-weight: 600; }
+.tactic-row { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-3) 0; border-bottom: var(--bw) solid var(--border); }
 .tactic-row:last-child { border-bottom: none; }
+.tactic-row-line1 { display: flex; }
+.tactic-row-line2 { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
 /* Фікс 3 критичного огляду: вертикальний відступ поля був лише 4px —
    набагато нижче 44-піксельного мінімуму, який цей-таки трекер послідовно
    тримає всюди. */
-.tactic-label-input { flex: 1; min-width: 0; min-height: var(--tap); background: transparent; border: none; color: var(--text-primary); font-size: var(--fs-md); font-family: inherit; padding: 0; }
+.tactic-label-input { flex: 1; min-width: 0; min-height: var(--tap-sm); background: transparent; border: none; color: var(--text-primary); font-size: var(--fs-md); font-family: inherit; padding: 0; }
 .tactic-label-input:focus { outline: none; }
 .tactic-label-input.archived { color: var(--text-muted); text-decoration: line-through; }
-.tactic-type-badge { font-size: var(--fs-xs); color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
+/* Пункт 4 фідбека: іконка без підпису не пояснювала сама себе — обидві
+   дії тепер прості текстові посилання, як .goal-close-link. */
+.tactic-action-link { background: none; border: none; padding: var(--sp-1) 0; font-size: var(--fs-xs); color: var(--text-muted); font-family: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; min-height: var(--tap-sm); white-space: nowrap; }
+.tactic-action-link:hover { color: var(--text-secondary); }
+.tactic-action-danger { color: var(--warn-text); }
+.tactic-action-danger:hover { color: var(--text-primary); }
 .btn-secondary:hover { background: var(--surface-2); color: var(--text-primary); }
 .fill-btn:hover { background: var(--surface-3); color: var(--text-primary); border-color: var(--text-muted); }
 .stepper { display: flex; align-items: center; gap: var(--sp-2); }
@@ -302,7 +309,7 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 /* Кругова кнопка-галочка замість нативного чекбокса — той самий патерн,
    що й у щоденній сітці (day-square), лишень трохи менша, бо тут вона
    одна в рядку, а не серед семи. */
-.week-check { width: var(--tap); height: var(--tap); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: var(--bw) solid var(--border-strong); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.week-check { width: var(--tap-sm); height: var(--tap-sm); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: var(--bw) solid var(--border-strong); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .week-check:hover { border-color: var(--focus); }
 .week-check:active { transform: scale(0.9); }
 .week-check.checked, .week-check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface-0); }
@@ -312,7 +319,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: var(--sp-3); }
 .daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: var(--sp-2); }
 .day-cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
-.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap); max-width: 56px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square { width: 100%; aspect-ratio: 1; min-height: var(--tap-sm); max-width: 48px; border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
 .day-square:hover { border-color: var(--focus); background: var(--surface-2); }
 .day-square:active { transform: scale(0.9); }
 .day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
@@ -422,7 +429,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
      окремі дні переставали читатись. 4px відновлюють роздільність. */
   .daily-grid { grid-template-columns: repeat(7, 1fr); gap: var(--sp-1); }
   .daily-block { padding-left: var(--sp-2); padding-right: var(--sp-2); }
-  .day-square { aspect-ratio: auto; height: var(--tap); max-width: none; border-radius: var(--r-sm); }
+  .day-square { aspect-ratio: auto; height: var(--tap-sm); max-width: none; border-radius: var(--r-sm); }
   .bar-amt { display: none; }
 }
 
@@ -514,7 +521,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v46 · checkboxes: rounded square instead of circle</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v48 · action row rebuilt: full label, editable type, labeled buttons, permanent delete</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -754,15 +761,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     // I8: перенесено сюди з інлайнових <svg> у розмітці — одне джерело правди
     dots: '<circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/>',
     target: '<circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/>',
-    sync: '<path d="M8 2a6 6 0 1 0 5.2 3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     download: '<path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     upload: '<path d="M8 14V6m0 0l-3 3m3-3l3 3M3 3h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     fill: '<path d="M8 2v9m0 0l-3.2-3.2M8 11l3.2-3.2M3 14h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     chevronLeft: '<path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     chevronRight: '<path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
-    chevronDown: '<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
-    archive: '<rect x="2.5" y="3" width="11" height="3" rx="0.8" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M3.5 6v6a1 1 0 0 0 1 1h7a1 1 0 0 0 1-1V6M6.5 9h3" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round"/>',
-    trash: '<path d="M3 4.5h10M6.3 4.5V3.2a1 1 0 0 1 1-1h1.4a1 1 0 0 1 1 1v1.3M4.3 4.5l.5 8a1 1 0 0 0 1 .9h4.4a1 1 0 0 0 1-.9l.5-8" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    chevronDown: '<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
   };
   function icon(name, size, extraStyle){ size = size || 14; return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 16 16" style="display:block;' + (extraStyle||'') + '">' + ICONS[name] + '</svg>'; }
 
@@ -903,6 +907,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // Пункт 17: памʼятаємо, який тиждень був намальований, щоб анімувати
   // лише справжню зміну, а не кожну перемальовку після вводу цифри.
   let lastRenderedWeek = null;
+  // Реальний скрін+відео користувача: перемикання тижнів "хаотично
+  // перемотувалось". Причина — стрічка ПЕРЕЦЕНТРОВУВАЛАСЬ на кожен виклик
+  // render() (а render() викликається геть на всі дії в застосунку, не
+  // лише на вибір тижня — тап по чекбоксу теж рендерить усе). Якщо
+  // користувач сам прогорнув стрічку подивитись інші тижні (не вибираючи
+  // жоден), наступний-ліпший рендер від будь-де ще на сторінці різко
+  // висмикував скрол назад до раніше обраного тижня. Тепер перецентровуємо
+  // лише тоді, коли ОБРАНИЙ тиждень справді змінився з минулого рендеру.
+  let lastJourneySelectedWeek = null;
   function activeWeek(){
     const w = selectedWeek === null ? currentWeek() : selectedWeek;
     return Math.min(Math.max(w, 1), WEEKS);
@@ -1335,15 +1348,40 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       num.className = 'journey-num';
       num.textContent = i;
       cell.appendChild(dot); cell.appendChild(num);
-      cell.onclick = () => { selectedWeek = i; render(); };
+      // Відео користувача: свайп по стрічці іноді долітав до реального тижня
+      // під пальцем як звичайний click — мобільний браузер вважає короткий
+      // дотик кліком, навіть якщо палець за секунду до того ковзав по екрану.
+      // setPointerCapture прив'язує наступні pointermove/up до ЦІЄЇ клітинки
+      // незалежно від того, над чим фізично опинився палець — так можна
+      // порахувати, скільки він проїхав по X, і відрізнити тап від прокрутки.
+      cell.addEventListener('pointerdown', (e) => {
+        try { cell.setPointerCapture(e.pointerId); } catch(err) {}
+        cell._dragStartX = e.clientX;
+        cell._dragDist = 0;
+      });
+      cell.addEventListener('pointermove', (e) => {
+        if (cell._dragStartX != null) cell._dragDist = Math.abs(e.clientX - cell._dragStartX);
+      });
+      cell.onclick = () => {
+        // Більш ніж 8px по X — це прокрутка стрічки, не намір обрати тиждень.
+        if (cell._dragDist > 8) return;
+        selectedWeek = i; render();
+      };
       strip.appendChild(cell);
     }
     wrap.appendChild(strip);
     // Якщо стрічка не влазить у ширину екрана — підкручуємо її так, щоб
-    // обраний тиждень був по центру видимої області.
-    const selEl = strip.children[sel - 1];
-    if (selEl && strip.scrollWidth > strip.clientWidth){
-      strip.scrollLeft = Math.max(0, selEl.offsetLeft - (strip.clientWidth - selEl.offsetWidth) / 2);
+    // обраний тиждень був по центру видимої області. Лише коли ОБРАНИЙ
+    // тиждень справді змінився з минулого рендеру (див. коментар біля
+    // lastJourneySelectedWeek) — інакше кожна дія деінде на сторінці
+    // (наприклад, тап по чекбоксу) висмикувала б власноруч прогорнуту
+    // користувачем позицію назад до вибраного тижня.
+    if (sel !== lastJourneySelectedWeek){
+      lastJourneySelectedWeek = sel;
+      const selEl = strip.children[sel - 1];
+      if (selEl && strip.scrollWidth > strip.clientWidth){
+        strip.scrollLeft = Math.max(0, selEl.offsetLeft - (strip.clientWidth - selEl.offsetWidth) / 2);
+      }
     }
   }
 
@@ -1680,9 +1718,18 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     let expPath = ''; for (let i = 0; i <= WEEKS; i++) expPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(expFn(i)) + ' ';
 
     // 1. Старт — окремий маркер, 3. остання точка підписана значенням.
+    // Раніше лінія домальовувалась аж до ПОТОЧНОГО тижня навіть без запису
+    // в ньому (умова була "i > cur", тобто саме i === cur пропуск не
+    // спрацьовував) — виходив плаский хвостик у нікуди після останньої
+    // реальної точки, це й помітив користувач на скріншоті. Тепер лінія
+    // ніколи не тягнеться далі ОСТАННЬОГО тижня з реальним записом.
+    // Пропущені тижні ВСЕРЕДИНІ діапазону (наприклад, тиждень 3 без запису,
+    // а тиждень 4 — є) і далі місткуються плоскою лінією, як і раніше —
+    // це навмисна поведінка, не баг.
+    let lastDataWeek = 0;
+    for (let i = 1; i <= WEEKS; i++) if (state[i][amtKey]) lastDataWeek = i;
     let actPath = '', dots = '', lastPoint = null;
-    for (let i = 0; i <= WEEKS; i++){
-      if (i > 0 && !state[i][amtKey] && i > cur) continue;
+    for (let i = 0; i <= lastDataWeek; i++){
       const v = cumSeries[i];
       actPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(v) + ' ';
       if (i === 0){
@@ -2182,13 +2229,40 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
     function buildRow(t, isArchived){
       const row = document.createElement('div'); row.className = 'tactic-row';
-      // Мітка цілі тепер не просто плашка для показу, а справжній
-      // селектор — можна змінити "Загальне" на "Вага" і так далі прямо
-      // тут, без видалення й повторного створення дії. <select> замість
-      // кастомної випадашки: безкоштовно отримуємо клавіатурну навігацію,
-      // читання скрінрідером і на iPhone — нативний колесо-пікер, який
-      // не довелось би вигадувати самотужки. Стилізуємо під ту саму
-      // плашку (варіант A), яку вже бачиш у картці тижня.
+      // Пункт 2 фідбека: назва дії обрізалась без жодної ознаки, що текст
+      // не влазить (звичайний <input> просто ховає хвіст за краєм, без
+      // "..."). Тепер назва — на власному повноширинному рядку зверху,
+      // а решта контролів (мітка цілі, тип, дії) — окремим рядком знизу,
+      // де їм більше не доводиться ділити місце з довгим текстом.
+      const line1 = document.createElement('div'); line1.className = 'tactic-row-line1';
+      const input = document.createElement('input');
+      input.type = 'text'; input.value = t.label; input.maxLength = 80;
+      input.className = 'tactic-label-input' + (isArchived ? ' archived' : '');
+      input.setAttribute('aria-label', 'Назва дії');
+      input.onblur = () => {
+        // Критичний огляд, пункт 2 (і виявлена при його фіксі друга проблема):
+        // це поле втрачає фокус не лише коли людина свідомо клікає деінде,
+        // а й ЯК ПОБІЧНИЙ ЕФЕКT closeModal() для батьківської модалки —
+        // той викликає restoreTo.focus(), що синхронно блурить це поле
+        // ПОСЕРЕД ЩЕ НЕ завершеного закриття. Відкривати іншу модалку
+        // (алерт про дублікат) синхронно просто тут — це стан гонки з
+        // модалкою, яка й досі закривається. setTimeout(0) переносить усю
+        // логіку на наступний тік, коли стек викликів уже розмотався.
+        setTimeout(() => {
+          const v = input.value.trim();
+          if (!v || v === t.label){ input.value = t.label; return; }
+          const dup = TACTICS.some(o => o !== t && o.archivedWeek === null && o.label.toLowerCase() === v.toLowerCase());
+          if (dup){ showAppAlert('Дія з такою назвою вже є серед активних.'); input.value = t.label; return; }
+          t.label = v; saveTactics(); render();
+        }, 0);
+      };
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+      line1.appendChild(input);
+      row.appendChild(line1);
+
+      const line2 = document.createElement('div'); line2.className = 'tactic-row-line2';
+
+      // Мітка цілі — та сама плашка-селектор, що й раніше.
       const goalSelect = document.createElement('select');
       goalSelect.className = 'goal-select';
       goalSelect.setAttribute('aria-label', 'До якої цілі стосується дія «' + t.label + '»');
@@ -2213,75 +2287,107 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         saveTactics();
         render(); // якщо ця дія показана в поточному тижні — оновить і там
       };
-      row.appendChild(goalSelect);
+      line2.appendChild(goalSelect);
 
-      const input = document.createElement('input');
-      input.type = 'text'; input.value = t.label; input.maxLength = 80;
-      input.className = 'tactic-label-input' + (isArchived ? ' archived' : '');
-      input.setAttribute('aria-label', 'Назва дії');
-      input.onblur = () => {
-        // Критичний огляд, пункт 2 (і виявлена при його фіксі друга проблема):
-        // це поле втрачає фокус не лише коли людина свідомо клікає деінде,
-        // а й ЯК ПОБІЧНИЙ ЕФЕКT closeModal() для батьківської модалки —
-        // той викликає restoreTo.focus(), що синхронно блурить це поле
-        // ПОСЕРЕД ЩЕ НЕ завершеного закриття. Відкривати іншу модалку
-        // (алерт про дублікат) синхронно просто тут — це стан гонки з
-        // модалкою, яка й досі закривається. setTimeout(0) переносить усю
-        // логіку на наступний тік, коли стек викликів уже розмотався.
-        setTimeout(() => {
-          const v = input.value.trim();
-          if (!v || v === t.label){ input.value = t.label; return; }
-          const dup = TACTICS.some(o => o !== t && o.archivedWeek === null && o.label.toLowerCase() === v.toLowerCase());
-          if (dup){ showAppAlert('Дія з такою назвою вже є серед активних.'); input.value = t.label; return; }
-          t.label = v; saveTactics(); render();
-        }, 0);
-      };
-      input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
-      row.appendChild(input);
-
-      const badge = document.createElement('span'); badge.className = 'tactic-type-badge';
-      // Критичний огляд, пункт 4: було "раз/тиждень" — виглядало як
-      // недороблений переклад поруч із повним текстом кнопок форми.
-      badge.textContent = t.type === 'daily' ? 'щодня' : 'щотижня';
-      row.appendChild(badge);
-
-      const btn = document.createElement('button');
-      btn.type = 'button'; btn.className = 'icon-btn'; btn.style.flexShrink = '0';
-      if (isArchived){
-        btn.title = 'Відновити'; btn.setAttribute('aria-label', 'Відновити дію «' + t.label + '»');
-        btn.innerHTML = icon('sync', 15);
-        btn.onclick = () => { t.archivedWeek = null; saveTactics(); renderTacticsSettings(); render(); };
-      } else {
-        // Критичний огляд, пункт 1: видалення дії без історії раніше
-        // спрацьовувало одним тапом без жодного підтвердження — єдине
-        // місце в застосунку, де незворотна дія не питала "ти впевнений?".
-        // Навіть "нема чого втрачати" не привід відходити від власного ж
-        // правила (порівняй зі "Скинути тиждень", яке завжди показує прев'ю).
+      // Пункт 3 фідбека: тип тепер теж редагований. "Щодня" зберігає масив
+      // із 7 булевих значень на тиждень, "щотижня" — одне булеве значення —
+      // ці форми даних несумісні, тож чесно попереджаємо й ОЧИЩУЄМО стару
+      // історію дії при зміні типу, а не намагаємось "вгадати" конвертацію,
+      // яка все одно спотворила б те, що людина реально робила.
+      const typeSelect = document.createElement('select');
+      typeSelect.className = 'goal-select';
+      typeSelect.setAttribute('aria-label', 'Як часто відмічається дія «' + t.label + '»');
+      [['daily','щодня'],['weekly','щотижня']].forEach(([ty, lbl]) => {
+        const opt = document.createElement('option');
+        opt.value = ty; opt.textContent = lbl;
+        if (ty === t.type) opt.selected = true;
+        typeSelect.appendChild(opt);
+      });
+      typeSelect.style.background = 'var(--surface-3)';
+      typeSelect.style.color = 'var(--text-secondary)';
+      typeSelect.onchange = () => {
+        const newType = typeSelect.value;
+        if (newType === t.type) return;
         const hasData = tacticHasAnyData(t);
-        btn.title = hasData ? 'Архівувати' : 'Видалити';
-        btn.setAttribute('aria-label', (hasData ? 'Архівувати' : 'Видалити') + ' дію «' + t.label + '»');
-        btn.innerHTML = icon(hasData ? 'archive' : 'trash', 15);
-        btn.onclick = () => {
-          if (hasData){
-            showAppModal({
-              message: 'Архівувати «' + t.label + '»? Тижні до цього моменту збережуть історію — вона нікуди не зникне. Нові тижні більше не питатимуть про цю дію.',
-              okLabel: 'Архівувати',
-              onOk: () => { t.archivedWeek = currentWeek(); saveTactics(); renderTacticsSettings(); render(); }
-            });
-          } else {
-            showAppModal({
-              message: 'Видалити «' + t.label + '»? Дію ще ніхто не позначав, тож видалення остаточне.',
-              okLabel: 'Видалити',
-              onOk: () => {
-                const idx = TACTICS.indexOf(t);
-                if (idx > -1) TACTICS.splice(idx, 1);
-                saveTactics(); renderTacticsSettings(); render();
-              }
-            });
+        const applyTypeChange = () => {
+          t.type = newType;
+          for (let i = 1; i <= WEEKS; i++){
+            if (state[i].custom && state[i].custom[t.id]){ delete state[i].custom[t.id]; saveWeek(i); }
           }
+          saveTactics(); renderTacticsSettings(); render();
         };
+        if (hasData){
+          showAppModal({
+            message: 'Змінити тип дії «' + t.label + '» на «' + (newType === 'daily' ? 'щодня' : 'щотижня') + '»? Записана історія цієї дії буде очищена — щоденний і щотижневий записи несумісні між собою.',
+            okLabel: 'Змінити й очистити',
+            onOk: applyTypeChange,
+            onCancel: () => { typeSelect.value = t.type; }
+          });
+        } else {
+          applyTypeChange();
+        }
+      };
+      line2.appendChild(typeSelect);
+
+      const spacer = document.createElement('div'); spacer.style.flex = '1'; line2.appendChild(spacer);
+
+      // Пункт 4 фідбека: іконка-без-підпису не пояснювала себе. Обидві
+      // кнопки тепер підписані текстом.
+      if (isArchived){
+        const restoreBtn = document.createElement('button');
+        restoreBtn.type = 'button'; restoreBtn.className = 'tactic-action-link';
+        restoreBtn.textContent = 'Відновити';
+        restoreBtn.setAttribute('aria-label', 'Відновити дію «' + t.label + '»');
+        restoreBtn.onclick = () => { t.archivedWeek = null; saveTactics(); renderTacticsSettings(); render(); };
+        line2.appendChild(restoreBtn);
+      } else {
+        const hasData = tacticHasAnyData(t);
+        const archiveBtn = document.createElement('button');
+        archiveBtn.type = 'button'; archiveBtn.className = 'tactic-action-link';
+        archiveBtn.textContent = 'Архівувати';
+        archiveBtn.setAttribute('aria-label', 'Архівувати дію «' + t.label + '»');
+        archiveBtn.onclick = () => {
+          showAppModal({
+            message: 'Архівувати «' + t.label + '»? Тижні до цього моменту збережуть історію — вона нікуди не зникне. Нові тижні більше не питатимуть про цю дію.',
+            okLabel: 'Архівувати',
+            onOk: () => { t.archivedWeek = currentWeek(); saveTactics(); renderTacticsSettings(); render(); }
+          });
+        };
+        // Архівувати без жодних даних немає сенсу — одразу пропонуємо
+        // видалення (нижче), а не порожній архів, який довелось би
+        // видаляти самим окремо ще раз.
+        if (hasData) line2.appendChild(archiveBtn);
       }
-      row.appendChild(btn);
+
+      // Пункт 5 фідбека: постійне видалення раніше було доступне ЛИШЕ для
+      // дій без жодних даних — щойно з'являлась хоч одна відмітка, єдиним
+      // варіантом лишалось архівувати. Тепер видалити можна завжди
+      // (архівовану дію теж), назавжди, і завжди з підтвердженням.
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button'; deleteBtn.className = 'tactic-action-link tactic-action-danger';
+      deleteBtn.textContent = 'Видалити';
+      deleteBtn.setAttribute('aria-label', 'Видалити дію «' + t.label + '» назавжди');
+      deleteBtn.onclick = () => {
+        const hasData = tacticHasAnyData(t);
+        const doDelete = () => {
+          const idx = TACTICS.indexOf(t);
+          if (idx > -1) TACTICS.splice(idx, 1);
+          for (let i = 1; i <= WEEKS; i++){
+            if (state[i].custom && state[i].custom[t.id]){ delete state[i].custom[t.id]; saveWeek(i); }
+          }
+          saveTactics(); renderTacticsSettings(); render();
+        };
+        showAppModal({
+          message: hasData
+            ? 'Видалити «' + t.label + '» назавжди? Уся записана історія цієї дії буде втрачена без можливості відновлення.'
+            : 'Видалити «' + t.label + '»? Дію ще ніхто не позначав, тож видалення остаточне.',
+          okLabel: 'Видалити назавжди',
+          onOk: doDelete
+        });
+      };
+      line2.appendChild(deleteBtn);
+
+      row.appendChild(line2);
       return row;
     }
 
