@@ -313,7 +313,7 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
 .week-check:hover { border-color: var(--focus); }
 .week-check:active { transform: scale(0.9); }
 .week-check.checked, .week-check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface-0); }
-.week-check[aria-checked="true"] svg { animation: checkPop 0.16s cubic-bezier(0.34, 1.4, 0.64, 1); }
+.week-check.just-toggled svg { animation: checkPop 0.16s cubic-bezier(0.34, 1.4, 0.64, 1); }
 input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
 .daily-block { border: var(--bw) solid transparent; border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4) var(--sp-4); margin-bottom: var(--sp-2); transition: background 0.2s, border-color 0.2s; }
 .daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: var(--sp-3); }
@@ -339,7 +339,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
 /* №7: галочка з'являлась різко — перехід був заданий лише для фону й межі. */
 @keyframes checkPop { from { transform: scale(0.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.day-square[aria-checked="true"] svg { animation: checkPop 0.16s cubic-bezier(0.34, 1.4, 0.64, 1); }
+.day-square.just-toggled svg { animation: checkPop 0.16s cubic-bezier(0.34, 1.4, 0.64, 1); }
 .day-cell-label { font-size: var(--fs-xs); color: var(--text-muted); }
 .hero-card { border-radius: var(--r-xl); padding: var(--sp-5); margin-bottom: var(--sp-5); background: var(--surface-1); border: var(--bw) solid var(--border); box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
 /* --- Пункт 13: у файлі було нуль градієнтів. Одна акуратна радіальна
@@ -501,7 +501,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v50 · $ in delta, no collapse, better wording, fixed dot animation</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v51 · checkPop animation scoped to just-toggled checkbox only</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -895,6 +895,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // висмикував скрол назад до раніше обраного тижня. Тепер перецентровуємо
   // лише тоді, коли ОБРАНИЙ тиждень справді змінився з минулого рендеру.
   let lastJourneySelectedWeek = null;
+  // Реальне відео користувача: тап по одній галочці — і інші, вже
+  // відмічені, "трішки здвигаються". Причина та сама, що й вище з
+  // таймлайном: render() перебудовує ВЕСЬ DOM, тож усі вже відмічені
+  // чекбокси отримують свіжі SVG-елементи галочок — а CSS-анімація
+  // "стрибка" (checkPop) прив'язана до aria-checked="true", тож
+  // програється заново на кожному з них, а не лише на тому, який щойно
+  // натиснули. justToggledKey зберігає, ЯКИЙ САМЕ чекбокс щойно змінили —
+  // анімація тепер прив'язана до окремого класу, що ставиться лише йому.
+  let justToggledKey = null;
   function activeWeek(){
     const w = selectedWeek === null ? currentWeek() : selectedWeek;
     return Math.min(Math.max(w, 1), WEEKS);
@@ -1783,7 +1792,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     return diff >= 0 && diff <= 6 ? diff : null;
   }
 
-  function dailyToggle(weekIdx, label, getArr, goal){
+  function dailyToggle(weekIdx, label, getArr, goal, tacticId){
     const arr = getArr();
     const frac = dayFraction(arr), pct = Math.round(frac*100);
     const todayIdx = todayIndexIn(weekIdx);
@@ -1815,7 +1824,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       if (isFuture) cell.classList.add('is-future');
 
       const sq = document.createElement('div');
-      sq.className = 'day-square' + (val ? ' checked' : '') + (isToday ? ' is-today' : '') + (isFuture ? ' is-future' : '');
+      const dayKey = 'daily:' + weekIdx + ':' + tacticId + ':' + di;
+      sq.className = 'day-square' + (val ? ' checked' : '') + (isToday ? ' is-today' : '') + (isFuture ? ' is-future' : '') + (dayKey === justToggledKey ? ' just-toggled' : '');
       sq.setAttribute('role', 'checkbox');
       sq.setAttribute('aria-checked', val ? 'true' : 'false');
       sq.setAttribute('tabindex', isFuture ? '-1' : '0');
@@ -1831,7 +1841,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         if (isFuture) return;
         const a = getArr();
         a[di] = !a[di];
-        saveWeek(weekIdx); render();
+        saveWeek(weekIdx); justToggledKey = dayKey; render();
       };
       sq.onclick = toggle;
       sq.onkeydown = (e) => {
@@ -1998,13 +2008,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         // Той самий доступний чекбокс-патерн, що й у щоденній сітці —
         // роль, стан, Tab-послідовність, Space/Enter — замість нативного
         // <input> ліворуч. Тепер кнопка кругла й праворуч, як у референсі.
-        const btn = document.createElement('div'); btn.className = 'week-check' + (checked ? ' checked' : '');
+        const btn = document.createElement('div');
+        const weekKey = 'weekly:' + i + ':' + t.id;
+        btn.className = 'week-check' + (checked ? ' checked' : '') + (weekKey === justToggledKey ? ' just-toggled' : '');
         btn.setAttribute('role', 'checkbox');
         btn.setAttribute('aria-checked', checked ? 'true' : 'false');
         btn.setAttribute('tabindex', '0');
         btn.setAttribute('aria-label', t.label);
         btn.innerHTML = checked ? icon('check', 18) : '';
-        const toggle = () => { tacticSetWeekly(i, t, !tacticGetWeekly(i, t)); saveWeek(i); render(); };
+        const toggle = () => { tacticSetWeekly(i, t, !tacticGetWeekly(i, t)); saveWeek(i); justToggledKey = weekKey; render(); };
         btn.onclick = toggle;
         btn.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggle(); } };
         row.appendChild(btn);
@@ -2012,7 +2024,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       });
     }
     dailyTactics.forEach(t => {
-      frag.appendChild(dailyToggle(i, t.label, () => tacticGetDailyArr(i, t), t.goal));
+      frag.appendChild(dailyToggle(i, t.label, () => tacticGetDailyArr(i, t), t.goal, t.id));
     });
     return frag;
   }
@@ -2543,6 +2555,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       renderMoneyChart('chart-debt', expDebtPaid, 'debtAmt', GOALS.debtStart, GOALS.debtEnd, C_DEBT, 'debt', snap);
       renderMoneyChart('chart-capital', expCapital, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd, C_CAPITAL, 'capital', snap);
       renderHero(snap);
+      // Ключ був потрібен лише для ЦЬОГО проходу — щоб не переанімувати ту
+      // саму галочку вдруге на наступному ж рендері від чогось геть іншого.
+      justToggledKey = null;
     } catch(err){
       const root = document.getElementById('tracker-root');
       if (root) root.innerHTML = '<div style="padding:var(--sp-5); font-family:sans-serif; color:#F0B94D;">Трекер не зміг відобразитись через помилку: ' + (err && err.message ? err.message : String(err)) + '. Спробуй відкрити цей артефакт у звичайному браузері телефону через кнопку "Publish".</div>';
