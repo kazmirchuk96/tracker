@@ -236,8 +236,6 @@
 .metric-body { flex: 1; min-width: 0; }
 .metric-top-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-2); }
 .metric-label { font-size: var(--fs-sm); color: var(--text-secondary); font-weight: 500; }
-.method-hint { width: 20px; height: 20px; border-radius: 50%; border: var(--bw) solid var(--border-strong); background: transparent; color: var(--text-muted); font-family: inherit; font-size: var(--fs-xs); line-height: 1; cursor: pointer; flex-shrink: 0; align-self: center; }
-.method-hint:hover { color: var(--text-primary); border-color: var(--text-muted); }
 .plan-note { font-size: var(--fs-sm); color: var(--text-muted); letter-spacing: var(--tr-caption); line-height: var(--lh-caption); }
 /* 3.7: поле + "підставити" + "копіювати" на вузькому екрані можуть не влізти
    в один рядок — дозволяємо перенос, щоб не виникало горизонтального скролу. */
@@ -501,10 +499,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v51 · checkPop animation scoped to just-toggled checkbox only</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v53 · fix: confirmation modal was hidden behind settings modal (z-index)</div>
 </div>
 
-<div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
+<div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:210; align-items:center; justify-content:center; padding:var(--sp-4);">
   <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:340px; width:100%; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
     <div id="app-modal-message" style="font-size:var(--fs-md); line-height:1.5; margin-bottom:var(--sp-4);"></div>
     <div id="app-modal-input-wrap" style="display:none; margin-bottom:var(--sp-4);">
@@ -1148,6 +1146,35 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const CAP = 6;
     const shown = parts.length > CAP ? parts.slice(0, CAP).concat(['ще ' + (parts.length - CAP)]) : parts;
     return count + ' ' + pluralUk(count, 'дія', 'дії', 'дій') + ' тижня: ' + shown.join(', ') + '.';
+  }
+  // Фідбек із реального пристрою: кнопка "?" не подобалась сама по собі,
+  // а пояснення під нею (суцільне речення з переліком назв через кому)
+  // не відповідало на головне питання — скільки відсотків дає КОЖЕН
+  // окремий пункт. Явний список замість абзацу: та сама мітка цілі, що
+  // вже показана нижче в "Дії тижня", + вага у відсотках навпроти кожної.
+  function scoreBreakdownHtml(n){
+    const items = [
+      { goal: 'debt', label: 'Борг · конверт готівкою' },
+      { goal: 'capital', label: 'Капітал · переказ' }
+    ];
+    TACTICS.forEach(t => { if (tacticAppliesTo(t, n)) items.push({ goal: t.goal, label: t.label }); });
+    const total = items.length;
+    if (total === 0) return '<div style="font-size:var(--fs-sm); color:var(--text-secondary);">На цей тиждень немає жодного пункту, що впливає на відсоток.</div>';
+    // Кожен пункт важить порівну — 100/total може не ділитись рівно
+    // (наприклад 100/3 = 33.3), тож позначаємо приблизно (~), як і
+    // деінде в застосунку для орієнтовних значень.
+    const raw = 100 / total;
+    const pctStr = Math.abs(raw - Math.round(raw)) < 0.05 ? String(Math.round(raw)) : raw.toFixed(1);
+    const rows = items.map(it =>
+      '<li style="display:flex; align-items:center; gap:var(--sp-2); padding:var(--sp-1) 0;">' +
+        goalBadge(it.goal) +
+        '<span style="flex:1; min-width:0;">' + escHtml(it.label) + '</span>' +
+        '<span style="font-weight:600; flex-shrink:0;">~' + pctStr + '%</span>' +
+      '</li>'
+    ).join('');
+    return '<div style="font-size:var(--fs-sm); color:var(--text-secondary); margin-bottom:var(--sp-2);">' +
+        total + ' ' + pluralUk(total, 'пункт', 'пункти', 'пунктів') + ' на цей тиждень, кожен важить порівну:</div>' +
+      '<ul style="list-style:none; margin:0; padding:0;">' + rows + '</ul>';
   }
 
   function dayFraction(arr){ return arr.filter(Boolean).length / 7; }
@@ -2147,8 +2174,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     card.appendChild(scoreRow);
 
     // Пункт 8: пояснення методики на три рядки важило більше за саму метрику
-    // і показувалось щодня. Після трьох запусків згортаємо його в іконку "?",
-    // яка розкриває той самий текст на вимогу.
+    // і показувалось щодня. Після трьох запусків згортаємо його в текстове
+    // посилання, яке розкриває пояснення на вимогу.
+    // Фідбек із реального пристрою: раніше тут була кругова кнопка "?" —
+    // сама по собі не подобалась, і пояснення під нею було суцільним
+    // реченням, не відповідало на "скільки відсотків дає який пункт".
+    // Тепер звичайне текстове посилання відкриває явний список (scoreBreakdownHtml).
     const scoreCaption = document.createElement('div');
     const showFull = launchCount() <= 3;
     scoreCaption.style.cssText = 'font-size:var(--fs-xs); color:var(--text-muted); letter-spacing:var(--tr-caption); line-height:var(--lh-caption); margin: 0 0 var(--sp-4);';
@@ -2163,11 +2194,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     } else {
       const hint = document.createElement('button');
       hint.type = 'button';
-      hint.className = 'method-hint';
-      hint.textContent = '?';
-      hint.title = 'Як рахується відсоток';
-      hint.setAttribute('aria-label', 'Як рахується відсоток виконання тижня');
-      hint.onclick = () => showAppModal({ html: METHOD_TEXT, okLabel: 'Зрозуміло', hideCancel: true });
+      hint.className = 'tactic-action-link';
+      hint.style.padding = '0';
+      hint.textContent = 'як рахується?';
+      hint.setAttribute('aria-label', 'Як рахується відсоток виконання тижня — список пунктів і вага кожного');
+      hint.onclick = () => showAppModal({ html: scoreBreakdownHtml(i), okLabel: 'Зрозуміло', hideCancel: true });
       scoreRow.appendChild(hint);
       scoreCaption.style.margin = '0 0 var(--sp-3)';
     }
