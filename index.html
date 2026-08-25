@@ -499,7 +499,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v53 · fix: confirmation modal was hidden behind settings modal (z-index)</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v54 · fix: comma decimal separator rejected in weight fields (iOS)</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:210; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -522,8 +522,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Вага, кг</div>
     <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-4);">
-      <input id="goal-weight-start" type="number" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
-      <input id="goal-weight-end" type="number" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-weight-start" type="text" inputmode="decimal" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-weight-end" type="text" inputmode="decimal" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Борг, $</div>
@@ -1890,16 +1890,29 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     if (min === undefined || min === null) min = 0;
     const wrap = document.createElement('div'); wrap.className = 'stepper';
     const input = document.createElement('input');
-    input.type = 'number'; input.step = step; input.min = min;
+    // Реальний фідбек: на iOS з українською розкладкою екранна клавіатура
+    // для type="number" показує КОМУ на місці десяткової крапки — а сам
+    // number-інпут за специфікацією приймає лише крапку незалежно від
+    // локалі. Браузер просто відмовлявся вводити кому, тож дробове число
+    // ввести було неможливо. text + inputmode="decimal" дає ту саму
+    // цифрову клавіатуру на екрані, але не накладає власних обмежень на
+    // символи — кому й крапку розбираємо самі в parseLocal нижче.
+    input.type = 'text';
+    input.step = step; input.min = min;
     input.value = value !== null && value !== undefined ? value : '';
     input.inputMode = decimals > 0 ? 'decimal' : 'numeric';
     input.onfocus = () => input.select();
+    function parseLocal(raw){
+      if (!raw) return null;
+      const n = parseFloat(String(raw).replace(',', '.'));
+      return isNaN(n) ? null : n;
+    }
     // While typing: only persist the value, never rebuild the DOM (that was causing focus loss / jank on every keystroke).
-    input.oninput = () => onLive(input.value ? parseFloat(input.value) : null);
+    input.oninput = () => onLive(parseLocal(input.value));
     // Full recalculation happens once editing is done — і тут же виправляємо, якщо ввели від'ємне число.
     input.onblur = () => {
-      const v = parseFloat(input.value);
-      if (!isNaN(v) && v < min){ input.value = min; onLive(min); }
+      const v = parseLocal(input.value);
+      if (v !== null && v < min){ input.value = min; onLive(min); }
       onCommit();
     };
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
@@ -2524,7 +2537,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     // задати ціль ваги "-50" чи старт боргу "-999", і далі всі формули темпу,
     // відсотків і графіків починали видавати безглузді значення без
     // найменшого попередження.
-    const num = (id, fallback) => { const v = parseFloat($(id).value); return isNaN(v) ? fallback : v; };
+    // Та сама причина, що й у stepper() — крапка/кома розбираються самі,
+    // бо поля тепер type="text" (щоб на iOS з українською розкладкою кому
+    // взагалі можна було ввести).
+    const num = (id, fallback) => { const v = parseFloat(String($(id).value).replace(',', '.')); return isNaN(v) ? fallback : v; };
     const next = {
       weightStart: num('goal-weight-start', GOALS.weightStart),
       weightEnd:   num('goal-weight-end', GOALS.weightEnd),
