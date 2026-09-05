@@ -499,7 +499,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v54 · fix: comma decimal separator rejected in weight fields (iOS)</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v55 · fix: weight-on-track badge ignored a hidden 0.15kg tolerance over plan</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:210; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -1258,7 +1258,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       neededWeeklyLoss: (lastWeight - GOALS.weightEnd) / remWeightWeeks,
       neededWeeklyDebt: (GOALS.debtEnd - debtCurrent) / remDebtWeeks,
       neededWeeklyCapital: (GOALS.capitalEnd - capitalCurrent) / remCapitalWeeks,
-      weightOnTrack: lastWeight <= expWeight(paceWeekWeight) + 0.15,
+      // Раніше тут був допуск +0.15 кг ("трохи вище плану — все одно у графіку"),
+      // щоб не тривожити через денний шум ваги. За проханням користувача прибрано:
+      // 78.6 кг при плані 78.5 кг тепер чесно рахується як "позаду", без винятків.
+      weightOnTrack: lastWeight <= expWeight(paceWeekWeight),
       debtOnTrack: debtCurrent >= expDebtPaid(paceWeekDebt) - 5,
       capitalOnTrack: capitalCurrent >= expCapital(paceWeekCapital) - 5,
       weightAhead: lastWeight < expWeight(paceWeekWeight) - 0.3,
