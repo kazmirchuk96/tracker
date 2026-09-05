@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Варіанти мітки цілі</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --surface-0: #0F0E0A; --surface-1: #1A1914; --surface-2: #232119; --surface-3: #2C2921;
+  --border: #3A3830; --border-strong: #7C7766;
+  --text-primary: #F3F1E8; --text-secondary: #B7B4A6; --text-muted: #9A9784;
+  --r-sm: 8px; --r-md: 12px; --r-lg: 16px; --r-pill: 999px;
+  --c-weight: #9089E0; --c-debt: #5BA3E8; --c-capital: #3BC4C4; --c-general: #9A9784;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--surface-0); color: var(--text-primary);
+  font-family: 'Inter', -apple-system, sans-serif; padding: 32px 16px 80px;
+}
+.wrap { max-width: 640px; margin: 0 auto; }
+h1 { font-family: 'Fraunces', serif; font-size: 24px; font-weight: 600; margin: 0 0 6px; }
+.intro { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin-bottom: 36px; max-width: 54ch; }
+
+.variant { margin-bottom: 40px; padding-bottom: 32px; border-bottom: 1px solid var(--border); }
+.variant:last-of-type { border-bottom: none; }
+.variant-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+.variant-letter {
+  font-family: 'Fraunces', serif; font-size: 15px; font-weight: 700; color: var(--surface-0);
+  background: var(--text-primary); width: 24px; height: 24px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.variant-name { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; }
+.variant-desc { color: var(--text-muted); font-size: 12.5px; line-height: 1.5; margin: 4px 0 16px; max-width: 56ch; }
+.reco { display: inline-block; font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  background: rgba(47,190,147,0.16); color: #6EE7C0; padding: 2px 8px; border-radius: var(--r-pill); margin-left: 4px; }
+
+/* --- контекст 1: рядок у списку налаштувань --- */
+.ctx-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin: 0 0 6px; }
+.mock-row {
+  display: flex; align-items: center; gap: 8px; padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.mock-input {
+  flex: 1; min-width: 0; background: transparent; border: none; color: var(--text-primary);
+  font-size: 14px; font-family: inherit; padding: 0;
+}
+.mock-type-badge { font-size: 11.5px; color: var(--text-muted); flex-shrink: 0; white-space: nowrap; }
+.mock-icon-btn {
+  width: 32px; height: 32px; border-radius: 50%; border: none; background: transparent;
+  color: var(--text-muted); flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+
+/* --- контекст 2: рядок у картці тижня --- */
+.mock-week { display: flex; flex-direction: column; gap: 8px; margin-top: 18px; padding: 12px 14px;
+  background: var(--surface-2); border-radius: var(--r-md); }
+.mock-week-row { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+.mock-checkbox { width: 16px; height: 16px; border-radius: 4px; border: 1.5px solid var(--border-strong); flex-shrink: 0; }
+
+/* ============ Стилі самих міток (те, що порівнюємо) ============ */
+
+/* A — м'яка плашка (bg 16% + текст кольором) */
+.badge-soft {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+  padding: 3px 9px; border-radius: var(--r-pill); white-space: nowrap;
+}
+
+/* B — контурна плашка */
+.badge-outline {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+  padding: 2px 8px; border-radius: var(--r-pill); border-width: 1.3px; border-style: solid;
+  background: transparent; white-space: nowrap;
+}
+
+/* C — суцільна плашка (темний текст на кольоровому фоні) */
+.badge-solid {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700;
+  padding: 3px 9px; border-radius: var(--r-pill); color: var(--surface-0); white-space: nowrap;
+}
+
+/* D — просто кольоровий текст із підкресленням, без форми плашки */
+.badge-underline {
+  display: inline-flex; align-items: center; font-size: 11px; font-weight: 600;
+  border-bottom: 1.5px solid; padding-bottom: 1px; white-space: nowrap;
+}
+
+/* E — іконка + текст на нейтральному фоні (форма додає другий канал розпізнавання, не лише колір) */
+.badge-icon {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600;
+  padding: 3px 9px 3px 6px; border-radius: var(--r-pill); background: var(--surface-3);
+  border: 1px solid var(--border); color: var(--text-primary); white-space: nowrap;
+}
+.badge-icon svg { flex-shrink: 0; }
+
+.example-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+
+footer { max-width: 640px; margin: 40px auto 0; padding-top: 24px; border-top: 1px solid var(--border); }
+footer h2 { font-family: 'Fraunces', serif; font-size: 16px; margin: 0 0 8px; }
+footer p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; max-width: 58ch; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Варіанти мітки цілі</h1>
+  <p class="intro">П'ять реальних варіантів, у тому самому темному стилі й тих самих двох місцях, де мітка зʼявляється в трекері: рядок налаштувань і картка тижня. Колір той самий скрізь — Вага фіолетова, Борг синій, Капітал бірюзовий, Загальне нейтральне. Різниться лише форма.</p>
+
+  <!-- ===================== A ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">A</span>
+      <span class="variant-name">М'яка плашка</span>
+      <span class="reco">рекомендую</span>
+    </div>
+    <div class="variant-desc">Приглушений кольоровий фон (16% прозорості) + текст повним кольором. Це вже наявна в трекері мова — саме так виглядають бейджі "у графіку" / "позаду" і пілюля "Сьогодні". Нове не вигадується, а просто переноситься.</div>
+
+    <div class="ctx-label">Рядок налаштувань</div>
+    <div class="mock-row">
+      <span class="badge-soft" style="background:rgba(144,137,224,0.16); color:#9089E0;">Вага</span>
+      <input class="mock-input" value="Зважування в понеділок зранку" readonly>
+      <span class="mock-type-badge">щотижня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+    <div class="mock-row">
+      <span class="badge-soft" style="background:rgba(91,163,232,0.16); color:#5BA3E8;">Борг</span>
+      <input class="mock-input" value="Відкладати на подушку безпеки" readonly>
+      <span class="mock-type-badge">щодня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+
+    <div class="ctx-label" style="margin-top:16px;">Картка тижня</div>
+    <div class="mock-week">
+      <div class="mock-week-row"><span class="mock-checkbox"></span> <span class="badge-soft" style="background:rgba(154,151,132,0.16); color:#C4C1B2;">Загальне</span> Аналіз тижня</div>
+    </div>
+  </div>
+
+  <!-- ===================== B ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">B</span>
+      <span class="variant-name">Контурна плашка</span>
+    </div>
+    <div class="variant-desc">Той самий текст, але без заливки — лише тонка кольорова рамка. Тихіше за варіант A, менше "кричить" поруч із рештою рядка. Гірше читається на відстані (менша площа кольору).</div>
+
+    <div class="ctx-label">Рядок налаштувань</div>
+    <div class="mock-row">
+      <span class="badge-outline" style="border-color:#9089E0; color:#9089E0;">Вага</span>
+      <input class="mock-input" value="Зважування в понеділок зранку" readonly>
+      <span class="mock-type-badge">щотижня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+    <div class="mock-row">
+      <span class="badge-outline" style="border-color:#3BC4C4; color:#3BC4C4;">Капітал</span>
+      <input class="mock-input" value="Переказ на Монобанк" readonly>
+      <span class="mock-type-badge">щодня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+
+    <div class="ctx-label" style="margin-top:16px;">Картка тижня</div>
+    <div class="mock-week">
+      <div class="mock-week-row"><span class="mock-checkbox"></span> <span class="badge-outline" style="border-color:#C4C1B2; color:#C4C1B2;">Загальне</span> Аналіз тижня</div>
+    </div>
+  </div>
+
+  <!-- ===================== C ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">C</span>
+      <span class="variant-name">Суцільна плашка</span>
+    </div>
+    <div class="variant-desc">Повністю залитий колір, темний текст поверх — найгучніший варіант, схожий на кружечки таймлайну тижнів. Добре виділяється, але на кожному рядку списку (а їх може бути десяток) це забагато яскравих плям одразу.</div>
+
+    <div class="ctx-label">Рядок налаштувань</div>
+    <div class="mock-row">
+      <span class="badge-solid" style="background:#9089E0;">Вага</span>
+      <input class="mock-input" value="Зважування в понеділок зранку" readonly>
+      <span class="mock-type-badge">щотижня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+    <div class="mock-row">
+      <span class="badge-solid" style="background:#5BA3E8;">Борг</span>
+      <input class="mock-input" value="Відкладати на подушку безпеки" readonly>
+      <span class="mock-type-badge">щодня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+
+    <div class="ctx-label" style="margin-top:16px;">Картка тижня</div>
+    <div class="mock-week">
+      <div class="mock-week-row"><span class="mock-checkbox"></span> <span class="badge-solid" style="background:#C4C1B2;">Загальне</span> Аналіз тижня</div>
+    </div>
+  </div>
+
+  <!-- ===================== D ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">D</span>
+      <span class="variant-name">Підкреслений текст</span>
+    </div>
+    <div class="variant-desc">Без форми плашки взагалі — просто кольоровий текст із тонким підкресленням кольору. Найкомпактніший (менше з'їдає ширину рядка), але й найтихіший — легко пропустити оком, якщо не шукати спеціально.</div>
+
+    <div class="ctx-label">Рядок налаштувань</div>
+    <div class="mock-row">
+      <span class="badge-underline" style="color:#9089E0; border-color:#9089E0;">Вага</span>
+      <input class="mock-input" value="Зважування в понеділок зранку" readonly>
+      <span class="mock-type-badge">щотижня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+    <div class="mock-row">
+      <span class="badge-underline" style="color:#3BC4C4; border-color:#3BC4C4;">Капітал</span>
+      <input class="mock-input" value="Переказ на Монобанк" readonly>
+      <span class="mock-type-badge">щодня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+
+    <div class="ctx-label" style="margin-top:16px;">Картка тижня</div>
+    <div class="mock-week">
+      <div class="mock-week-row"><span class="mock-checkbox"></span> <span class="badge-underline" style="color:#C4C1B2; border-color:#C4C1B2;">Загальне</span> Аналіз тижня</div>
+    </div>
+  </div>
+
+  <!-- ===================== E ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">E</span>
+      <span class="variant-name">Іконка + текст</span>
+      <span class="reco" style="background:rgba(240,185,77,0.16); color:#F0B94D;">цікавий варіант</span>
+    </div>
+    <div class="variant-desc">Нейтральний фон, а розрізняє категорії ще й ФОРМА іконки, не лише колір, — другий канал розпізнавання. Найкорисніше саме тут: Борг і Капітал обидва "про гроші" й найлегше сплутати одне з одним по кольору, а іконки (конверт проти графіка) розводять їх однозначно навіть при поганому освітленні екрана чи для людей із дальтонізмом.</div>
+
+    <div class="ctx-label">Рядок налаштувань</div>
+    <div class="mock-row">
+      <span class="badge-icon"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="5" r="2.6" stroke="#9089E0" stroke-width="1.4" fill="none"/><path d="M4.5 14l1.2-6h4.6l1.2 6" stroke="#9089E0" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Вага</span>
+      <input class="mock-input" value="Зважування в понеділок зранку" readonly>
+      <span class="mock-type-badge">щотижня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+    <div class="mock-row">
+      <span class="badge-icon"><svg width="12" height="12" viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="8.5" rx="1.3" stroke="#5BA3E8" stroke-width="1.3" fill="none"/><path d="M2.3 4.5L8 9l5.7-4.5" stroke="#5BA3E8" stroke-width="1.3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Борг</span>
+      <input class="mock-input" value="Відкладати на подушку безпеки" readonly>
+      <span class="mock-type-badge">щодня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+    <div class="mock-row">
+      <span class="badge-icon"><svg width="12" height="12" viewBox="0 0 16 16"><path d="M2.5 11.5l3.5-4 2.5 2.5 4.5-5.5" stroke="#3BC4C4" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 4.5h3v3" stroke="#3BC4C4" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Капітал</span>
+      <input class="mock-input" value="Переказ на Монобанк" readonly>
+      <span class="mock-type-badge">щодня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+    <div class="mock-row">
+      <span class="badge-icon"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" stroke="#C4C1B2" stroke-width="1.3" fill="none"/><circle cx="8" cy="8" r="1.4" fill="#C4C1B2"/></svg>Загальне</span>
+      <input class="mock-input" value="Аналіз тижня" readonly>
+      <span class="mock-type-badge">щотижня</span>
+      <span class="mock-icon-btn">···</span>
+    </div>
+
+    <div class="ctx-label" style="margin-top:16px;">Картка тижня</div>
+    <div class="mock-week">
+      <div class="mock-week-row">
+        <span class="mock-checkbox"></span>
+        <span class="badge-icon"><svg width="12" height="12" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" stroke="#C4C1B2" stroke-width="1.3" fill="none"/><circle cx="8" cy="8" r="1.4" fill="#C4C1B2"/></svg>Загальне</span>
+        Аналіз тижня
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <h2>Що раджу</h2>
+    <p><b>A (м'яка плашка)</b> — за замовчуванням: вона вже є в трекері (бейджі прогресу, пілюля "Сьогодні"), тож нічого нового вигадувати не треба, і вона одразу впізнається як "той самий тип елемента". Текст читається чіткіше, ніж у B/D, і не такий крикливий, як C.</p>
+    <p style="margin-top:10px;">Якщо хочеться саме "класний" варіант і не шкода трохи більше роботи — <b>E (іконка + текст)</b> вирішує реальну проблему, а не тільки естетичну: Борг і Капітал обидва сині-бірюзові відтінки "про гроші", їх найлегше переплутати одне з одним. Іконка розводить їх формою, не тільки кольором.</p>
+    <p style="margin-top:10px;">Можна й поєднати: A скрізь, окрім Боргу/Капіталу — там іконка. Але це вже деталізація, не варта ускладнення, поки не побачиш два варіанти наживо й не визначишся.</p>
+  </footer>
+</div>
+</body>
+</html>

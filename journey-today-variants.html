@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Варіанти відображення поточного тижня</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --surface-0: #0F0E0A; --surface-1: #1A1914; --surface-2: #232119; --surface-3: #2C2921;
+  --border: #3A3830; --border-strong: #7C7766;
+  --text-primary: #F3F1E8; --text-secondary: #B7B4A6; --text-muted: #9A9784;
+  --accent: #2FBE93; --accent-text: #6EE7C0;
+  --brand: #FF6B7A;
+  --done: #2FBE93; --neutral: #A8A292;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--surface-0); color: var(--text-primary);
+  font-family: 'Inter', -apple-system, sans-serif; padding: 28px 16px 80px;
+}
+.wrap { max-width: 640px; margin: 0 auto; }
+h1 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; margin: 0 0 6px; }
+.intro { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin-bottom: 32px; max-width: 56ch; }
+
+.variant { margin-bottom: 36px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+.variant:last-of-type { border-bottom: none; }
+.variant-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+.variant-letter {
+  font-family: 'Fraunces', serif; font-size: 14px; font-weight: 700; color: var(--surface-0);
+  background: var(--text-primary); width: 22px; height: 22px; border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.variant-name { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+.variant-desc { color: var(--text-muted); font-size: 12.5px; line-height: 1.5; margin: 4px 0 18px; max-width: 58ch; }
+.reco { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+  background: rgba(47,190,147,0.16); color: #6EE7C0; padding: 2px 8px; border-radius: 999px; margin-left: 2px; }
+
+/* --- Стрічка тижнів (той самий патерн, що й у трекері) --- */
+.strip { display: flex; gap: 12px; overflow-x: auto; padding: 6px 2px 8px; }
+.cell { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 0 0 auto; }
+.dot { position: relative; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; }
+.dot svg { position: absolute; inset: 0; }
+.num { position: relative; font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.wk { font-size: 11px; color: var(--text-muted); }
+.wk.today { color: var(--accent-text); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Варіанти відображення поточного тижня</h1>
+  <p class="intro">Зараз тижні 1-2 (виконано, зелена дуга) виглядають чисто. Тиждень-"сьогодні" (3) має ДВА кільця майже впритул — внутрішню дугу прогресу і зовнішнє обведення "сьогодні" — і разом вони зливаються в пляму. П'ять варіантів нижче — усі в тому самому 44px розмірі й тій самій стрічці, для чесного порівняння.</p>
+
+  <!-- ===================== ПОТОЧНИЙ СТАН (для порівняння) ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">0</span>
+      <span class="variant-name">Як зараз</span>
+    </div>
+    <div class="variant-desc">Два кільця з проміжком лише 3px — на маленькому 44px колі вони практично зливаються.</div>
+    <div class="strip" id="s0"></div>
+  </div>
+
+  <!-- ===================== A ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">A</span>
+      <span class="variant-name">Без другого кільця</span>
+      <span class="reco">найпростіше</span>
+    </div>
+    <div class="variant-desc">Прибираємо зовнішнє обведення повністю. "Сьогодні" сигналізує тільки підпис номера тижня знизу (уже є) — жодного дублювання кілець, дуга прогресу лишається єдиним і чистим сигналом.</div>
+    <div class="strip" id="sA"></div>
+  </div>
+
+  <!-- ===================== B ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">B</span>
+      <span class="variant-name">Ширший проміжок</span>
+    </div>
+    <div class="variant-desc">Те саме друге кільце, але відсунуте далі (7px замість 3px) — тепер це явно ДВА окремих кола, а не одна розмита пляма. Ціна: кожен кружечок трохи "товщає" на стрічці.</div>
+    <div class="strip" id="sB"></div>
+  </div>
+
+  <!-- ===================== C ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">C</span>
+      <span class="variant-name">Тонований трек замість другого кільця</span>
+      <span class="reco">рекомендую</span>
+    </div>
+    <div class="variant-desc">Одне кільце, як і в решти тижнів, — але сірий фоновий трек прогрес-дуги замінюємо на м'який зелений тон. Різниця з рештою тижнів помітна одразу, а зайвого шару геометрії немає взагалі.</div>
+    <div class="strip" id="sC"></div>
+  </div>
+
+  <!-- ===================== D ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">D</span>
+      <span class="variant-name">М'яке світіння замість жорсткого кільця</span>
+    </div>
+    <div class="variant-desc">Розмитий ореол (box-shadow blur) позаду кружечка замість чіткого кола. Виглядає м'якше, але на дуже темному фоні світіння такого розміру буває непомітним при яскравому освітленні екрана.</div>
+    <div class="strip" id="sD"></div>
+  </div>
+
+  <!-- ===================== E ===================== -->
+  <div class="variant">
+    <div class="variant-head">
+      <span class="variant-letter">E</span>
+      <span class="variant-name">Маленька крапка-мітка в кутку</span>
+    </div>
+    <div class="variant-desc">Без жодних змін у самому кільці — компактна крапка в правому верхньому куті, як нотифікація. Дуже стримано, але при швидкому погляді на стрічку легше пропустити, який тиждень поточний.</div>
+    <div class="strip" id="sE"></div>
+  </div>
+
+  <footer style="max-width:640px; margin:36px auto 0; padding-top:20px; border-top:1px solid var(--border);">
+    <h2 style="font-family:'Fraunces',serif; font-size:15px; margin:0 0 8px;">Що раджу</h2>
+    <p style="color:var(--text-secondary); font-size:12.5px; line-height:1.6; max-width:58ch;">
+      <b>C (тонований трек)</b> — вирішує саме названу проблему: жодного другого шару геометрії, лише один чистий сигнал кольору, який не конкурує з дугою прогресу. Якщо хочеться геометричнішого акценту (не лише тон, а форма) — <b>A (без другого кільця)</b> найбезпечніший: підпис тижня знизу вже й так підсвічений, друге кільце було зайвим із самого початку.
+    </p>
+  </footer>
+</div>
+
+<script>
+const R = 19, CIRC = 2 * Math.PI * R;
+const weeks = [
+  { n: 1, score: 91, done: true },
+  { n: 2, score: 86, done: true },
+  { n: 3, score: 68, today: true },
+  { n: 4, score: 13 },
+  { n: 5, score: 13 },
+  { n: 6, score: 13 },
+];
+
+function arcColor(w){
+  if (w.done) return 'var(--done)';
+  if (w.today) return 'var(--neutral)';
+  return 'var(--neutral)';
+}
+
+function buildCell(w, variant){
+  const cell = document.createElement('div'); cell.className = 'cell';
+  const dot = document.createElement('div'); dot.className = 'dot';
+  const offset = CIRC * (1 - w.score / 100);
+  const color = arcColor(w);
+  const isToday = !!w.today;
+
+  let extraRing = '';
+  let trackColor = 'var(--surface-3)';
+
+  if (isToday && variant === '0'){
+    extraRing = '<circle cx="22" cy="22" r="19.5" fill="none" stroke="var(--accent)" stroke-width="2" opacity="1" style="filter:none;" data-ring="outer0"/>';
+  }
+  if (isToday && variant === 'B'){
+    extraRing = '<circle cx="22" cy="22" r="21.5" fill="none" stroke="var(--accent)" stroke-width="2"/>';
+  }
+  if (isToday && variant === 'C'){
+    trackColor = 'rgba(47,190,147,0.28)';
+  }
+
+  dot.innerHTML =
+    '<svg width="44" height="44" viewBox="0 0 44 44">' +
+      (variant === 'B' ? extraRing : '') +
+      '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="' + trackColor + '" stroke-width="3"/>' +
+      '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="' + color + '" stroke-width="3" stroke-linecap="round" ' +
+        'stroke-dasharray="' + CIRC.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" transform="rotate(-90 22 22)"/>' +
+      (variant === '0' ? extraRing : '') +
+    '</svg>' +
+    '<span class="num">' + w.score + '</span>';
+
+  if (isToday && variant === 'D'){
+    dot.style.boxShadow = '0 0 0 6px rgba(47,190,147,0.22), 0 0 14px 4px rgba(47,190,147,0.35)';
+    dot.style.borderRadius = '50%';
+  }
+  if (isToday && variant === 'E'){
+    const badge = document.createElement('span');
+    badge.style.cssText = 'position:absolute; top:-1px; right:-1px; width:10px; height:10px; border-radius:50%; background:var(--accent); border:2px solid var(--surface-0);';
+    dot.appendChild(badge);
+  }
+
+  cell.appendChild(dot);
+  const wk = document.createElement('span'); wk.className = 'wk' + (isToday ? ' today' : '');
+  wk.textContent = w.n; cell.appendChild(wk);
+  return cell;
+}
+
+['0','A','B','C','D','E'].forEach(v => {
+  const strip = document.getElementById('s' + v);
+  weeks.forEach(w => strip.appendChild(buildCell(w, v)));
+});
+</script>
+</body>
+</html>

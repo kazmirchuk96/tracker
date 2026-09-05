@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Варіанти чекбоксів дій</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --surface-1: #1A1914; --surface-2: #232119; --surface-3: #2C2921;
+  --border: #3A3830; --border-strong: #7C7766;
+  --text-primary: #F3F1E8; --text-secondary: #B7B4A6; --text-muted: #9A9784;
+  --accent: #2FBE93; --accent-text: #6EE7C0;
+  --weight: #9089E0; --general: #9A9784;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: #0F0E0A; color: var(--text-primary); font-family: 'Inter', -apple-system, sans-serif; padding: 28px 16px 80px; }
+.wrap { max-width: 560px; margin: 0 auto; }
+h1 { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; margin: 0 0 6px; }
+.intro { color: var(--text-secondary); font-size: 14px; line-height: 1.5; margin-bottom: 30px; max-width: 56ch; }
+
+.variant { margin-bottom: 34px; padding-bottom: 26px; border-bottom: 1px solid var(--border); }
+.variant:last-of-type { border-bottom: none; }
+.variant-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 4px; flex-wrap: wrap; }
+.variant-letter { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 700; color: #0F0E0A; background: var(--text-primary); width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.variant-name { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+.variant-desc { color: var(--text-muted); font-size: 12.5px; line-height: 1.5; margin: 4px 0 16px; max-width: 58ch; }
+.reco { display: inline-block; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; background: rgba(47,190,147,0.16); color: #6EE7C0; padding: 2px 8px; border-radius: 999px; }
+
+.week-row { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 18px; margin-bottom: 8px; }
+.badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+.label { flex: 1; min-width: 0; font-size: 14px; }
+
+.daily-block { border-radius: 18px; padding: 12px 16px 16px; }
+.daily-head { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 12px; }
+.daily-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+.day-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.day-label { font-size: 10px; color: var(--text-muted); }
+
+svg.chk { display: block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Варіанти кнопок-галочок</h1>
+  <p class="intro">Суцільні залиті кола — і в діях тижня, і в щоденній сітці — виглядають важкувато, як цукерки, і не дуже пасують до тонких дугових кілець таймлайну. Нижче — 4 варіанти форми/стилю, кожен показаний і в рядку дії, і в сітці днів.</p>
+
+  <!-- ================= 0: ЯК ЗАРАЗ ================= -->
+  <div class="variant">
+    <div class="variant-head"><span class="variant-letter">0</span><span class="variant-name">Як зараз</span></div>
+    <div class="variant-desc">Суцільне залите коло — важке порівняно з рештою інтерфейсу.</div>
+    <div id="row0"></div>
+    <div id="grid0" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- ================= A: ЗАКРУГЛЕНИЙ КВАДРАТ ================= -->
+  <div class="variant">
+    <div class="variant-head"><span class="variant-letter">A</span><span class="variant-name">Закруглений квадрат</span></div>
+    <div class="variant-desc">Класична форма чекбокса — одразу зрозуміло, що це перемикач, а не аватар чи статус-крапка. Найбезпечніша, найзвичніша форма.</div>
+    <div id="rowA"></div>
+    <div id="gridA" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- ================= B: КОНТУР БЕЗ ЗАЛИВКИ ================= -->
+  <div class="variant">
+    <div class="variant-head"><span class="variant-letter">B</span><span class="variant-name">Контур без заливки</span><span class="reco">рекомендую</span></div>
+    <div class="variant-desc">Те саме коло, але без суцільної заливки — тонка лінія й галочка кольором акценту. Легше, узгоджується з тонкими дуговими кільцями таймлайну.</div>
+    <div id="rowB"></div>
+    <div id="gridB" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- ================= C: МЕНШЕ + ТОНШЕ ================= -->
+  <div class="variant">
+    <div class="variant-head"><span class="variant-letter">C</span><span class="variant-name">Менший розмір</span></div>
+    <div class="variant-desc">Той самий стиль, що зараз, але компактніший — менше домінує в рядку, особливо в сітці з 7 елементів.</div>
+    <div id="rowC"></div>
+    <div id="gridC" style="margin-top:10px;"></div>
+  </div>
+
+  <!-- ================= D: М'ЯКА ПЛЯШКА-ІНДИКАТОР ================= -->
+  <div class="variant">
+    <div class="variant-head"><span class="variant-letter">D</span><span class="variant-name">Тонований рядок замість кола</span></div>
+    <div class="variant-desc">Форма кола зникає геть — весь рядок дії підсвічується м'яким зеленим, галочка лишається лише маленькою іконкою праворуч. Для сітки днів лишаємо компактний квадрат (варіант A), бо тут "тонувати весь рядок" нема чого.</div>
+    <div id="rowD"></div>
+    <div id="gridD" style="margin-top:10px;"></div>
+  </div>
+
+  <footer style="max-width:560px; margin:34px auto 0; padding-top:18px; border-top:1px solid var(--border);">
+    <h2 style="font-family:'Fraunces',serif; font-size:15px; margin:0 0 8px;">Що раджу</h2>
+    <p style="color:var(--text-secondary); font-size:12.5px; line-height:1.6; max-width:58ch;">
+      <b>B (контур без заливки)</b> — вирішує саме назване: форма лишається впізнаваною круглою кнопкою, але без важкої суцільної заливки вона більше не виглядає як цукерка, і природно узгоджується з тонкими дуговими кільцями, які вже є на таймлайні. Якщо хочеться геть іншої мови, не круглої, — <b>A (закруглений квадрат)</b> найбезпечніший і найзвичніший варіант чекбокса.
+    </p>
+  </footer>
+</div>
+
+<script>
+const check = '<svg class="chk" width="W" height="W" viewBox="0 0 16 16"><path d="M3.5 8.3l3 3 6-6.6" stroke="COLOR" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function weekRow(style){
+  const wrap = document.createElement('div');
+  const row = document.createElement('div'); row.className = 'week-row';
+  row.style.background = style.rowBg || 'var(--surface-2)';
+  const b = document.createElement('span'); b.className = 'badge'; b.textContent = 'Вага';
+  b.style.cssText += 'background:rgba(144,137,224,0.16); color:var(--weight);';
+  row.appendChild(b);
+  const lbl = document.createElement('span'); lbl.className = 'label'; lbl.textContent = 'Зважування в понеділок зранку';
+  row.appendChild(lbl);
+  row.appendChild(style.btn(true));
+  wrap.appendChild(row);
+
+  const row2 = document.createElement('div'); row2.className = 'week-row';
+  row2.style.background = style.rowBg || 'var(--surface-2)';
+  const b2 = document.createElement('span'); b2.className = 'badge'; b2.textContent = 'Загальне';
+  b2.style.cssText += 'background:rgba(154,151,132,0.16); color:var(--general);';
+  row2.appendChild(b2);
+  const lbl2 = document.createElement('span'); lbl2.className = 'label'; lbl2.textContent = 'Білок';
+  row2.appendChild(lbl2);
+  row2.appendChild(style.btn(false));
+  wrap.appendChild(row2);
+  return wrap;
+}
+
+function dayGrid(style){
+  const block = document.createElement('div'); block.className = 'daily-block';
+  block.style.background = 'var(--surface-2)';
+  const head = document.createElement('div'); head.className = 'daily-head';
+  head.innerHTML = '<span><span class="badge" style="background:rgba(154,151,132,0.16); color:var(--general); margin-right:6px;">Загальне</span>Облік їжі кожного дня</span><span style="color:var(--accent-text);">4/7 (57%)</span>';
+  block.appendChild(head);
+  const grid = document.createElement('div'); grid.className = 'daily-grid';
+  const days = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+  const states = [true,true,true,true,false,'today',false];
+  days.forEach((d, i) => {
+    const cell = document.createElement('div'); cell.className = 'day-cell';
+    cell.appendChild(style.btn(states[i] === true, states[i] === 'today'));
+    const lb = document.createElement('span'); lb.className = 'day-label'; lb.textContent = d;
+    if (states[i] === 'today') lb.style.cssText = 'color:var(--text-primary); font-weight:700;';
+    cell.appendChild(lb);
+    grid.appendChild(cell);
+  });
+  block.appendChild(grid);
+  return block;
+}
+
+const variants = {
+  '0': { size: 44, radius: '50%', filled: true,
+    btn(on, today){
+      const el = document.createElement('div');
+      el.style.cssText = 'width:' + this.size + 'px; height:' + this.size + 'px; border-radius:' + this.radius + '; display:flex; align-items:center; justify-content:center; flex-shrink:0;';
+      el.style.background = on ? 'var(--accent)' : 'var(--surface-3)';
+      el.style.border = (today ? '2px solid var(--accent)' : '1px solid var(--border-strong)');
+      if (on) el.innerHTML = check.replace(/W/g, '18').replace('COLOR', '#0F0E0A');
+      return el;
+    }
+  },
+  'A': { size: 32, radius: '10px', filled: true,
+    btn(on, today){
+      const el = document.createElement('div');
+      el.style.cssText = 'width:' + this.size + 'px; height:' + this.size + 'px; border-radius:' + this.radius + '; display:flex; align-items:center; justify-content:center; flex-shrink:0;';
+      el.style.background = on ? 'var(--accent)' : 'var(--surface-3)';
+      el.style.border = (today ? '2px solid var(--accent)' : '1px solid var(--border-strong)');
+      if (on) el.innerHTML = check.replace(/W/g, '16').replace('COLOR', '#0F0E0A');
+      return el;
+    }
+  },
+  'B': { size: 32, radius: '50%',
+    btn(on, today){
+      const el = document.createElement('div');
+      el.style.cssText = 'width:' + this.size + 'px; height:' + this.size + 'px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:transparent;';
+      el.style.border = (today ? '2px solid var(--accent)' : (on ? '1.6px solid var(--accent)' : '1px solid var(--border-strong)'));
+      if (on) el.innerHTML = check.replace(/W/g, '16').replace('COLOR', 'var(--accent-text)');
+      return el;
+    }
+  },
+  'C': { size: 26, radius: '50%',
+    btn(on, today){
+      const el = document.createElement('div');
+      el.style.cssText = 'width:' + this.size + 'px; height:' + this.size + 'px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;';
+      el.style.background = on ? 'var(--accent)' : 'var(--surface-3)';
+      el.style.border = (today ? '2px solid var(--accent)' : '1px solid var(--border-strong)');
+      if (on) el.innerHTML = check.replace(/W/g, '13').replace('COLOR', '#0F0E0A');
+      return el;
+    }
+  },
+  'D': { size: 26,
+    btn(on, today){
+      const el = document.createElement('div');
+      el.style.cssText = 'width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0; background:transparent;';
+      if (on) el.innerHTML = check.replace(/W/g, '18').replace('COLOR', 'var(--accent-text)');
+      else { el.style.border = today ? '2px solid var(--accent)' : '1px solid var(--border-strong)'; }
+      return el;
+    }
+  }
+};
+
+['0','A','B','C'].forEach(v => {
+  document.getElementById('row' + v).appendChild(weekRow(variants[v]));
+  document.getElementById('grid' + v).appendChild(dayGrid(variants[v]));
+});
+// D: тонований рядок для дій тижня + компактний квадрат (варіант A) для сітки днів
+document.getElementById('rowD').appendChild(weekRow(Object.assign({}, variants['D'], { rowBg: 'rgba(47,190,147,0.10)' })));
+document.getElementById('gridD').appendChild(dayGrid(variants['A']));
+</script>
+</body>
+</html>

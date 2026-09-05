@@ -1,0 +1,2619 @@
+
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
+:root {
+  /* --- Пункт 2: сходинки глибини. Кожен наступний шар світліший за попередній:
+     сторінка -> картка -> рядок усередині картки -> контрол.
+     До цього шари йшли навпаки, і глибина читалась навиворіт. --- */
+  --surface-0: #0F0E0A;   /* фон сторінки */
+  --surface-1: #1A1914;   /* картки */
+  --surface-2: #232119;   /* рядки всередині карток */
+  --surface-3: #2C2921;   /* контроли: поля вводу, квадратики днів */
+  /* рамка теж мусила посвітлішати — на #2C2921 стара #34322B майже зникала */
+  --border: #3A3830;
+  /* A1: межі інтерактивних контролів мають давати ≥3:1 (WCAG 1.4.11).
+     Було #4A473C = 2.08:1 — провал. #7C7766 дає від 3.24:1 на найсвітлішій
+     поверхні до 4.31:1 на найтемнішій, тобто проходить на всіх чотирьох. */
+  --border-strong: #7C7766;
+  --text-primary: #F3F1E8;
+  --text-secondary: #B7B4A6;
+  /* Пункт 21: #8C8977 давав 4.66:1 при нормі 4.5 — запас 3%, і саме цим
+     кольором набрано найдрібніший текст. #9A9784 дає 5.6:1. */
+  --text-muted: #9A9784;
+
+  /* --- I6: семантичні кольори станів. Раніше зелений/жовтий/червоний були
+     розсипані по коду як літерали (#2FBE93, rgba(47,190,147,0.16) тощо),
+     тож зміна теми їх не підхоплювала. --- */
+  --accent: #2FBE93;
+  --accent-soft: rgba(47, 190, 147, 0.16);
+  /* Пункт 13: підсвітка за карткою тижня — окремий токен, щоб літерал
+     не осідав у правилі. */
+  --accent-glow: rgba(47, 190, 147, 0.07);
+  --accent-text: #6EE7C0;
+  /* Кораловий "бренд"-акцент, доданий під час редизайну під референс,
+     прибрано повністю: після кількох раундів фідбека ("сьогодні" читалось
+     як заперечення, потім те саме про кнопки й перемикачі) жодне місце
+     в застосунку більше його не використовує. Двоакцентна система не
+     прижилась на практиці — єдиний зелений скрізь, як і до редизайну. */
+  /* Пункт 9: "у процесі" — нейтральний стан, він не мусить тривожити.
+     Раніше і він, і "відстаєш", і попередження були одним жовтим. */
+  --neutral-progress: #A8A292;
+  --neutral-progress-soft: rgba(168, 162, 146, 0.14);
+  --warn: #E8A93C;
+  --warn-soft: rgba(232, 169, 60, 0.16);
+  --warn-text: #E8A93C;
+  --danger: #FF7A54;
+  --focus: #1D9E75;
+
+  /* --- I1: шкала радіусів. Було 9 випадкових значень (3/8/12/14/16/20/22...),
+     стало 4 кроки + пігулка. Правило: sm — дрібні елементи, md — контроли,
+     lg — внутрішні панелі, xl — зовнішні картки. --- */
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 18px;
+  --r-xl: 24px;
+  --r-pill: 999px;
+
+  /* --- I3: одна товщина рамки замість 0.5/1/1.5px. 0.5px на екранах з DPR 2
+     округлюється непередбачувано і місцями не малюється взагалі. --- */
+  /* --- Пункт 3: двошарові тіні. Попередня мала лише 12% чорного і на майже
+     чорному фоні не давала жодного ефекту — типове значення зі світлої теми.
+     Перший шар окреслює край, другий дає розсіяну тінь. --- */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.5);
+  --shadow-md: 0 1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.5);
+  --shadow-lg: 0 1px 2px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.65);
+
+  --bw: 1px;
+  /* акцентна межа: підсвічує елемент, лишаючись межею (сьогоднішній день) */
+  --bw-emphasis: 2px;
+  /* акцентні смужки (ліва грань банера, верхня грань картки тижня) —
+     не хейрлайн, а самостійний елемент, тому окремий токен */
+  --bw-accent: 3px;
+
+  /* --- I2: один розмір для всіх круглих кнопок-іконок і тап-цілей.
+     Було чотири різні (30/28/34/36px) без жодної причини. --- */
+  --tap: 44px;
+  /* За конкретним проханням: чекбокси дій (щотижневі й щоденні) трохи
+     менші за загальний мінімум --tap. Не займаю сам --tap — він і далі
+     мінімум для решти кнопок застосунку, де про це не просили. */
+  --tap-sm: 32px;
+
+  /* --- I4: шкала розмірів тексту. Було 14 різних значень, стало 6.
+     Нижня межа 11.5px — Apple HIG не радить опускатись нижче 11pt
+     навіть для допоміжного тексту. --- */
+  --fs-xs: 11.5px;
+  --fs-sm: 12.5px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 22px;
+  --fs-display: 42px;
+  --fs-h1: var(--fs-xl);
+
+  /* --- Пункт 4: шкала міжрядкових інтервалів. До цього скрізь стояло
+     line-height: normal, тобто ритм визначав браузер. Що більший кегль,
+     то щільніший інтервал. --- */
+  --lh-display: 1.05;
+  --lh-heading: 1.2;
+  --lh-body: 1.45;
+  --lh-caption: 1.5;
+
+  /* --- Пункт 12: трекінг. Було -0.01em однаково на заголовок і на число.
+     Великі кеглі потребують щільнішого, дрібні — навпаки, розрідженого. --- */
+  --tr-display: -0.03em;
+  --tr-heading: -0.015em;
+  --tr-caption: 0.01em;
+
+  /* --- Шкала відступів на 4px-сітці. До цього у файлі було 26 різних значень:
+     5px, 7px, 11px, плюс rem-и, що давали нецілі пікселі (1.1rem = 17.6px,
+     1.2rem = 19.2px, 0.9rem = 14.4px). Через це дві сусідні картки мали різні
+     відступи без жодної причини. --sp-0 — єдиний крок нижче 4px, лишений
+     свідомо для зазору між іконкою і текстом усередині кнопки. --- */
+  --sp-0: 2px;
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --sp-8: 64px;
+}
+
+#tracker-root {
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: var(--text-primary);
+  width: 100%;
+  max-width: 720px;
+  box-sizing: border-box;
+  margin: 0 auto;
+  position: relative;
+  background: var(--surface-0);
+  /* 3.6: мета-теги viewport-fit=cover + apple-mobile-web-app-capable кажуть iOS
+     малювати контент на весь екран — під динамічний острівець і home-indicator.
+     Без цих env() у standalone-режимі (запуск з іконки) верх і низ підʼїжджали
+     під вирізи. max() лишає звичайні 1.5rem там, де вирізів немає. */
+  padding: max(var(--sp-5), env(safe-area-inset-top)) max(var(--sp-5), env(safe-area-inset-right)) max(var(--sp-5), env(safe-area-inset-bottom)) max(var(--sp-5), env(safe-area-inset-left));
+  border-radius: var(--r-xl);
+  overflow-x: clip;
+}
+#tracker-root h1 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: var(--tr-heading); line-height: var(--lh-heading); }
+/* --- Пункт 4: базовий вертикальний ритм; окремі елементи перекривають своїм --- */
+#tracker-root { line-height: var(--lh-body); }
+/* --- Пункт 18: на десктопі рядок сягав ~90 символів при комфортних 60-75.
+   Обмежуємо саме текстові блоки, не контейнери з контролами. --- */
+#tracker-root p { max-width: 68ch; }
+/* --- Пункт 11: Fraunces підключений як варіативний (opsz 9..144), але жодна
+   вісь не використовувалась. opsz auto дає правильні пропорції на різних
+   кеглях, SOFT згладжує кути, WONK вмикає характерні альтернативні форми. --- */
+#tracker-root h1, #tracker-root .hero-num, #tracker-root .section-label {
+  font-optical-sizing: auto;
+  font-variation-settings: 'SOFT' 20, 'WONK' 1;
+}
+.section-label { font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 500; line-height: var(--lh-heading); letter-spacing: var(--tr-heading); margin-bottom: var(--sp-3); }
+/* 3.1: раніше вся стрічка була одним SVG з viewBox 680px, який стискався під
+   ширину картки — на iPhone кружечок виходив 14.6px, а цифра всередині 5.3px.
+   Тепер це звичайні HTML-елементи фіксованого розміру 44px (мінімум Apple HIG),
+   а якщо 12 штук не влазять — стрічка горизонтально прокручується. */
+/* Пункт 19: єдиним натяком на прокрутку був обрізаний 12-й кружечок.
+   Градієнтна маска робить край явно "продовжуваним". */
+.journey-strip { display: flex; gap: var(--sp-2); overflow-x: auto; padding: var(--sp-1) var(--sp-0) var(--sp-2); scroll-behavior: smooth; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%); }
+.journey-strip::-webkit-scrollbar { display: none; }
+.journey-cell { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); background: none; border: none; padding: 0; cursor: pointer; font-family: inherit; -webkit-tap-highlight-color: transparent; }
+.journey-dot { position: relative; width: var(--tap); height: var(--tap); box-sizing: border-box; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+.journey-ring { position: absolute; inset: 0; }
+.journey-num-inner { position: relative; font-size: var(--fs-md); font-weight: 700; color: var(--text-primary); font-variant-numeric: tabular-nums; }
+/* --- Пункт 6: одинадцять кружечків майбутніх тижнів були залиті насиченим
+   жовтим на повну і разом важили більше за єдину змістовну картку.
+   Порожній стан має мовчати: сама дуга просто відсутня (лишається тільки
+   тьмяне коло-трек), число теж приглушене. --- */
+.journey-dot.is-empty .journey-num-inner { color: var(--text-muted); font-weight: 500; }
+.journey-cell:active .journey-dot { transform: scale(0.92); }
+/* Позначка обраного тижня — розміром, а не світлом навколо: на темному
+   тлі будь-який ореол читається як забруднення, не акцент. */
+.journey-cell.selected .journey-dot { transform: scale(1.09); }
+.journey-cell.selected .journey-num { color: var(--text-primary); font-weight: 600; }
+.journey-num { font-size: var(--fs-xs); color: var(--text-muted); }
+/* 3.2: 12 підписів сум не влазять у ширину телефона — там лишається
+   тільки висота стовпчика, а точна сума доступна тапом (tooltip). */
+.journey-cell.today .journey-num { color: var(--text-primary); font-weight: 700; }
+/* Кораловий контур навколо кільця "сьогодні" — окремий від дуги прогресу
+   сигнал, той самий принцип, що й обведення дня "сьогодні" в референсі. */
+/* Варіант C: два кільця майже впритул (внутрішня дуга прогресу + зовнішнє
+   обведення "сьогодні") на 44px колі зливались у нечитабельну пляму —
+   користувач це помітив на реальному скріншоті. Тепер "сьогодні" сигналізує
+   тонований трек самого прогрес-кільця (див. JS, arcColor/trackColor),
+   без жодного другого шару геометрії. */
+.card { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--shadow-sm); }
+.hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: var(--tr-display); line-height: var(--lh-display); transition: color 0.3s; }
+/* I7: усі індикатори стану — один патерн "пігулка". Відрізняються
+   лише кольором (нейтральний / у графіку / відстає), не формою. */
+.chip, .badge, .today-pill { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); letter-spacing: 0.02em; white-space: nowrap; }
+.badge-ok, .today-pill { background: var(--accent-soft); color: var(--accent-text); }
+/* Картка показника має право переносити слова — інакше довгі рядки
+   на кшталт "ціль $1,800" вилазять за її межі на вузькому екрані. */
+.stat-card { min-width: 0; overflow-wrap: anywhere; }
+.stat-card .badge { white-space: normal; }
+.badge-behind { background: var(--warn-soft); color: var(--warn-text); }
+/* Другорядна дія на картці прогресу — навмисно легша за .btn, щоб не
+   конкурувати за увагу з головним числом і бейджем стану над нею. */
+.goal-close-link { background: none; border: none; padding: 0; font-size: var(--fs-xs); color: var(--text-muted); font-family: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; min-height: var(--tap); display: inline-flex; align-items: center; }
+.goal-close-link:hover { color: var(--text-secondary); }
+.group-label { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-top: var(--sp-4); margin-bottom: var(--sp-2); }
+/* Пункт 14: три рівноправні сутності не відокремлювались — між рядками
+   було 8px, стільки ж, скільки всередині рядка. */
+.metric-row { padding: var(--sp-3) var(--sp-4); border: var(--bw) solid transparent; border-radius: var(--r-lg); margin-bottom: var(--sp-4); display: flex; gap: var(--sp-3); transition: background 0.2s, border-color 0.2s; }
+/* Пункт 15: була вертикальна смужка на всю висоту рядка (Material 2018).
+   Замінено на компактну крапку — менше шуму, той самий сигнал. */
+/* Крапка вирівнюється оптично по центру першого рядка підпису, тому
+   зсув задано в em — він прив’язаний до типографіки, а не до сітки відступів. */
+.metric-accent { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 0.42em; }
+.goal-dot { display: inline-block; border-radius: 50%; flex-shrink: 0; vertical-align: middle; margin-right: var(--sp-1); }
+.goal-badge { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill); white-space: nowrap; flex-shrink: 0; }
+/* Клікабельна версія плашки — у списку налаштувань, де мітку можна
+   міняти. appearance навмисно НЕ прибираю: нативна стрілка select-а —
+   безкоштовний і однозначний сигнал "тут можна натиснути й обрати", який
+   довелось би вигадувати заново кастомним значком. */
+.goal-select { font-size: var(--fs-xs); font-weight: 600; font-family: inherit; border: none; border-radius: var(--r-pill); padding: var(--sp-0) var(--sp-1) var(--sp-0) var(--sp-2); flex-shrink: 0; cursor: pointer; }
+.goal-select:focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+.metric-body { flex: 1; min-width: 0; }
+.metric-top-row { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); flex-wrap: wrap; margin-bottom: var(--sp-2); }
+.metric-label { font-size: var(--fs-sm); color: var(--text-secondary); font-weight: 500; }
+.plan-note { font-size: var(--fs-sm); color: var(--text-muted); letter-spacing: var(--tr-caption); line-height: var(--lh-caption); }
+/* 3.7: поле + "підставити" + "копіювати" на вузькому екрані можуть не влізти
+   в один рядок — дозволяємо перенос, щоб не виникало горизонтального скролу. */
+.metric-input-row { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+/* Пункт 5: заміряно в браузері — висота була 31px при заявленому мінімумі 44px,
+   а власний фон конфліктував із сусідньою прозорою .icon-btn. */
+.fill-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-1); min-height: var(--tap); padding: 0 var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong); background: transparent; color: var(--text-secondary); font-family: inherit; font-size: var(--fs-sm); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+/* I5: явна ієрархія дій. Первинна — заливка, більший горизонтальний
+   відступ, жирніший шрифт. Вторинна — без фону й рамки, приглушений колір,
+   щоб не конкурувала за увагу. */
+.btn { min-height: var(--tap); border-radius: var(--r-pill); font-family: inherit; font-size: var(--fs-md); cursor: pointer; transition: background 0.15s, color 0.15s, opacity 0.15s; }
+.btn-primary { padding: var(--sp-3) var(--sp-5); border: none; background: var(--accent); color: var(--surface-0); font-weight: 600; }
+.btn-primary:hover { opacity: 0.88; }
+.btn-secondary { padding: var(--sp-3) var(--sp-4); border: none; background: transparent; color: var(--text-secondary); font-weight: 400; }
+/* Перемикач типу нової дії (Щодня / Раз на тиждень) — btn-secondary за
+   замовчуванням прозорий, тож обраний варіант позначаємо рамкою. */
+.btn-secondary[aria-pressed="true"] { background: var(--surface-3); border: var(--bw) solid var(--accent); color: var(--text-primary); font-weight: 600; }
+.tactic-row { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-3) 0; border-bottom: var(--bw) solid var(--border); }
+.tactic-row:last-child { border-bottom: none; }
+.tactic-row-line1 { display: flex; }
+.tactic-row-line2 { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+/* Фікс 3 критичного огляду: вертикальний відступ поля був лише 4px —
+   набагато нижче 44-піксельного мінімуму, який цей-таки трекер послідовно
+   тримає всюди. */
+.tactic-label-input { flex: 1; min-width: 0; min-height: var(--tap-sm); background: transparent; border: none; color: var(--text-primary); font-size: var(--fs-md); font-family: inherit; padding: 0; }
+.tactic-label-input:focus { outline: none; }
+.tactic-label-input.archived { color: var(--text-muted); text-decoration: line-through; }
+/* Пункт 4 фідбека: іконка без підпису не пояснювала сама себе — обидві
+   дії тепер прості текстові посилання, як .goal-close-link. */
+.tactic-action-link { background: none; border: none; padding: var(--sp-1) 0; font-size: var(--fs-xs); color: var(--text-muted); font-family: inherit; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; min-height: var(--tap-sm); white-space: nowrap; }
+.tactic-action-link:hover { color: var(--text-secondary); }
+.tactic-action-danger { color: var(--warn-text); }
+.tactic-action-danger:hover { color: var(--text-primary); }
+.btn-secondary:hover { background: var(--surface-2); color: var(--text-primary); }
+.fill-btn:hover { background: var(--surface-3); color: var(--text-primary); border-color: var(--text-muted); }
+.stepper { display: flex; align-items: center; gap: var(--sp-2); }
+/* --- Пункт 7: заміряно — поле займало близько 500px під три-чотири символи.
+   Велика порожня плита з крихітним числом у лівому краю. Тепер поле
+   компактне, число вирівняне праворуч, а одиниця виміру стоїть поруч
+   як окремий сірий суфікс. --- */
+.stepper { flex: 0 1 auto; min-width: 0; display: flex; align-items: center; gap: var(--sp-2); }
+.stepper-unit { font-size: var(--fs-sm); color: var(--text-muted); flex-shrink: 0; }
+.stepper input { border: var(--bw) solid var(--border-strong); border-radius: var(--r-md); width: 100%; max-width: 128px; box-sizing: border-box; height: var(--tap); padding: 0 var(--sp-3); text-align: right; font-size: var(--fs-lg); font-weight: 500; background: var(--surface-3); color: var(--text-primary); font-variant-numeric: tabular-nums; transition: border-color 0.15s; }
+.stepper input:focus { outline: none; border-color: var(--focus); }
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+.icon-btn { width: var(--tap); height: var(--tap); padding: 0; border-radius: 50%; border: none; background: transparent; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.15s, color 0.15s; flex-shrink: 0; }
+.icon-btn:hover { background: var(--surface-3); color: var(--text-primary); }
+/* --- Пункт 16: у застосунку було лише 2 active-стани, дотик не давав
+   тактильного відгуку — інтерфейс здавався неживим. --- */
+#tracker-root button:active, .btn:active, .day-square:active { transform: scale(0.97); }
+.journey-cell:active .journey-dot { transform: scale(0.94); }
+#tracker-root button, .btn { transition: transform 0.08s ease, background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s; }
+/* A7: єдиний видимий стиль фокуса для всього інтерактиву. Використовуємо
+   outline з відступом — на відміну від border він не обрізається
+   заокругленням і не змінює розміри елемента (тобто не зсуває layout). */
+#tracker-root :focus-visible,
+#app-modal-overlay :focus-visible,
+#goals-overlay :focus-visible {
+  outline: 2px solid var(--accent-text);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+#tracker-root .journey-cell:focus-visible .journey-dot { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+#tracker-root .journey-cell:focus-visible { outline: none; }
+.habit-row { display: flex; align-items: center; gap: var(--sp-3); padding: var(--sp-3) var(--sp-4); border: var(--bw) solid transparent; border-radius: var(--r-lg); margin-bottom: var(--sp-2); font-size: var(--fs-md); transition: background 0.2s, border-color 0.2s; }
+.habit-label { flex: 1; min-width: 0; }
+/* Кругова кнопка-галочка замість нативного чекбокса — той самий патерн,
+   що й у щоденній сітці (day-square), лишень трохи менша, бо тут вона
+   одна в рядку, а не серед семи. */
+.week-check { width: var(--tap-sm); height: var(--tap-sm); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; border: var(--bw) solid var(--border-strong); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.week-check:hover { border-color: var(--focus); }
+.week-check:active { transform: scale(0.9); }
+.week-check.checked, .week-check[aria-checked="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface-0); }
+.week-check.just-toggled svg { animation: checkPop 0.16s cubic-bezier(0.34, 1.4, 0.64, 1); }
+input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cursor: pointer; accent-color: var(--accent); flex-shrink: 0; }
+.daily-block { border: var(--bw) solid transparent; border-radius: var(--r-lg); padding: var(--sp-3) var(--sp-4) var(--sp-4); margin-bottom: var(--sp-2); transition: background 0.2s, border-color 0.2s; }
+.daily-head { display: flex; justify-content: space-between; font-size: var(--fs-md); margin-bottom: var(--sp-3); }
+.daily-grid { display: flex; justify-content: space-between; }
+.day-cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); }
+.day-square { width: var(--tap-sm); height: var(--tap-sm); border-radius: var(--r-md); display: flex; align-items: center; justify-content: center; cursor: pointer; user-select: none; border: var(--bw) solid var(--border); background: var(--surface-3); color: var(--text-muted); transition: background 0.15s, border-color 0.15s, transform 0.1s; }
+.day-square:hover { border-color: var(--focus); background: var(--surface-2); }
+.day-square:active { transform: scale(0.9); }
+.day-square.checked { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
+/* A3: квадратик дня тепер має role="checkbox" і потрапляє у Tab-послідовність */
+.day-square[aria-checked="true"] { background: var(--accent); border: var(--bw) solid var(--accent); color: var(--surface-0); }
+
+/* №1: сьогоднішній день. Без цього щоразу доводилось згадувати, який
+   сьогодні день тижня, і шукати потрібну літеру серед семи однакових. */
+.day-square.is-today { border: var(--bw-emphasis) solid var(--accent); }
+.day-square.is-today[aria-checked="false"] { background: var(--surface-2); }
+.day-cell.is-today .day-cell-label { color: var(--text-primary); font-weight: 600; }
+
+/* №2: майбутні дні поточного тижня. Трекер не має дозволяти відмічати те,
+   чого ще не було — інакше можна закрити весь тиждень у понеділок. */
+.day-square.is-future { opacity: 0.3; pointer-events: none; }
+.day-cell.is-future .day-cell-label { opacity: 0.45; }
+
+/* №7: галочка з'являлась різко — перехід був заданий лише для фону й межі. */
+@keyframes checkPop { from { transform: scale(0.55); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.day-square.just-toggled svg { animation: checkPop 0.16s cubic-bezier(0.34, 1.4, 0.64, 1); }
+.day-cell-label { font-size: var(--fs-xs); color: var(--text-muted); }
+.hero-card { border-radius: var(--r-xl); padding: var(--sp-5); margin-bottom: var(--sp-5); background: var(--surface-1); border: var(--bw) solid var(--border); box-shadow: var(--shadow-md); position: relative; overflow: hidden; }
+/* --- Пункт 13: у файлі було нуль градієнтів. Одна акуратна радіальна
+   підсвітка згори дає карті глибину, не перетворюючись на "ефект". --- */
+.hero-card::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(120% 80% at 50% 0%, var(--accent-glow), transparent 62%); }
+.hero-card > * { position: relative; }
+.legend { display: flex; gap: var(--sp-4); flex-wrap: wrap; font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-3); }
+.legend span { display: inline-flex; align-items: center; gap: var(--sp-1); }
+.legend i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.save-status { font-size: var(--fs-xs); color: var(--text-muted); }
+.delta { font-size: var(--fs-xs); margin-top: var(--sp-1); }
+.delta-good { color: var(--accent-text); }
+.delta-bad { color: var(--warn-text); }
+.dashboard-line { display: flex; align-items: center; gap: var(--sp-3); font-size: var(--fs-md); color: var(--text-secondary); flex-wrap: wrap; }
+.menu-wrap { position: relative; }
+.menu-btn { width: var(--tap); height: var(--tap); padding: 0; border-radius: 50%; border: var(--bw) solid var(--border); background: var(--surface-2); color: var(--text-secondary); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.menu-btn:hover { background: var(--surface-3); }
+.menu-panel { position: absolute; right: 0; top: 40px; background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-2); min-width: 180px; box-shadow: var(--shadow-lg); z-index: 20; display: none; backdrop-filter: blur(20px); }
+.menu-panel.open { display: block; }
+[data-icon] { display: inline-flex; align-items: center; flex-shrink: 0; }
+.menu-item { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-md); border-radius: var(--r-sm); cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
+.menu-item:hover { background: var(--surface-3); }
+@keyframes celebratePulse { 0% { transform: scale(1); } 35% { transform: scale(1.15); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
+.celebrate { animation: celebratePulse 0.55s ease; }
+@keyframes weekEnter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+.week-enter { animation: weekEnter 0.18s ease-out; }
+@keyframes chartDotPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.55; } }
+.chart-dot-live { animation: chartDotPulse 1.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+@keyframes flashBg { 0% { background-color: #E1F5EE; } 100% { background-color: transparent; } }
+.flash { animation: flashBg 1.2s ease; }
+
+/* ---------------------------------------------------------------------
+   Розділ 4 (Responsive). Раніше тут був один-єдиний медіа-запит на 520px,
+   що чіпав чотири властивості, плюс два розсипані на 470px. Тепер це три
+   свідомі точки зламу, кожна прив'язана до конкретного розрахунку, а не
+   до круглого числа.
+   --------------------------------------------------------------------- */
+
+/* ≤520px — телефон. Три картки показників у ряд стають нечитабельними. */
+@media (max-width: 520px) {
+  #stat-cards { grid-template-columns: 1fr 1fr !important; }
+  .card { padding: var(--sp-4); }
+  .hero-card { padding: var(--sp-4); }
+  /* Скріншот показав явно видимий "мертвий" простір фону обабіч контенту —
+     два накладені шари відступу (зовнішня обгортка body + власний padding
+     кореня) разом давали 36px з кожного боку. Тут звужуємо ВЛАСНИЙ відступ
+     кореня з 24px до 12px саме на мобільних; safe-area-inset (виїмка,
+     індикатор жесту) все одно бере максимум із двох значень, тож на
+     пристроях з вирізом менше не стане. */
+  #tracker-root { padding-left: max(var(--sp-3), env(safe-area-inset-left)); padding-right: max(var(--sp-3), env(safe-area-inset-right)); }
+}
+
+/* Пункт 10: раніше .hero-num на мобільному падав до --fs-xl (22px) — рівно
+   стільки ж, скільки h1. Головна метрика не може важити стільки ж, скільки
+   назва застосунку. Перевизначаємо самі токени, а не перекриваємо елементи
+   через !important — так шкала лишається єдиним джерелом правди. */
+@media (max-width: 520px) {
+  :root { --fs-display: 34px; --fs-h1: 17px; }
+}
+
+/* Пункт 23: між 520px і 1440px не змінювалось рівно нічого — вся середня
+   зона діапазону була обділена. */
+@media (min-width: 900px) {
+  :root { --fs-display: 52px; }
+  .card, .hero-card { padding: var(--sp-6); }
+  #tracker-root { max-width: 780px; }
+}
+
+/* ≤460px — сім квадратиків по 44px перестають вміщатись.
+   Розрахунок: 7×44 + 6×6 = 344px потрібного проти (ширина − 100px)
+   доступного, тобто межа настає близько 444px. Беремо 460 із запасом.
+   Тут же ховаємо підписи сум над стовпчиками бар-чарта — дванадцять
+   підписів на такій ширині перетворюються на кашу. */
+@media (max-width: 460px) {
+  .bar-amt { display: none; }
+}
+
+/* ≤380px — старі/компактні телефони. Дві картки показників у ряд дають
+   близько 130px на картку, чого замало для числа з підписом. */
+@media (max-width: 380px) {
+  #stat-cards { grid-template-columns: 1fr !important; }
+  .card { padding: var(--sp-3); }
+  .hero-card { padding: var(--sp-3); }
+  .metric-input-row { gap: var(--sp-2); }
+}
+
+/* Системне налаштування "зменшити рух". У трекері є нескінченна пульсація
+   точки поточного тижня на графіках — саме такі анімації провокують
+   дискомфорт у людей із вестибулярними розладами. WCAG 2.3.3. */
+@media (prefers-reduced-motion: reduce) {
+  #tracker-root *, #app-modal-overlay *, #goals-overlay * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+</style>
+
+<div id="tracker-root">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: var(--sp-5);">
+    <div style="display:flex; gap:var(--sp-3); align-items:center;">
+      <svg width="38" height="38" viewBox="0 0 40 40" style="flex-shrink:0;">
+        <path d="M4 30 L14 14 L20 22 L26 10 L36 30" fill="none" stroke="#9089E0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.65"/>
+        <circle cx="36" cy="30" r="2.5" fill="#2FBE93"/>
+        <path d="M4 30 L36 30" stroke="#34322B" stroke-width="1" stroke-dasharray="1,3"/>
+      </svg>
+      <div>
+        <h1 style="margin: 0 0 var(--sp-1); font-size: var(--fs-h1);">12 тижнів</h1>
+        <p style="color: var(--text-secondary); font-size: var(--fs-sm); margin: 0;">27 липня — 18 жовтня 2026 <span id="sync-badge" style="color: var(--text-muted); font-size: var(--fs-xs);"></span></p>
+      </div>
+    </div>
+    <div class="menu-wrap">
+      <button class="menu-btn" id="menu-btn" title="Меню" aria-label="Меню трекера" aria-haspopup="true" aria-expanded="false" aria-controls="menu-panel">
+        <span data-icon="dots" data-icon-size="16"></span>
+      </button>
+      <div class="menu-panel" id="menu-panel">
+        <button class="menu-item" id="setup-goals"><span data-icon="target"></span>Налаштування</button>
+        <button class="menu-item" id="export-json"><span data-icon="download"></span>Експорт JSON</button>
+        <button class="menu-item" id="export-csv"><span data-icon="download"></span>Експорт CSV</button>
+        <button class="menu-item" id="import-json"><span data-icon="upload"></span>Імпорт JSON</button>
+        <input type="file" id="import-file-input" accept="application/json" style="display:none;">
+        <div style="padding:var(--sp-2) var(--sp-3); font-size:var(--fs-xs); color:var(--text-muted); border-top: var(--bw) solid var(--border); margin-top:var(--sp-1);"><span id="save-status" class="save-status">Збережено ✓</span></div>
+        <div style="padding:0 var(--sp-3) var(--sp-2); font-size:var(--fs-xs); color:var(--text-muted);" id="sync-status"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="journey-wrap" style="margin-bottom: var(--sp-5);"></div>
+
+  <div id="hero-wrap"></div>
+
+  <div class="card" style="margin-bottom: var(--sp-5); padding: var(--sp-4) var(--sp-5);">
+    <div style="font-size:var(--fs-md); font-weight:500; margin-bottom:var(--sp-4);">Прогрес і графіки</div>
+    <div id="dashboard-line" class="dashboard-line" style="margin: 0 0 var(--sp-3);"></div>
+    <div id="stat-cards" style="display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--sp-3); margin-bottom: var(--sp-3);"></div>
+    <div id="pace-banner" style="margin-bottom: var(--sp-3);"></div>
+    <div style="margin-bottom: var(--sp-4);">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-0);">
+        <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Вага за 12 тижнів</div>
+        <span id="chart-weight-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
+      </div>
+        <div id="chart-weight"></div>
+      </div>
+      <div style="margin-bottom: var(--sp-4);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-0);">
+          <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Борг</div>
+          <span id="chart-debt-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
+        </div>
+        <div id="chart-debt"></div>
+      </div>
+      <div style="margin-bottom: var(--sp-2);">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-0);">
+          <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Капітал</div>
+          <span id="chart-capital-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
+        </div>
+        <div id="chart-capital"></div>
+      </div>
+  </div>
+
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v54 · fix: comma decimal separator rejected in weight fields (iOS)</div>
+</div>
+
+<div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:210; align-items:center; justify-content:center; padding:var(--sp-4);">
+  <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:340px; width:100%; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+    <div id="app-modal-message" style="font-size:var(--fs-md); line-height:1.5; margin-bottom:var(--sp-4);"></div>
+    <div id="app-modal-input-wrap" style="display:none; margin-bottom:var(--sp-4);">
+      <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-2);">
+      <button id="app-modal-cancel" type="button" class="btn btn-secondary">Скасувати</button>
+      <button id="app-modal-ok" type="button" class="btn btn-primary">OK</button>
+    </div>
+  </div>
+</div>
+
+<div id="goals-overlay" role="dialog" aria-modal="true" aria-labelledby="goals-title" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
+  <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+    <h2 id="goals-title" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600; margin:0 0 var(--sp-1);">Точка А і ціль</h2>
+    <div style="font-size:var(--fs-sm); color:var(--text-secondary, #B7B4A6); margin-bottom:var(--sp-4);">Звідки стартуємо і куди прийти за 12 тижнів. Порожнє поле = без змін.</div>
+
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Вага, кг</div>
+    <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-4);">
+      <input id="goal-weight-start" type="text" inputmode="decimal" step="0.1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-weight-end" type="text" inputmode="decimal" step="0.1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+    </div>
+
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Борг, $</div>
+    <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-2);">
+      <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+    </div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Тут не залишок боргу, а СКІЛЬКИ ПЛАНУЄШ ВИПЛАТИТИ за 12 тижнів. Старт (А) зазвичай 0, ціль (Б) — сума всіх запланованих платежів (наприклад 0 → 1800).</div>
+
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Капітал, $</div>
+    <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-2);">
+      <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+      <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+    </div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
+
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-bottom:var(--sp-2); padding-top:var(--sp-3); border-top:var(--bw) solid var(--border);">Дії тижня</div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted); line-height:1.4; margin-bottom:var(--sp-3);">Кожна дія важить порівну у відсотку виконання тижня. Нова дія стосується тижнів починаючи з цього — минулі тижні не постраждають.</div>
+    <div id="tactics-list" style="margin-bottom:var(--sp-3);"></div>
+    <input id="tactic-new-label" type="text" placeholder="Напр. Білок 120г щодня" maxlength="80" style="width:100%; box-sizing:border-box; padding:var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg); margin-bottom:var(--sp-2);">
+    <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-2);">
+      <button type="button" id="tactic-type-daily" class="btn btn-secondary" style="flex:1; justify-content:center;" aria-pressed="true">Щодня</button>
+      <button type="button" id="tactic-type-weekly" class="btn btn-secondary" style="flex:1; justify-content:center;" aria-pressed="false">Раз на тиждень</button>
+    </div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted); margin-bottom:var(--sp-1);">Стосується:</div>
+    <!-- Заповнюється через JS із GOAL_META — кольори беруться з того самого
+         об'єкта, що й крапки в самій картці тижня, щоб hex-значення не
+         розповзлись окремо в розмітці й окремо в JS. -->
+    <div id="tactic-goal-selector" style="display:flex; gap:var(--sp-1); margin-bottom:var(--sp-3); flex-wrap:wrap;"></div>
+    <button type="button" id="tactic-add-btn" class="btn btn-primary" style="width:100%; justify-content:center; margin-bottom:var(--sp-4);">+ Додати дію</button>
+
+    <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-bottom:var(--sp-2); padding-top:var(--sp-3); border-top:var(--bw) solid var(--border);">Синхронізація</div>
+    <input id="goal-sync-url" type="text" placeholder="URL Google Apps Script (порожньо — вимкнути)" style="width:100%; box-sizing:border-box; padding:var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
+    <div style="font-size:var(--fs-xs); color:var(--text-muted); line-height:var(--lh-caption); margin:var(--sp-2) 0 var(--sp-5);" id="goal-sync-status"></div>
+
+    <div style="display:flex; justify-content:flex-end; gap:var(--sp-2);">
+      <button id="goals-cancel" type="button" class="btn btn-secondary">Скасувати</button>
+      <button id="goals-save" type="button" class="btn btn-primary">Зберегти</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const START = new Date(2026, 6, 27);
+  const WEEKS = 12;
+  let GOALS = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800,
+    // Дострокове закриття цілі: номер тижня, у якому закрито, або null —
+    // ще відкрита. Повністю реактивне (autoCloseCheck перераховує щоразу
+    // з нуля): зменшив суму нижче цілі — відкрилось саме. Жодної ручної
+    // кнопки закриття/відкриття немає ніде — орієнтир суто на дані.
+    weightClosedWeek: null, debtClosedWeek: null, capitalClosedWeek: null };
+  // Той самий захист, що і для тижнів (див. коментар біля load()): якщо
+  // цілі змінили, поки фонова синхронізація ще летить, позначаємо це,
+  // щоб застаріла відповідь їх не перезаписала.
+  async function saveGoals(){ if (syncInFlight) editedDuringSync.add('goals'); try { await storage.set('goals', JSON.stringify(GOALS)); } catch(e) {} }
+  const C_WEIGHT = '#9089E0', C_DEBT = '#5BA3E8', C_CAPITAL = '#3BC4C4';
+  const C_DONE = '#2FBE93', C_MISSED = '#FF7A54', C_CURRENT = '#F0B94D', C_FUTURE_FALLBACK = '#4A473C';
+  // Пункт 9: "у процесі" — нейтральний стан, він не мусить тривожити,
+  // тоді як "відстаєш" (C_MISSED) і попередження — мусять.
+  const C_NEUTRAL = '#A8A292';
+  // Мітка "до якої цілі стосується дія". Єдине джерело кольору й назви —
+  // і форма додавання, і список налаштувань, і сама картка тижня читають
+  // звідси, щоб hex-значення кольорів не розповзлись у трьох місцях.
+  // "general" — для дій без конкретної цілі (як-от "Аналіз тижня").
+  const GOAL_META = {
+    weight: { label: 'Вага', color: C_WEIGHT, soft: 'rgba(144,137,224,0.16)' },
+    debt: { label: 'Борг', color: C_DEBT, soft: 'rgba(91,163,232,0.16)' },
+    capital: { label: 'Капітал', color: C_CAPITAL, soft: 'rgba(59,196,196,0.16)' },
+    general: { label: 'Загальне', color: 'var(--text-muted)', soft: 'rgba(154,151,132,0.16)' }
+  };
+  // Крапка — лишається лише для перемикача у формі додавання (там вона
+  // всередині кнопки поруч із власним текстом кнопки).
+  function goalDot(goal, size){
+    const meta = GOAL_META[goal] || GOAL_META.general;
+    size = size || 7;
+    // aria-hidden: колір тут не єдиний спосіб дізнатись мітку — у списку
+    // налаштувань поруч завжди йде текстова назва; у картці тижня є title.
+    return '<span class="goal-dot" style="width:' + size + 'px; height:' + size + 'px; background:' + meta.color + ';" title="Стосується: ' + meta.label + '" aria-hidden="true"></span>';
+  }
+  // Варіант A з макета (goal-label-variants.html): м'яка кольорова плашка —
+  // 16% фону кольором цілі + текст повним кольором. Та сама мова, що вже
+  // в бейджах "у графіку"/"позаду" і пілюлі "Сьогодні", тож нічого нового
+  // не вигадуємо. Контраст тексту перевірено на кожній поверхні, де плашка
+  // з'являється (surface-1/2/3): мінімум 4.73:1 при нормі 4.5:1.
+  function goalBadge(goal){
+    const meta = GOAL_META[goal] || GOAL_META.general;
+    return '<span class="goal-badge" style="background:' + meta.soft + '; color:' + meta.color + ';">' + meta.label + '</span>';
+  }
+  // Назва дії — вільний текст від користувача. Кілька місць підставляють її
+  // через innerHTML (кольорова крапка перед назвою, прев'ю скидання) — без
+  // екранування назва на кшталт "Пити <2л води" зламала б розмітку.
+  function escHtml(s){
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+  // Чи є в тижні бодай якісь дані — щоб відрізнити "0% бо ще не почав"
+  // від "0% бо провалив".
+  function hasAnyData(n){
+    const st = state[n];
+    return !!(st.weight || st.debtAmt || st.capitalAmt ||
+      (st.checks && st.checks.w1) ||
+      (st.logDays || []).some(Boolean) || (st.calorieDays || []).some(Boolean));
+  }
+  const DAY_LABELS = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+  // Повні назви — для aria-label. Скорочення "Пн"/"Вт" скрінрідер вимовляє
+  // як беззмістовний набір літер.
+  const DAY_FULL = ['Понеділок','Вівторок','Середа','Четвер','Пʼятниця','Субота','Неділя'];
+  // "% виконання тижня" — це Weekly Execution Score за методикою "12 тижнів у році":
+  // рахує виконання ДІЙ (lead-показники), а не саму суму грошей. Для боргу дія —
+  // це фізичне відкладення готівки в конверт цього тижня; для капіталу — переказ
+  // на картку/рахунок. Чи зроблено дію = чи введена сума > 0 (не обов'язково точно
+  // за планом — за це окремо попереджає індикатор "незвично велика/мала сума").
+  // Прогрес до самих грошових цілей (борг $X, капітал $X) рахується окремо —
+  // дивись пейс-бейджі "у графіку" / "позаду" / "випереджає".
+  // Ваги більше не фіксовані константою: кожна дія, що застосовується до
+  // конкретного тижня (див. tacticAppliesTo нижче), важить порівну — і
+  // вбудовані, і додані користувачем. Формула в score().
+
+  // --- Дії тижня (TACTICS) ---
+  // Раніше тут був WEEKLY_TACTICS — жорстко зашитий масив з ОДНИМ пунктом
+  // ("Зважування"), плюс два окремі виклики dailyToggle('logDays', ...) /
+  // dailyToggle('calorieDays', ...) прямо в buildWeekBody. Тепер це єдиний
+  // динамічний реєстр: користувач може додавати власні дії (щоденні або
+  // щотижневі), перейменовувати й архівувати — і вбудовані три пункти, і свої.
+  //
+  // Ключова проблема, яку тут треба було вирішити: якщо додати дію
+  // "Білок 120г" у тиждень 5, тижні 1-4 не повинні заднім числом вважатись
+  // "проваленими" через дію, якої тоді ще не існувало. І навпаки — якщо
+  // архівувати дію в тиждень 8, тижні 1-8 мають зберегти її в підрахунку
+  // (вона реально трекалась), а тижні 9+ — ні.
+  //
+  // Рішення: кожна дія має createdWeek (з якого тижня рахується) і
+  // archivedWeek (з якого тижня НЕ рахується, або null — усе ще активна).
+  // tacticAppliesTo() — єдина функція, яку використовують і рендер, і
+  // рахунок відсотка, тож показане завжди збігається з порахованим.
+  function defaultTactics(){
+    return [
+      { id: 'w1', label: 'Зважування в понеділок зранку', type: 'weekly', goal: 'weight', createdWeek: 1, archivedWeek: null, builtin: true },
+      { id: 'logDays', label: 'Облік їжі кожного дня', type: 'daily', goal: 'weight', createdWeek: 1, archivedWeek: null, builtin: true },
+      { id: 'calorieDays', label: 'Не більше 2000 ккал/день', type: 'daily', goal: 'weight', createdWeek: 1, archivedWeek: null, builtin: true }
+    ];
+  }
+  let TACTICS = defaultTactics();
+
+  function tacticAppliesTo(t, n){
+    if (t.createdWeek > n) return false;
+    // Тиждень, у якому дію архівували, ще зараховується — архівація діє
+    // з НАСТУПНОГО тижня, а не заднім числом стирає вже зроблене цього тижня.
+    if (t.archivedWeek !== null && n > t.archivedWeek) return false;
+    return true;
+  }
+
+  // Уніфікований доступ до значення дії — приховує різницю між вбудованими
+  // полями (checks.w1, logDays, calorieDays лишились фіксованими полями
+  // стану заради нульового ризику для вже синхронізованих даних) і новими
+  // користувацькими діями (живуть у state[i].custom{}).
+  function tacticGetWeekly(i, t){
+    if (t.id === 'w1') return !!state[i].checks.w1;
+    return !!(state[i].custom && state[i].custom[t.id]);
+  }
+  function tacticSetWeekly(i, t, val){
+    if (t.id === 'w1'){ state[i].checks.w1 = val; return; }
+    if (!state[i].custom) state[i].custom = {};
+    state[i].custom[t.id] = val;
+  }
+  function tacticGetDailyArr(i, t){
+    if (t.id === 'logDays') return state[i].logDays;
+    if (t.id === 'calorieDays') return state[i].calorieDays;
+    if (!state[i].custom) state[i].custom = {};
+    if (!Array.isArray(state[i].custom[t.id])) state[i].custom[t.id] = [false,false,false,false,false,false,false];
+    return state[i].custom[t.id];
+  }
+  // Чи є в цієї дії бодай якісь дані хоч у якомусь тижні — визначає, чи
+  // можна її просто видалити (типо, помилка при створенні), чи треба
+  // архівувати (щоб не загубити реальну історію).
+  function tacticHasAnyData(t){
+    for (let i = 1; i <= WEEKS; i++){
+      if (t.type === 'weekly'){ if (tacticGetWeekly(i, t)) return true; }
+      else { if (tacticGetDailyArr(i, t).some(Boolean)) return true; }
+    }
+    return false;
+  }
+  // Три вбудовані дії ЗАВЖДИ стосуються ваги — це знаємо напевно, на
+  // відміну від довільних користувацьких дій, для яких немає способу
+  // вгадати ціль заднім числом.
+  const BUILTIN_GOAL_BY_ID = { w1: 'weight', logDays: 'weight', calorieDays: 'weight' };
+  function applyTacticsRaw(raw){
+    try {
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (Array.isArray(parsed) && parsed.length){
+        // Зворотна сумісність: дії, збережені до появи міток цілей, не мають
+        // поля goal. Раніше ВСІ такі дії — включно з вбудованими — тихо
+        // ставали "Загальне", хоча для трьох вбудованих ми точно знаємо
+        // правильну відповідь (Вага). Довільні користувацькі дії й далі
+        // йдуть у "Загальне" — вгадати їхню ціль заднім числом нема як.
+        TACTICS = parsed.map(t => Object.assign({ goal: BUILTIN_GOAL_BY_ID[t.id] || 'general' }, t));
+      }
+    } catch(e) {}
+  }
+  async function saveTactics(){
+    if (syncInFlight) editedDuringSync.add('tactics');
+    try { await storage.set('tactics', JSON.stringify(TACTICS)); } catch(e) {}
+  }
+  function genTacticId(){ return 'a_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+
+  const ICONS = {
+    check: '<path d="M4 8.5l3 3 5.5-6.5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    x: '<path d="M4.5 4.5l7 7M11.5 4.5l-7 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>',
+    plus: '<path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+    minus: '<path d="M3 8h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>',
+    reset: '<path d="M3.5 8a4.5 4.5 0 1 1 1.3 3.2M3.5 8V4.3M3.5 8h3.7" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    // I8: перенесено сюди з інлайнових <svg> у розмітці — одне джерело правди
+    dots: '<circle cx="3" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="13" cy="8" r="1.3" fill="currentColor"/>',
+    target: '<circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.4" fill="none"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/>',
+    download: '<path d="M8 2v8m0 0l-3-3m3 3l3-3M3 13h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    upload: '<path d="M8 14V6m0 0l-3 3m3-3l3 3M3 3h10" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    fill: '<path d="M8 2v9m0 0l-3.2-3.2M8 11l3.2-3.2M3 14h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    chevronLeft: '<path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    chevronRight: '<path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    chevronDown: '<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+  };
+  function icon(name, size, extraStyle){ size = size || 14; return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 16 16" style="display:block;' + (extraStyle||'') + '">' + ICONS[name] + '</svg>'; }
+
+  // --- Власні модальні вікна замість window.confirm/prompt/alert. ---
+  // Нативні діалоги браузер може мовчки заблокувати ("Prevent this page from
+  // creating additional dialogs") після кількох поспіль — тоді кнопки виглядають
+  // так, ніби взагалі не працюють. Власний overlay такого не має.
+  // --- A5/A6: спільне керування фокусом для обох модалок. ---
+  // Раніше модалки не мали ні role="dialog", ні перенесення фокуса, ні пастки
+  // фокуса (Tab виходив у контент позаду), ні закриття по Escape. Ці функції
+  // закривають усе перелічене одним механізмом на обидва діалоги.
+  const FOCUSABLE = 'button:not([disabled]), [href], input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
+  // Стек, а не одна змінна: попередження може відкритись поверх діалогу
+  // цілей, і тоді обробник нижнього діалогу не можна ні загубити, ні
+  // лишити активним — інакше один Escape закрив би обидва.
+  const modalStack = [];
+
+  function openModal(overlay, opts){
+    opts = opts || {};
+    const restoreTo = document.activeElement;   // куди повернути фокус після закриття
+    overlay.style.display = 'flex';
+
+    function focusables(){
+      return Array.from(overlay.querySelectorAll(FOCUSABLE))
+        .filter(el => el.offsetParent !== null || el === document.activeElement);
+    }
+    function onKeydown(e){
+      if (e.key === 'Escape'){ e.preventDefault(); closeModal(overlay); if (opts.onEscape) opts.onEscape(); return; }
+      if (e.key !== 'Tab') return;
+      // Пастка фокуса: Tab по колу всередині модалки, не вислизає назад у сторінку.
+      const items = focusables();
+      if (!items.length) return;
+      const first = items[0], last = items[items.length - 1];
+      if (e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+    }
+    // Обробник попереднього діалогу тимчасово вимикаємо, щоб події не
+    // спрацьовували одразу на двох рівнях.
+    const parent = modalStack[modalStack.length - 1];
+    if (parent) document.removeEventListener('keydown', parent.onKeydown, true);
+    document.addEventListener('keydown', onKeydown, true);
+    modalStack.push({ overlay: overlay, onKeydown: onKeydown, restoreTo: restoreTo });
+
+    // Фокус усередину: на поле вводу, якщо воно є, інакше на першу кнопку.
+    setTimeout(() => {
+      const target = opts.focusEl || overlay.querySelector('input:not([type=hidden])') || focusables()[0];
+      if (target) target.focus();
+    }, 50);
+  }
+
+  function closeModal(overlay){
+    // Явно знімаємо фокус із будь-якого поля всередині модалки ПЕРЕД
+    // закриттям. Раніше на це покладались опосередковано: виклик
+    // restoreTo.focus() нижче іноді спричиняв blur поточного поля як
+    // побічний ефект — але тільки якщо restoreTo сам був справді
+    // фокусованим елементом. Якщо ні (наприклад, <body> без tabindex),
+    // .focus() на ньому — просто no-op, і поле всередині модалки НІКОЛИ
+    // не втрачало фокус: логіка onblur (зокрема збереження перейменування
+    // дії) могла тихо не спрацювати. Явний .blur() тут гарантує
+    // детерміновану поведінку незалежно від того, чим виявиться restoreTo.
+    if (document.activeElement && overlay.contains(document.activeElement)){
+      document.activeElement.blur();
+    }
+    overlay.style.display = 'none';
+    const idx = modalStack.map(m => m.overlay).lastIndexOf(overlay);
+    if (idx === -1) return;
+    const entry = modalStack.splice(idx, 1)[0];
+    document.removeEventListener('keydown', entry.onKeydown, true);
+    // Повертаємо керування діалогу, що лишився під цим.
+    const parent = modalStack[modalStack.length - 1];
+    if (parent) document.addEventListener('keydown', parent.onKeydown, true);
+    // Фокус повертається на елемент, що відкрив діалог, — інакше він падає
+    // на <body> і навігація з клавіатури починається спочатку.
+    if (entry.restoreTo && typeof entry.restoreTo.focus === 'function' && document.contains(entry.restoreTo)) {
+      entry.restoreTo.focus();
+    }
+  }
+
+  function showAppModal(opts){
+    const overlay = document.getElementById('app-modal-overlay');
+    if (!overlay) return;
+    const msgEl = document.getElementById('app-modal-message');
+    const inputWrap = document.getElementById('app-modal-input-wrap');
+    const input = document.getElementById('app-modal-input');
+    const okBtn = document.getElementById('app-modal-ok');
+    const cancelBtn = document.getElementById('app-modal-cancel');
+    if (opts.html) msgEl.innerHTML = opts.html; else msgEl.textContent = opts.message || '';
+    if (opts.showInput){ inputWrap.style.display = 'block'; input.value = opts.inputValue || ''; }
+    else { inputWrap.style.display = 'none'; }
+    okBtn.textContent = opts.okLabel || 'OK';
+    cancelBtn.style.display = opts.hideCancel ? 'none' : 'inline-block';
+    function cleanup(){ closeModal(overlay); okBtn.onclick = null; cancelBtn.onclick = null; overlay.onclick = null; }
+    okBtn.onclick = () => { const val = opts.showInput ? input.value : true; cleanup(); if (opts.onOk) opts.onOk(val); };
+    cancelBtn.onclick = () => { cleanup(); if (opts.onCancel) opts.onCancel(); };
+    overlay.onclick = (e) => { if (e.target === overlay && !opts.hideCancel) { cleanup(); if (opts.onCancel) opts.onCancel(); } };
+    openModal(overlay, {
+      focusEl: opts.showInput ? input : okBtn,
+      onEscape: () => { okBtn.onclick = null; cancelBtn.onclick = null; overlay.onclick = null; if (opts.onCancel) opts.onCancel(); }
+    });
+  }
+  function showAppAlert(message){
+    // Переноси рядків через textContent не працюють, тому перетворюємо
+    // на розмітку — з екрануванням, бо в тексті може бути ввід користувача.
+    const esc = String(message)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    showAppModal({ html: esc.replace(/\n/g, '<br>'), okLabel: 'Гаразд', hideCancel: true });
+  }
+
+  function cv(name, fallback){
+    try {
+      const el = document.getElementById('tracker-root') || document.body;
+      const v = getComputedStyle(el).getPropertyValue(name).trim();
+      return v || fallback;
+    } catch(e){ return fallback; }
+  }
+
+  function weekStart(n){ const s = new Date(START); s.setDate(s.getDate() + (n-1)*7); return s; }
+  function weekEnd(n){ const e = weekStart(n); e.setDate(e.getDate() + 6); e.setHours(23,59,59,999); return e; }
+  function weekDates(n){
+    const fmt = d => d.toLocaleDateString('uk-UA', {day:'2-digit', month:'2-digit'});
+    return fmt(weekStart(n)) + ' – ' + fmt(weekEnd(n));
+  }
+  function expWeight(i){ return GOALS.weightStart + (GOALS.weightEnd - GOALS.weightStart) * i / WEEKS; }
+  function expDebtPaid(i){ return GOALS.debtStart + (GOALS.debtEnd - GOALS.debtStart) * i / WEEKS; }
+  function expCapital(i){ return GOALS.capitalStart + (GOALS.capitalEnd - GOALS.capitalStart) * i / WEEKS; }
+  function fmt1(n){ return Math.round(n * 10) / 10; }
+
+  function emptyWeek(){ return { weight: null, debtAmt: null, capitalAmt: null, checks: {}, logDays: [false,false,false,false,false,false,false], calorieDays: [false,false,false,false,false,false,false], custom: {} }; }
+
+  let state = {};
+  for (let i = 1; i <= WEEKS; i++) state[i] = emptyWeek();
+  let prevScores = {};
+  // U1/U2: який тиждень зараз відкритий у головній картці. null = поточний.
+  // Дозволяє редагувати будь-який тиждень одним тапом по кружечку таймлайну,
+  // замість "скрол вниз → розгорнути історію → знайти рядок → розгорнути".
+  let selectedWeek = null;
+  // Пункт 17: памʼятаємо, який тиждень був намальований, щоб анімувати
+  // лише справжню зміну, а не кожну перемальовку після вводу цифри.
+  let lastRenderedWeek = null;
+  // Реальний скрін+відео користувача: перемикання тижнів "хаотично
+  // перемотувалось". Причина — стрічка ПЕРЕЦЕНТРОВУВАЛАСЬ на кожен виклик
+  // render() (а render() викликається геть на всі дії в застосунку, не
+  // лише на вибір тижня — тап по чекбоксу теж рендерить усе). Якщо
+  // користувач сам прогорнув стрічку подивитись інші тижні (не вибираючи
+  // жоден), наступний-ліпший рендер від будь-де ще на сторінці різко
+  // висмикував скрол назад до раніше обраного тижня. Тепер перецентровуємо
+  // лише тоді, коли ОБРАНИЙ тиждень справді змінився з минулого рендеру.
+  let lastJourneySelectedWeek = null;
+  // Реальне відео користувача: тап по одній галочці — і інші, вже
+  // відмічені, "трішки здвигаються". Причина та сама, що й вище з
+  // таймлайном: render() перебудовує ВЕСЬ DOM, тож усі вже відмічені
+  // чекбокси отримують свіжі SVG-елементи галочок — а CSS-анімація
+  // "стрибка" (checkPop) прив'язана до aria-checked="true", тож
+  // програється заново на кожному з них, а не лише на тому, який щойно
+  // натиснули. justToggledKey зберігає, ЯКИЙ САМЕ чекбокс щойно змінили —
+  // анімація тепер прив'язана до окремого класу, що ставиться лише йому.
+  let justToggledKey = null;
+  function activeWeek(){
+    const w = selectedWeek === null ? currentWeek() : selectedWeek;
+    return Math.min(Math.max(w, 1), WEEKS);
+  }
+
+  function showSaveStatus(text, isError){
+    const el = document.getElementById('save-status');
+    el.textContent = text;
+    el.style.color = isError ? '#D85A30' : 'var(--text-muted)';
+  }
+
+  // --- Сховище: localStorage (миттєвий локальний кеш) + опційна синхронізація
+  // через Google Apps Script Web App (Google Таблиця як спільна база для всіх пристроїв). ---
+  // Пункт 8: рахуємо запуски, щоб знати, коли новачкові вже не потрібне
+  // пояснення методики під головним числом.
+  function launchCount(){
+    try {
+      const n = parseInt(localStorage.getItem('tracker:launches') || '0', 10) + 1;
+      return n;
+    } catch(e){ return 99; }
+  }
+  function bumpLaunchCount(){
+    try {
+      const n = parseInt(localStorage.getItem('tracker:launches') || '0', 10);
+      if (n < 10) localStorage.setItem('tracker:launches', String(n + 1));
+    } catch(e) {}
+  }
+
+  function getWebAppUrl(){ try { return (localStorage.getItem('tracker:weburl') || '').trim(); } catch(e){ return ''; } }
+  function setWebAppUrl(url){ try { localStorage.setItem('tracker:weburl', url || ''); } catch(e){} }
+  function updateSyncStatusUI(){
+    const el = document.getElementById('sync-status');
+    if (!el) return;
+    el.textContent = getWebAppUrl() ? 'Синхронізація: увімкнена (Google Таблиця)' : 'Синхронізація: вимкнена (лише цей браузер)';
+  }
+
+  // Локальний кеш — синхронний, без жодного мережевого запиту.
+  function localGet(key){ try { return localStorage.getItem('tracker:' + key); } catch(e){ return null; } }
+  function localSet(key, value){ try { localStorage.setItem('tracker:' + key, value); } catch(e) {} }
+
+  const ALL_KEYS = (function(){ const k = ['goals', 'tactics']; for (let i = 1; i <= WEEKS; i++) k.push('week:' + i); return k; })();
+
+  // Забирає ВСІ ключі одним запитом (action=getall). Якщо бекенд старої
+  // версії такої дії не знає — падає на паралельні запити. Раніше тут було
+  // 13 ЧЕРГОВИХ запитів, кожен чекав попереднього — звідси 20 секунд
+  // порожнього екрана при відкритті.
+  async function remoteFetchAll(url){
+    try {
+      const res = await fetch(url + '?action=getall');
+      const data = await res.json();
+      if (data && data.items && typeof data.items === 'object') return data.items;
+    } catch(e) { /* старий бекенд або немає звʼязку — пробуємо запасний шлях */ }
+    try {
+      const results = await Promise.all(ALL_KEYS.map(async function(key){
+        try {
+          const res = await fetch(url + '?action=get&key=' + encodeURIComponent(key));
+          const d = await res.json();
+          return [key, (d && d.value) ? d.value : null];
+        } catch(e){ return [key, null]; }
+      }));
+      const map = {};
+      results.forEach(function(pair){ if (pair[1]) map[pair[0]] = pair[1]; });
+      return map;
+    } catch(e){ return null; }
+  }
+
+  const storage = {
+    async set(key, value){
+      localSet(key, value);
+      const url = getWebAppUrl();
+      if (!url) return true; // синхронізація вимкнена — локально вже збережено
+      try {
+        await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // text/plain уникає CORS preflight
+          body: JSON.stringify({ action: 'set', key: key, value: value })
+        });
+        return true;
+      } catch(e) { return false; }
+    }
+  };
+
+  function applyGoalsRaw(raw){ try { if (raw) GOALS = Object.assign({}, GOALS, JSON.parse(raw)); } catch(e) {} }
+  function applyWeekRaw(i, raw){ try { if (raw) state[i] = Object.assign(emptyWeek(), JSON.parse(raw)); } catch(e) {} }
+  function refreshPrevScores(){ for (let i = 1; i <= WEEKS; i++) prevScores[i] = score(i); }
+  function setSyncBadge(text){ const el = document.getElementById('sync-badge'); if (el) el.textContent = text || ''; }
+
+  // БАГ (знайдено за відео користувача): галочка ставилась і за частку секунди
+  // сама зникала. Причина — гонка між фоновою синхронізацією при відкритті
+  // й дотиком користувача.
+  //
+  // load() запускає ОДИН пакетний GET одразу при старті (щоб не робити 13
+  // окремих запитів), але сторінка вже намальована й повністю клікабельна
+  // з локального кешу, поки цей GET летить. Якщо Apps Script відповідає
+  // повільно (холодний старт, читання всієї таблиці) — а в записаному відео
+  // це зайняло ~6 секунд — користувач встигає натиснути чекбокс ДО того, як
+  // відповідь прийде. GET летів із застарілим знімком (без щойно поставленої
+  // галочки), і коли він нарешті приходить, load() безумовно перезаписував
+  // ним стан тижня — свіжий локальний дотик зникав.
+  //
+  // syncInFlight + editedDuringSync — прапорець і список тижнів, змінених
+  // ПОКИ той самий запит ще летів. При мержі результату такі тижні
+  // пропускаються: локальна зміна свіжіша за відповідь, що її наздогнала.
+  let syncInFlight = false;
+  const editedDuringSync = new Set();
+
+  async function load(){
+    bumpLaunchCount();
+    // Крок 1 — миттєво малюємо з локального кешу, БЕЗ мережі.
+    // Користувач бачить трекер одразу, а не через 20 секунд.
+    applyGoalsRaw(localGet('goals'));
+    applyTacticsRaw(localGet('tactics'));
+    for (let i = 1; i <= WEEKS; i++) applyWeekRaw(i, localGet('week:' + i));
+    refreshPrevScores();
+    updateSyncStatusUI();
+    render();
+
+    // Крок 2 — синхронізація у фоні; екран уже показано, чекати нема чого.
+    const url = getWebAppUrl();
+    if (!url) return;
+    setSyncBadge('синхронізація…');
+    syncInFlight = true;
+    editedDuringSync.clear();
+    const remote = await remoteFetchAll(url);
+    syncInFlight = false;
+    if (!remote){ setSyncBadge('офлайн'); return; }
+    if (remote['goals'] && !editedDuringSync.has('goals')){ localSet('goals', remote['goals']); applyGoalsRaw(remote['goals']); }
+    if (remote['tactics'] && !editedDuringSync.has('tactics')){ localSet('tactics', remote['tactics']); applyTacticsRaw(remote['tactics']); }
+    for (let i = 1; i <= WEEKS; i++){
+      if (editedDuringSync.has(i)) continue; // саме тут гасився дотик користувача — тепер пропускаємо
+      const raw = remote['week:' + i];
+      if (raw){ localSet('week:' + i, raw); applyWeekRaw(i, raw); }
+    }
+    refreshPrevScores();
+    setSyncBadge('');
+    render();
+  }
+  async function saveWeek(n){
+    // Позначаємо тиждень як "живо змінений" ДО збереження — сам факт виклику
+    // saveWeek означає, що користувач щойно щось відмітив/ввів, і це має
+    // пережити будь-яку паралельну синхронізацію, що вже летить.
+    if (syncInFlight) editedDuringSync.add(n);
+    showSaveStatus('Збереження…');
+    const ok = await storage.set('week:' + n, JSON.stringify(state[n]));
+    if (ok) showSaveStatus('Збережено ✓');
+    else showSaveStatus('Збережено локально (хмара недоступна)', true);
+  }
+
+  // Q3: раніше тут був лише try/catch навколо JSON.parse. Якщо файл був
+  // валідним JSON, але з іншою структурою (наприклад weight: "abc"),
+  // Object.assign мовчки підставляв сміття, і далі NaN розповзався по score,
+  // темпу і графіках без жодного повідомлення. Тепер кожне поле перевіряється
+  // за типом, а неочікувані значення відкидаються з підсумковим звітом.
+  function sanitizeWeek(raw){
+    const clean = emptyWeek();
+    const skipped = [];
+    const numField = (key, max) => {
+      if (raw[key] === undefined || raw[key] === null || raw[key] === '') return;
+      const v = Number(raw[key]);
+      if (!isFinite(v) || v < 0 || v > max){ skipped.push(key); return; }
+      clean[key] = v;
+    };
+    numField('weight', 500);
+    numField('debtAmt', 10000000);
+    numField('capitalAmt', 10000000);
+    if (raw.checks && typeof raw.checks === 'object' && !Array.isArray(raw.checks)){
+      clean.checks = { w1: !!raw.checks.w1 };
+    } else if (raw.checks !== undefined) skipped.push('checks');
+    ['logDays', 'calorieDays'].forEach(key => {
+      if (raw[key] === undefined) return;
+      if (Array.isArray(raw[key]) && raw[key].length === 7) clean[key] = raw[key].map(Boolean);
+      else skipped.push(key);
+    });
+    // Користувацькі дії: структурна перевірка без прив'язки до конкретного
+    // реєстру TACTICS (файл могли експортувати до перейменування/архівації
+    // дії) — кожне значення має бути або boolean (щотижнева дія), або масив
+    // рівно з 7 елементів (щоденна). Усе інше відкидається поіменно.
+    if (raw.custom && typeof raw.custom === 'object' && !Array.isArray(raw.custom)){
+      const cleanCustom = {};
+      let customSkipped = 0;
+      Object.keys(raw.custom).forEach(k => {
+        const v = raw.custom[k];
+        if (typeof v === 'boolean') cleanCustom[k] = v;
+        else if (Array.isArray(v) && v.length === 7) cleanCustom[k] = v.map(Boolean);
+        else customSkipped++;
+      });
+      clean.custom = cleanCustom;
+      if (customSkipped) skipped.push('custom(' + customSkipped + ')');
+    } else if (raw.custom !== undefined) skipped.push('custom');
+    if (typeof raw.notes === 'string') clean.notes = raw.notes.slice(0, 2000);
+    else if (raw.notes !== undefined) skipped.push('notes');
+    return { clean: clean, skipped: skipped };
+  }
+
+  async function importData(file){
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)){
+        showAppAlert('Це не схоже на файл трекера — очікується обʼєкт із ключами week1…week12.');
+        return;
+      }
+      let imported = 0;
+      const allSkipped = [];
+      for (let i = 1; i <= WEEKS; i++){
+        const raw = parsed['week' + i];
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue;
+        const res = sanitizeWeek(raw);
+        state[i] = res.clean;
+        await saveWeek(i);
+        imported++;
+        res.skipped.forEach(f => { if (allSkipped.indexOf(f) === -1) allSkipped.push(f); });
+      }
+      if (!imported){
+        showAppAlert('У файлі не знайдено жодного тижня (очікуються ключі week1…week12).');
+        return;
+      }
+      render();
+      showSaveStatus('Імпортовано ✓');
+      if (allSkipped.length){
+        showAppAlert('Імпортовано тижнів: ' + imported + '.\nДеякі поля пропущено через некоректні значення: ' + allSkipped.join(', ') + '.');
+      }
+    } catch(err){ showAppAlert('Не вдалося прочитати файл: ' + (err && err.message ? err.message : err)); }
+  }
+
+  // Українська плюралізація: 1 дія, 2-4 дії, 0/5-20 дій, і той самий
+  // цикл далі (21 дія, 22-24 дії, 25 дій...).
+  function pluralUk(n, one, few, many){
+    const mod10 = n % 10, mod100 = n % 100;
+    if (mod10 === 1 && mod100 !== 11) return one;
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return few;
+    return many;
+  }
+  // Текст підказки під відсотком — раніше був жорстко "5 дій тижня: ...",
+  // тепер будується з реального переліку дій, застосовних до тижня n.
+  function scoreCaptionText(n){
+    const parts = ['конверт на борг', 'переказ на капітал'];
+    TACTICS.forEach(t => { if (tacticAppliesTo(t, n)) parts.push(t.label.toLowerCase()); });
+    const count = parts.length;
+    // Критичний огляд, пункт 5: з великою кількістю кастомних дій речення
+    // ставало нескінченним. Показуємо перші 6, решту — одним числом.
+    const CAP = 6;
+    const shown = parts.length > CAP ? parts.slice(0, CAP).concat(['ще ' + (parts.length - CAP)]) : parts;
+    return count + ' ' + pluralUk(count, 'дія', 'дії', 'дій') + ' тижня: ' + shown.join(', ') + '.';
+  }
+  // Фідбек із реального пристрою: кнопка "?" не подобалась сама по собі,
+  // а пояснення під нею (суцільне речення з переліком назв через кому)
+  // не відповідало на головне питання — скільки відсотків дає КОЖЕН
+  // окремий пункт. Явний список замість абзацу: та сама мітка цілі, що
+  // вже показана нижче в "Дії тижня", + вага у відсотках навпроти кожної.
+  function scoreBreakdownHtml(n){
+    const items = [
+      { goal: 'debt', label: 'Борг · конверт готівкою' },
+      { goal: 'capital', label: 'Капітал · переказ' }
+    ];
+    TACTICS.forEach(t => { if (tacticAppliesTo(t, n)) items.push({ goal: t.goal, label: t.label }); });
+    const total = items.length;
+    if (total === 0) return '<div style="font-size:var(--fs-sm); color:var(--text-secondary);">На цей тиждень немає жодного пункту, що впливає на відсоток.</div>';
+    // Кожен пункт важить порівну — 100/total може не ділитись рівно
+    // (наприклад 100/3 = 33.3), тож позначаємо приблизно (~), як і
+    // деінде в застосунку для орієнтовних значень.
+    const raw = 100 / total;
+    const pctStr = Math.abs(raw - Math.round(raw)) < 0.05 ? String(Math.round(raw)) : raw.toFixed(1);
+    const rows = items.map(it =>
+      '<li style="display:flex; align-items:center; gap:var(--sp-2); padding:var(--sp-1) 0;">' +
+        goalBadge(it.goal) +
+        '<span style="flex:1; min-width:0;">' + escHtml(it.label) + '</span>' +
+        '<span style="font-weight:600; flex-shrink:0;">~' + pctStr + '%</span>' +
+      '</li>'
+    ).join('');
+    return '<div style="font-size:var(--fs-sm); color:var(--text-secondary); margin-bottom:var(--sp-2);">' +
+        total + ' ' + pluralUk(total, 'пункт', 'пункти', 'пунктів') + ' на цей тиждень, кожен важить порівну:</div>' +
+      '<ul style="list-style:none; margin:0; padding:0;">' + rows + '</ul>';
+  }
+
+  function dayFraction(arr){ return arr.filter(Boolean).length / 7; }
+  function score(n){
+    let done = 0, total = 0;
+    // Гроші рахуються завжди, поза реєстром дій — вони не архівуються.
+    // closedWeek передається, щоб actionFraction_ не вимагав імітувати
+    // внески в тижні після того, як ціль уже достроково закрита.
+    total += 1; done += actionFraction_(n, 'debtAmt', GOALS.debtStart, GOALS.debtEnd, GOALS.debtClosedWeek);
+    total += 1; done += actionFraction_(n, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd, GOALS.capitalClosedWeek);
+    // Кожна дія, що діяла в тиждень n (див. tacticAppliesTo), важить порівну.
+    // Для тижнів без жодної кастомної дії це рівно те саме, що й раніше:
+    // 2 (гроші) + 3 (вбудовані) = 5, по 20% кожна.
+    TACTICS.forEach(t => {
+      if (!tacticAppliesTo(t, n)) return;
+      total += 1;
+      if (t.type === 'weekly'){ if (tacticGetWeekly(n, t)) done += 1; }
+      else { done += dayFraction(tacticGetDailyArr(n, t)); }
+    });
+    return total > 0 ? Math.round((done / total) * 100) : 0;
+  }
+  function weekStatus(n){
+    const now = new Date();
+    if (now < weekStart(n)) return 'future';
+    if (now <= weekEnd(n)) return 'current';
+    return score(n) >= 85 ? 'done' : 'missed';
+  }
+  function displayStatus(n){
+    const dateSt = weekStatus(n);
+    const s = score(n);
+    if (dateSt === 'future'){
+      if (s >= 85) return 'done';
+      if (s > 0) return 'inprogress';
+      return 'future';
+    }
+    if (dateSt !== 'current') return dateSt;
+    if (s >= 85) return 'done';
+    if (s > 0) return 'inprogress';
+    return 'future';
+  }
+  function statusColor(st){ return st === 'done' ? C_DONE : st === 'missed' ? C_MISSED : (st === 'current' || st === 'inprogress') ? C_CURRENT : cv('--border-strong', C_FUTURE_FALLBACK); }
+  function currentWeek(){ const now = new Date(); for (let i = 1; i <= WEEKS; i++) if (now <= weekEnd(i)) return i; return WEEKS; }
+  function findPrevWeight(i){ for (let j = i-1; j >= 1; j--) if (state[j].weight) return state[j].weight; return GOALS.weightStart; }
+  function findPrevAmt(i, key){ for (let j = i-1; j >= 1; j--) if (state[j][key]) return state[j][key]; return null; }
+  function computeStreak(){
+    let streak = 0;
+    for (let i = WEEKS; i >= 1; i--){
+      const st = weekStatus(i);
+      if (st === 'future') continue;
+      if (st === 'current'){ if (score(i) >= 85) streak++; continue; }
+      if (score(i) >= 85) streak++; else break;
+    }
+    return streak;
+  }
+  function computeSnapshot(){
+    let cur = 0;
+    for (let i = 1; i <= WEEKS; i++){
+      const st = state[i];
+      const hasData = st.weight || st.debtAmt || st.capitalAmt || Object.values(st.checks).some(Boolean) || st.logDays.some(Boolean) || st.calorieDays.some(Boolean);
+      if (hasData) cur = i;
+    }
+    const cwNow = currentWeek();
+    // Pace is based only on weeks that have actually concluded (by date), never on
+    // whether the current week itself already has data — otherwise filling in this
+    // week's own value retroactively changes this same week's own displayed plan.
+    const completedWeeks = Math.max(cwNow - 1, 0);
+    const paceWeekWeight = completedWeeks;
+    const paceWeekDebt = completedWeeks;
+    const paceWeekCapital = completedWeeks;
+    let lastWeight = GOALS.weightStart;
+    for (let i = 1; i <= WEEKS; i++) if (state[i].weight) lastWeight = state[i].weight;
+    let debtPaid = 0, capitalAdded = 0;
+    for (let i = 1; i <= WEEKS; i++){ if (state[i].debtAmt) debtPaid += Number(state[i].debtAmt); if (state[i].capitalAmt) capitalAdded += Number(state[i].capitalAmt); }
+    const debtCurrent = GOALS.debtStart + debtPaid; // виплачено = старт (зазвичай 0) + все внесене
+    const capitalCurrent = GOALS.capitalStart + capitalAdded; // поточний капітал = старт + все внесене
+    const remWeightWeeks = Math.max(WEEKS - paceWeekWeight, 1);
+    const remDebtWeeks = Math.max(WEEKS - paceWeekDebt, 1);
+    const remCapitalWeeks = Math.max(WEEKS - paceWeekCapital, 1);
+    return {
+      cur, paceWeekWeight, paceWeekDebt, paceWeekCapital, lastWeight, debtPaid, capitalAdded, capitalCurrent, debtCurrent,
+      neededWeeklyLoss: (lastWeight - GOALS.weightEnd) / remWeightWeeks,
+      neededWeeklyDebt: (GOALS.debtEnd - debtCurrent) / remDebtWeeks,
+      neededWeeklyCapital: (GOALS.capitalEnd - capitalCurrent) / remCapitalWeeks,
+      weightOnTrack: lastWeight <= expWeight(paceWeekWeight) + 0.15,
+      debtOnTrack: debtCurrent >= expDebtPaid(paceWeekDebt) - 5,
+      capitalOnTrack: capitalCurrent >= expCapital(paceWeekCapital) - 5,
+      weightAhead: lastWeight < expWeight(paceWeekWeight) - 0.3,
+      debtAhead: debtCurrent > expDebtPaid(paceWeekDebt) + 50,
+      capitalAhead: capitalCurrent > expCapital(paceWeekCapital) + 50,
+      // Закрита ціль — окремий стан, що переважає onTrack/ahead скрізь у
+      // рендері (бейджі карток, банер відставання/випередження, підпис
+      // під графіком).
+      weightClosed: GOALS.weightClosedWeek != null,
+      debtClosed: GOALS.debtClosedWeek != null,
+      capitalClosed: GOALS.capitalClosedWeek != null
+    };
+  }
+
+  // Рахує потрібну щотижневу суму так само, як snap.neededWeeklyDebt/Capital,
+  // але виключає власне значення тижня i з суми "вже внесено". Без цього план
+  // для ПОТОЧНОГО тижня стрибав щоразу, коли в нього ж вводили суму — бо власне
+  // ще не завершене введення одразу впливало на власну ж мету.
+  // Борг і капітал тепер рахуються ОДНАКОВО: старт → ціль як зростаюча сума
+  // внесків (скільки вже виплачено/накопичено), без окремого "isDebt"-режиму.
+  function neededWeeklyExcluding_(i, amtKey, start, end){
+    let total = 0;
+    for (let j = 1; j <= WEEKS; j++){
+      if (j === i) continue;
+      if (state[j][amtKey]) total += Number(state[j][amtKey]);
+    }
+    const remaining = (end - start) - total;
+    const completedWeeks = Math.max(currentWeek() - 1, 0);
+    const remWeeks = Math.max(WEEKS - completedWeeks, 1);
+    return remaining / remWeeks;
+  }
+
+  // Скільки заплановано внести/виплатити цього тижня (для рядка вводу і для
+  // Weekly Execution Score). Для минулих (уже закритих) тижнів — фіксований
+  // дефолт 145; для поточного/майбутніх — темп, що підлаштовується під факт.
+  function planFor_(i, amtKey, start, end){
+    const completedWeeks = Math.max(currentWeek() - 1, 0);
+    if (i <= completedWeeks) return 145;
+    return Math.max(Math.round(neededWeeklyExcluding_(i, amtKey, start, end)), 0);
+  }
+
+  // Частка виконання грошової дії цього тижня: 0, якщо нічого не внесено;
+  // інакше — скільки внесено відносно плану (максимум 100%, переплата не дає
+  // бонусу). Якщо план уже <= 0 (ціль випереджена наперед) — будь-яка сума
+  // рахується як повністю виконана дія. Якщо ціль ЗАКРИТА достроково (closedWeek)
+  // і тиждень n настав ПІСЛЯ закриття — дія теж повністю виконана без жодного
+  // запису: без цього довелось би або вносити символічний $1 щотижня заради
+  // бала, або дивитись, як бал падає за те, що вже нема чого доплачувати.
+  function actionFraction_(n, amtKey, start, end, closedWeek){
+    if (closedWeek != null && n > closedWeek) return 1;
+    const amt = state[n][amtKey];
+    if (!amt || amt <= 0) return 0;
+    const plan = planFor_(n, amtKey, start, end);
+    if (plan <= 0) return 1;
+    return Math.min(amt / plan, 1);
+  }
+
+  function renderJourney(){
+    const cur = currentWeek();
+    const sel = activeWeek();
+    const wrap = document.getElementById('journey-wrap');
+    wrap.innerHTML = '';
+    const strip = document.createElement('div');
+    strip.className = 'journey-strip';
+    strip.setAttribute('role', 'tablist');
+    strip.setAttribute('aria-label', 'Тижні програми');
+    // Дугове кільце замість суцільної заливки — референс користувача показує
+    // прогрес саме так на календарних клітинках. r=19 лишає 3px на товщину
+    // дуги в межах 44px кола (var(--tap)); довжина дуги = відсоток виконання.
+    const R = 19, CIRC = 2 * Math.PI * R;
+    for (let i = 1; i <= WEEKS; i++){
+      const s = score(i);
+      const cell = document.createElement('button');
+      cell.type = 'button';
+      cell.className = 'journey-cell' + (i === sel ? ' selected' : '') + (i === cur ? ' today' : '');
+      cell.title = 'Тиждень ' + i + ' — ' + s + '%' + (i === cur ? ' (поточний)' : '');
+      cell.setAttribute('role', 'tab');
+      cell.setAttribute('aria-selected', i === sel ? 'true' : 'false');
+      cell.setAttribute('aria-label', 'Тиждень ' + i + ', виконано ' + s + ' відсотків' + (i === cur ? ', поточний тиждень' : ''));
+      // Пункт 6: тиждень без жодних даних не заливаємо — він має мовчати.
+      // Дуга з'являється тільки тижням, у яких щось відбувалось.
+      const isEmpty = s === 0 && !hasAnyData(i);
+      const arcColor = s >= 85 ? C_DONE : (i < cur ? C_MISSED : C_NEUTRAL);
+      const offset = CIRC * (1 - (isEmpty ? 0 : s) / 100);
+      // Варіант C: замість другого кільця навколо (яке на 44px зливалось із
+      // дугою прогресу в пляму — див. коментар у CSS) "сьогодні" сигналізує
+      // сам ФОН кільця: трек тонується м'яким зеленим замість сірого. Одне
+      // й те саме кільце, ніякого додаткового шару геометрії.
+      const trackColor = i === cur ? hexToRgba(C_DONE, 0.28) : 'var(--surface-3)';
+      const dot = document.createElement('span');
+      dot.className = 'journey-dot' + (isEmpty ? ' is-empty' : '');
+      dot.innerHTML =
+        '<svg class="journey-ring" width="44" height="44" viewBox="0 0 44 44" aria-hidden="true">' +
+          '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="' + trackColor + '" stroke-width="3"/>' +
+          (isEmpty ? '' :
+            '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="' + arcColor + '" stroke-width="3" ' +
+            'stroke-linecap="round" stroke-dasharray="' + CIRC.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" ' +
+            'transform="rotate(-90 22 22)"/>') +
+        '</svg>' +
+        '<span class="journey-num-inner">' + s + '</span>';
+      const num = document.createElement('span');
+      num.className = 'journey-num';
+      num.textContent = i;
+      cell.appendChild(dot); cell.appendChild(num);
+      // Відео користувача: свайп по стрічці іноді долітав до реального тижня
+      // під пальцем як звичайний click — мобільний браузер вважає короткий
+      // дотик кліком, навіть якщо палець за секунду до того ковзав по екрану.
+      // setPointerCapture прив'язує наступні pointermove/up до ЦІЄЇ клітинки
+      // незалежно від того, над чим фізично опинився палець — так можна
+      // порахувати, скільки він проїхав по X, і відрізнити тап від прокрутки.
+      cell.addEventListener('pointerdown', (e) => {
+        try { cell.setPointerCapture(e.pointerId); } catch(err) {}
+        cell._dragStartX = e.clientX;
+        cell._dragDist = 0;
+      });
+      cell.addEventListener('pointermove', (e) => {
+        if (cell._dragStartX != null) cell._dragDist = Math.abs(e.clientX - cell._dragStartX);
+      });
+      cell.onclick = () => {
+        // Більш ніж 8px по X — це прокрутка стрічки, не намір обрати тиждень.
+        if (cell._dragDist > 8) return;
+        selectedWeek = i; render();
+      };
+      strip.appendChild(cell);
+    }
+    wrap.appendChild(strip);
+    // Якщо стрічка не влазить у ширину екрана — підкручуємо її так, щоб
+    // обраний тиждень був по центру видимої області. Лише коли ОБРАНИЙ
+    // тиждень справді змінився з минулого рендеру (див. коментар біля
+    // lastJourneySelectedWeek) — інакше кожна дія деінде на сторінці
+    // (наприклад, тап по чекбоксу) висмикувала б власноруч прогорнуту
+    // користувачем позицію назад до вибраного тижня.
+    if (sel !== lastJourneySelectedWeek){
+      lastJourneySelectedWeek = sel;
+      const selEl = strip.children[sel - 1];
+      if (selEl && strip.scrollWidth > strip.clientWidth){
+        strip.scrollLeft = Math.max(0, selEl.offsetLeft - (strip.clientWidth - selEl.offsetWidth) / 2);
+      }
+    }
+  }
+
+  // Раніше приймала лише "unit"-суфікс (" кг"), що додавався ПІСЛЯ числа —
+  // для грошей це не працює (потрібен префікс "$" ПЕРЕД числом, і символ
+  // узагалі бракував: "+944" замість "+$944"). Тепер приймає функцію
+  // форматування — кожна ціль сама вирішує, як показати своє значення
+  // (префікс, суфікс, відсотки тощо), і додавати новий тип цілі в
+  // майбутньому не доведеться змінювати саму deltaHtml.
+  function deltaHtml(current, previous, betterWhenLower, formatFn){
+    if (previous === null || previous === undefined) return '';
+    const diff = current - previous;
+    // Було: підпис "без змін з мин. тижня" при різниці < 0.05. Для боргу й
+    // капіталу це порівнює суму ЦЬОГО тижня із сумою МИНУЛОГО, а не
+    // загальний прогрес — людина на стабільному плані внесків (щотижня
+    // рівно $150) бачила б цей підпис щоразу, і він читався як застій,
+    // хоча насправді все йшло за планом. Тепер за відсутності помітної
+    // зміни просто нічого не показуємо; реальна зміна ("+50", "-2.9 кг")
+    // і далі відображається — вона однозначна.
+    if (Math.abs(diff) < 0.05) return '';
+    const good = betterWhenLower ? diff < 0 : diff > 0;
+    // Раніше "-" бралось невимушено з того, що само число diff було
+    // відʼємним при конкатенації в рядок. Тепер formatFn отримує
+    // Math.abs(diff) (щоб "$"-префікс і "кг"-суфікс могли працювати
+    // однаково для обох напрямків) — тож знак треба ставити явно для
+    // ОБОХ випадків, інакше втрата ваги показувалась би без мінуса.
+    const sign = diff > 0 ? '+' : '-';
+    return '<div class="delta ' + (good ? 'delta-good' : 'delta-bad') + '">' + sign + formatFn(Math.abs(diff)) + ' з мин. тижня</div>';
+  }
+  function statCard(label, valueHtml, subLabel, onTrack, ahead, hasData, deltaHtmlStr, closedWeek, color){
+    // Вміст обрізався по горизонталі: у двох колонках на телефоні на картку
+    // припадає ~130px, а рядки на кшталт "ціль $1,800" і "без змін з мин.
+    // тижня" туди не вміщались і вилазили за край. Тепер картка може
+    // переносити слова, а бейдж стану переїхав під підпис, щоб не стискав його.
+    let badge = '';
+    if (closedWeek != null){
+      // Дострокове закриття повністю автоматичне й реактивне в обидва боки:
+      // досяг цифри — закрилось; зменшив суму назад нижче цілі —
+      // відкрилось само (autoCloseCheck перераховує з нуля щоразу). Жодної
+      // ручної кнопки немає ніде: реагувати вручну нема на що.
+      badge = '<div style="margin-top:var(--sp-1);"><span class="badge badge-ok">✓ закрито у тижні ' + closedWeek + '</span></div>';
+      // Пункт 4: "без змін з мин. тижня" для закритої цілі не мало сенсу —
+      // порівняння з минулим тижнем нерелевантне, коли вносити вже нічого.
+      deltaHtmlStr = '';
+    } else {
+      if (hasData) badge = '<div style="margin-top:var(--sp-1);"><span class="badge ' + (onTrack ? 'badge-ok' : 'badge-behind') + '">' + (ahead ? 'випереджає' : onTrack ? 'у графіку' : 'позаду') + '</span></div>';
+    }
+    // Той самий принцип тонування — картка кольором своєї категорії.
+    const bgStyle = color ? ' background:' + hexToRgba(color, 0.16) + '; border-color:' + hexToRgba(color, 0.3) + ';' : '';
+    return '<div class="card stat-card" style="padding: var(--sp-4); border-radius: var(--r-lg);' + bgStyle + '">' +
+      '<div style="font-size: var(--fs-sm); color: var(--text-secondary);">' + label + '</div>' + badge +
+      '<div class="hero-num" style="font-size: var(--fs-xl); line-height: 1; margin-top: var(--sp-2);">' + valueHtml + '</div>' +
+      '<div style="font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1);">ціль ' + subLabel + '</div>' +
+      (deltaHtmlStr || '') + '</div>';
+  }
+  // --- Helpers для оновлених графіків: % прогресу, підсумок-речення людською
+  // мовою, підписи тижнів на осі, і бар-спарклайн тижневих внесків. ---
+  function progressPct_(kind, snap){
+    let total, done;
+    if (kind === 'weight'){ total = GOALS.weightStart - GOALS.weightEnd; done = GOALS.weightStart - snap.lastWeight; }
+    else if (kind === 'debt'){ total = GOALS.debtEnd - GOALS.debtStart; done = snap.debtCurrent - GOALS.debtStart; }
+    else { total = GOALS.capitalEnd - GOALS.capitalStart; done = snap.capitalCurrent - GOALS.capitalStart; }
+    if (!total) return 0;
+    return Math.max(0, Math.min(100, Math.round((done / total) * 100)));
+  }
+  function updateChartPct_(elId, kind, snap){
+    const el = document.getElementById(elId);
+    if (!el) return;
+    const onTrack = kind === 'weight' ? snap.weightOnTrack : (kind === 'debt' ? snap.debtOnTrack : snap.capitalOnTrack);
+    if (snap.cur === 0){ el.textContent = ''; return; }
+    el.textContent = progressPct_(kind, snap) + '% шляху';
+    el.style.color = onTrack ? '#6EE7C0' : '#F0B94D';
+  }
+  function chartSummary_(kind, snap){
+    if (kind === 'weight'){
+      if (snap.weightClosed) return '🎯 Ціль закрита достроково в тижні ' + GOALS.weightClosedWeek + ' з ' + WEEKS + '.';
+      if (snap.cur === 0) return 'Ще немає замірів — внеси вагу за перший тиждень.';
+      if (snap.weightAhead) return 'Випереджаєш темп схуднення — вистачить ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень до кінця.';
+      if (!snap.weightOnTrack) return 'Темп відстає — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень, щоб встигнути.';
+      return 'У графіку — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень.';
+    }
+    const isDebt = kind === 'debt';
+    const ahead = isDebt ? snap.debtAhead : snap.capitalAhead;
+    const onTrack = isDebt ? snap.debtOnTrack : snap.capitalOnTrack;
+    const closed = isDebt ? snap.debtClosed : snap.capitalClosed;
+    const closedWeek = isDebt ? GOALS.debtClosedWeek : GOALS.capitalClosedWeek;
+    const needed = isDebt ? snap.neededWeeklyDebt : snap.neededWeeklyCapital;
+    const noun = isDebt ? 'виплат боргу' : 'внесків капіталу';
+    if (closed) return '🎯 Ціль закрита достроково в тижні ' + closedWeek + ' з ' + WEEKS + '.';
+    if (snap.cur === 0) return 'Ще немає внесків — почни з першого тижня.';
+    if (ahead) return 'Випереджаєш план ' + noun + ' — вистачить ~$' + Math.max(Math.round(needed),0) + '/тиждень.';
+    if (!onTrack) return 'Темп відстає — потрібно ~$' + Math.round(needed) + '/тиждень ' + noun + ', щоб встигнути.';
+    return 'У графіку — тримай ~$' + Math.round(needed) + '/тиждень.';
+  }
+  function niceStep_(span, targetLines){
+    const raw = span / (targetLines || 5);
+    if (raw <= 0) return 1;
+    const magnitude = Math.pow(10, Math.floor(Math.log10(raw)));
+    const residual = raw / magnitude;
+    let niceResidual;
+    if (residual > 5) niceResidual = 10;
+    else if (residual > 2) niceResidual = 5;
+    else if (residual > 1) niceResidual = 2;
+    else niceResidual = 1;
+    return niceResidual * magnitude;
+  }
+  function weekAxisLabels_(x, mutedColor, h, cur){
+    let s = '';
+    [1,3,6,9,12].forEach(i => {
+      const isCur = i === cur;
+      s += '<text x="' + x(i) + '" y="' + (h-6) + '" text-anchor="middle" font-size="11" font-weight="' + (isCur ? '700' : '400') + '" fill="' + (isCur ? C_CURRENT : mutedColor) + '">' + i + '</text>';
+    });
+    return s;
+  }
+  function weeklyBarsHtml_(amtKey, color){
+    const amounts = []; for (let i = 1; i <= WEEKS; i++) amounts.push(Number(state[i][amtKey]) || 0);
+    const maxAmt = Math.max(1, ...amounts);
+    const cur = currentWeek();
+    let bars = '';
+    for (let i = 1; i <= WEEKS; i++){
+      const amt = amounts[i-1];
+      const pct = amt > 0 ? Math.max(Math.round((amt / maxAmt) * 100), 6) : 0;
+      const isCur = i === cur;
+      bars += '<div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:var(--sp-0); min-width:0;">' +
+        '<div class="bar-amt" style="font-size:var(--fs-xs); color:' + color + '; font-weight:600; white-space:nowrap; height:13px;">' + (amt > 0 ? '$' + amt.toLocaleString() : '') + '</div>' +
+        '<div style="width:100%; height:44px; display:flex; align-items:flex-end;" title="Тиждень ' + i + ': $' + amt + '">' +
+          '<div style="width:100%; height:' + pct + '%; min-height:' + (amt > 0 ? '3px' : '1px') + '; background:' + (amt > 0 ? color : 'var(--border-strong)') + '; opacity:' + (amt > 0 ? 1 : 0.3) + '; border-radius: var(--r-sm) 3px 0 0;"></div>' +
+        '</div>' +
+        '<div style="font-size:var(--fs-xs); color:' + (isCur ? color : 'var(--text-muted)') + '; font-weight:' + (isCur ? '700' : '400') + ';">' + i + '</div>' +
+      '</div>';
+    }
+    return '<div style="border-top: var(--bw) solid ' + cv('--border', '#34322B') + '; margin-top:var(--sp-2); padding-top:var(--sp-2);">' +
+      '<div style="display:flex; gap:var(--sp-1); align-items:flex-end;">' + bars + '</div>' +
+      '<div style="font-size:var(--fs-xs); color:var(--text-muted); margin-top:var(--sp-1);">внески по тижнях' + (maxAmt > 1 ? ' · макс $' + maxAmt.toLocaleString() : '') + '</div>' +
+    '</div>';
+  }
+
+  // 9. "Тиждень X з 12 · лишилось Y" — раніше цей рядок був у розмітці, але ніколи не заповнювався.
+  function renderDashboardLine(snap){
+    const el = document.getElementById('dashboard-line');
+    if (!el) return;
+    const cur = currentWeek();
+    const remaining = Math.max(WEEKS - cur, 0);
+    const word = remaining === 1 ? 'тиждень' : (remaining >= 2 && remaining <= 4 ? 'тижні' : 'тижнів');
+    el.innerHTML = '<span style="font-weight:600; color:var(--text-primary);">Тиждень ' + cur + ' з ' + WEEKS + '</span><span>·</span><span>лишилось ' + remaining + ' ' + word + '</span>';
+  }
+
+  function renderStats(snap){
+    const hasData = snap.cur > 0;
+    const prevWeight = snap.cur > 1 ? findPrevWeight(snap.cur) : null;
+    // Було snap.cur + 1 — через -1 усередині findPrevAmt це фактично
+    // означало "почни пошук із самого snap.cur", тож функція одразу
+    // знаходила значення ЦЬОГО Ж тижня (адже snap.cur за визначенням має
+    // дані) й порівнювала суму сама з собою. Різниця виходила 0 завжди,
+    // незалежно від того, скільки реально вносили тижнем раніше — тому
+    // дельта для боргу й капіталу ніколи не могла показати справжню зміну.
+    const prevDebtAmt = snap.cur > 0 ? findPrevAmt(snap.cur, 'debtAmt') : null;
+    const prevCapAmt = snap.cur > 0 ? findPrevAmt(snap.cur, 'capitalAmt') : null;
+    const thisWeekDebt = snap.cur > 0 ? state[snap.cur].debtAmt : null;
+    const thisWeekCap = snap.cur > 0 ? state[snap.cur].capitalAmt : null;
+    document.getElementById('stat-cards').innerHTML =
+      statCard('Вага', fmt1(snap.lastWeight) + ' кг', GOALS.weightEnd + ' кг', snap.weightOnTrack, snap.weightAhead, hasData, prevWeight !== null && snap.cur > 1 ? deltaHtml(snap.lastWeight, prevWeight, true, v => fmt1(v) + ' кг') : '', GOALS.weightClosedWeek, C_WEIGHT) +
+      statCard('Борг виплачено', '$' + Math.round(snap.debtCurrent).toLocaleString(), '$' + GOALS.debtEnd.toLocaleString(), snap.debtOnTrack, snap.debtAhead, hasData, thisWeekDebt && prevDebtAmt ? deltaHtml(thisWeekDebt, prevDebtAmt, false, v => '$' + Math.round(v).toLocaleString()) : '', GOALS.debtClosedWeek, C_DEBT) +
+      statCard('Капітал (внески)', '$' + Math.round(snap.capitalCurrent).toLocaleString(), '$' + GOALS.capitalEnd.toLocaleString(), snap.capitalOnTrack, snap.capitalAhead, hasData, thisWeekCap && prevCapAmt ? deltaHtml(thisWeekCap, prevCapAmt, false, v => '$' + Math.round(v).toLocaleString()) : '', GOALS.capitalClosedWeek, C_CAPITAL);
+
+    const banner = document.getElementById('pace-banner');
+    const behind = [];
+    // Закриті цілі ніколи не потрапляють у "відстає" чи "випереджає" — вони
+    // вже поза шкалою темпу, обидва повідомлення для них позбавлені сенсу.
+    if (!snap.weightClosed && !snap.weightOnTrack) behind.push(['Вага', '~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень до кінця']);
+    if (!snap.debtClosed && !snap.debtOnTrack) behind.push(['Борг', '~$' + Math.round(snap.neededWeeklyDebt) + '/тиждень до кінця']);
+    if (!snap.capitalClosed && !snap.capitalOnTrack) behind.push(['Капітал', '~$' + Math.round(snap.neededWeeklyCapital) + '/тиждень до кінця']);
+    const ahead = [];
+    if (!snap.weightClosed && snap.weightAhead) ahead.push(['Вага', 'вистачить ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень']);
+    if (!snap.debtClosed && snap.debtAhead) ahead.push(['Борг', 'вистачить ~$' + Math.max(Math.round(snap.neededWeeklyDebt),0) + '/тиждень']);
+    if (!snap.capitalClosed && snap.capitalAhead) ahead.push(['Капітал', 'вистачить ~$' + Math.max(Math.round(snap.neededWeeklyCapital),0) + '/тиждень']);
+    if (!hasData || (behind.length === 0 && ahead.length === 0)){
+      banner.innerHTML = '';
+    } else if (behind.length > 0){
+      const rows = behind.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:var(--fs-md); padding:var(--sp-1) 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
+      banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_CURRENT + '; border-radius: var(--r-lg); padding: var(--sp-4);"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: var(--sp-2);">Темп відстає — новий орієнтир</div>' + rows + '</div>';
+    } else {
+      const rows = ahead.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:var(--fs-md); padding:var(--sp-1) 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
+      banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_DONE + '; border-radius: var(--r-lg); padding: var(--sp-4);"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: var(--sp-2);">🎉 Випереджаєш план</div>' + rows + '</div>';
+    }
+  }
+
+  // Автоматичне дострокове закриття цілей. Викликається з render() — тобто
+  // ПІСЛЯ коміту значення (blur/Enter/дії "заповнити"/"скопіювати"), НІКОЛИ
+  // на кожне натискання клавіші під час живого набору: інакше "80" по цифрі
+  // "8" миттєво закрило б ціль на недописаному значенні "8 кг".
+  //
+  // РЕАКТИВНА модель: щоразу перераховуємо стан із нуля за поточними
+  // даними, а не запам'ятовуємо одноразово "закрито — і все". Раніше було
+  // навпаки (закриття лише вмикалось, ніколи не перевірялось повторно) —
+  // і це був реальний баг: людина поставила капітал $1800 (закрилось),
+  // передумала й виправила на $0, а бейдж так і лишався "закрито",
+  // показуючи застарілий стан. Тепер контрольне значення щоразу рахується
+  // заново, тож зменшення суми відкриває ціль назад САМЕ, без жодної
+  // ручної дії — тому кнопки "Відкрити знову" в системі більше немає:
+  // реагувати вручну нема на що.
+  //
+  // Скануємо всі тижні хронологічно й закриваємо в НАЙРАНІШОМУ тижні, де
+  // умова вже виконана, — а не обов'язково в тому, який зараз редагується:
+  // якщо людина заднім числом виправляє старі тижні чи імпортує дані,
+  // "момент досягнення" має бути тим самим тижнем, коли це реально сталось.
+  //
+  // Вага — спадна ціль (закриваємо, коли значення <= ціль); борг і капітал —
+  // зростаюча кумулятивна сума (закриваємо, коли сумарно внесено >= ціль).
+  function autoCloseCheck(){
+    let weightAt = null;
+    for (let i = 1; i <= WEEKS; i++){
+      if (state[i].weight && state[i].weight <= GOALS.weightEnd){ weightAt = i; break; }
+    }
+    let debtSum = 0, capSum = 0, debtAt = null, capAt = null;
+    for (let i = 1; i <= WEEKS; i++){
+      if (state[i].debtAmt) debtSum += Number(state[i].debtAmt);
+      if (state[i].capitalAmt) capSum += Number(state[i].capitalAmt);
+      if (debtAt === null && GOALS.debtStart + debtSum >= GOALS.debtEnd) debtAt = i;
+      if (capAt === null && GOALS.capitalStart + capSum >= GOALS.capitalEnd) capAt = i;
+    }
+    const changed = weightAt !== GOALS.weightClosedWeek || debtAt !== GOALS.debtClosedWeek || capAt !== GOALS.capitalClosedWeek;
+    GOALS.weightClosedWeek = weightAt;
+    GOALS.debtClosedWeek = debtAt;
+    GOALS.capitalClosedWeek = capAt;
+    if (changed) saveGoals();
+    return changed;
+  }
+
+  // 3.2: підганяє систему координат SVG під реальну ширину контейнера.
+  // Доти viewBox був жорстко 620px і стискався під ~292px екрана iPhone
+  // (масштаб 0.47), через що підпис 10px ставав 4.7px — нечитабельно.
+  // Тепер малюємо 1:1, і заявлений розмір шрифту дорівнює екранному.
+  function chartWidth_(containerId){
+    const el = document.getElementById(containerId);
+    const measured = el && el.clientWidth ? el.clientWidth : 0;
+    return Math.max(260, Math.min(measured || 620, 900));
+  }
+
+  function renderWeightChart(snap){
+    const w = chartWidth_('chart-weight'), h = 190, padL = 38, padR = 16, padT = 16, padB = 26;
+    const cur = currentWeek();
+
+    // 2. Динамічний діапазон шкали замість жорстких 70-80 кг
+    const entered = []; for (let i = 1; i <= WEEKS; i++) if (state[i].weight) entered.push(state[i].weight);
+    const allVals = entered.concat([GOALS.weightStart, GOALS.weightEnd]);
+    let loV = Math.min.apply(null, allVals), hiV = Math.max.apply(null, allVals);
+    if (loV === hiV){ loV -= 1; hiV += 1; }
+    const spanV = hiV - loV;
+    const yMin = loV - spanV * 0.18, yMax = hiV + spanV * 0.18;
+
+    const x = i => padL + (w - padL - padR) * i / WEEKS;
+    const y = v => padT + (h - padT - padB) * (yMax - v) / (yMax - yMin);
+    const gridColor = cv('--border', '#E1E0D9'), mutedColor = cv('--text-muted', '#898781'), ringColor = cv('--surface-2', '#FFFFFF');
+
+    let grid = '';
+    const step = spanV > 6 ? 2 : (spanV > 2.5 ? 1 : 0.5);
+    for (let v = Math.ceil(yMin / step) * step; v <= yMax; v += step){
+      grid += '<line x1="' + padL + '" y1="' + y(v) + '" x2="' + (w-padR) + '" y2="' + y(v) + '" stroke="' + gridColor + '" stroke-width="1" />';
+      grid += '<text x="' + (padL - 8) + '" y="' + (y(v)+3) + '" text-anchor="end" font-size="11" fill="' + mutedColor + '">' + fmt1(v) + '</text>';
+    }
+
+    let expPath = ''; for (let i = 0; i <= WEEKS; i++) expPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(expWeight(i)) + ' ';
+
+    // 1. Старт — окремий порожній маркер із підписом "Старт", не плутається з реальними замірами.
+    // Анімація "живої" точки раніше перевіряла i === cur (буквально поточний
+    // календарний тиждень) — якщо цей тиждень ще не заповнений (типова
+    // ситуація на початку тижня), точка з анімацією просто не малювалась
+    // узагалі, хоча на грошових графіках вона показувалась (там для цього
+    // тижня вже був запис). Тепер орієнтуємось на ОСТАННІЙ тиждень із
+    // реальним заміром — так само, як уже зроблено для грошових графіків.
+    let lastWeightWeek = 0;
+    for (let i = 1; i <= WEEKS; i++) if (state[i] && state[i].weight) lastWeightWeek = i;
+    let actPath = '', dots = '', started = false, lastPoint = null;
+    for (let i = 0; i <= WEEKS; i++){
+      const wt = i === 0 ? GOALS.weightStart : (state[i] && state[i].weight);
+      if (!wt) continue;
+      actPath += (!started ? 'M' : 'L') + x(i) + ',' + y(wt) + ' '; started = true;
+      if (i === 0){
+        // Мітка "Старт" перекривалась підписом значення першого тижня, а сама
+        // порожня точка на осі і так очевидно означає початок.
+        dots += '<circle cx="' + x(0) + '" cy="' + y(wt) + '" r="4" fill="' + cv('--surface-1','#1A1914') + '" stroke="' + C_WEIGHT + '" stroke-width="2" />';
+      } else {
+        dots += '<circle cx="' + x(i) + '" cy="' + y(wt) + '" r="4.5" fill="' + C_WEIGHT + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === lastWeightWeek ? 'chart-dot-live' : '') + '" />';
+        lastPoint = { i: i, v: wt };
+      }
+    }
+    // 3. Значення останньої реальної точки — підписано прямо на графіку.
+    if (lastPoint) dots += '<text x="' + x(lastPoint.i) + '" y="' + (y(lastPoint.v) - 10) + '" text-anchor="middle" font-size="12" font-weight="600" fill="' + C_WEIGHT + '">' + fmt1(lastPoint.v) + ' кг</text>';
+
+    // 5. Заливка між планом і фактом: зелена — випереджаєш/у графіку, жовта — позаду.
+    let shade = '';
+    if (lastPoint){
+      const shadeColor = snap.weightOnTrack ? 'rgba(47,190,147,0.14)' : 'rgba(240,185,77,0.14)';
+      let bandPath = 'M' + x(0) + ',' + y(GOALS.weightStart) + ' ';
+      for (let i = 1; i <= lastPoint.i; i++) bandPath += 'L' + x(i) + ',' + y(state[i].weight || expWeight(i)) + ' ';
+      for (let i = lastPoint.i; i >= 0; i--) bandPath += 'L' + x(i) + ',' + y(expWeight(i)) + ' ';
+      shade = '<path d="' + bandPath + 'Z" fill="' + shadeColor + '" stroke="none" />';
+    }
+
+    const targetY = y(GOALS.weightEnd);
+    // 9. Мітки тижнів на осі, поточний тиждень виділено.
+    const xlabels = weekAxisLabels_(x, mutedColor, h, cur);
+    const remainingKg = Math.max(snap.lastWeight - GOALS.weightEnd, 0);
+
+    // 4. % прогресу над графіком
+    updateChartPct_('chart-weight-pct', 'weight', snap);
+
+    document.getElementById('chart-weight').innerHTML =
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%; height:auto; display:block; overflow:visible;">' +
+        grid + shade +
+        '<line x1="' + padL + '" y1="' + targetY + '" x2="' + (w-padR) + '" y2="' + targetY + '" stroke="' + C_WEIGHT + '" stroke-dasharray="3,3" stroke-width="1.2" />' +
+        '<text x="' + (w-padR) + '" y="' + (targetY - 6) + '" text-anchor="end" font-size="11" fill="' + C_WEIGHT + '">ціль ' + GOALS.weightEnd + ' кг</text>' +
+        '<path d="' + expPath + '" fill="none" stroke="' + cv('--border-strong', C_FUTURE_FALLBACK) + '" stroke-width="1.5" stroke-dasharray="4,4" />' +
+        '<path d="' + actPath + '" fill="none" stroke="' + C_WEIGHT + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />' +
+        dots + xlabels +
+      '</svg>' +
+      // 6 і 10. Підсумок людською мовою + скільки лишилось прямо під графіком.
+      '<div style="font-size:var(--fs-sm); color:var(--text-secondary); margin-top:var(--sp-2); line-height:1.4;">' + chartSummary_('weight', snap) +
+        (snap.cur > 0 && !snap.weightClosed ? ' Залишилось ' + fmt1(remainingKg) + ' кг.' : '') + '</div>';
+  }
+
+  function renderMoneyChart(containerId, expFn, amtKey, start, end, color, kind, snap){
+    const w = chartWidth_(containerId), h = 190, padL = 50, padR = 16, padT = 16, padB = 26;
+    const cur = currentWeek();
+    const isDebt = kind === 'debt';
+    const onTrack = isDebt ? snap.debtOnTrack : snap.capitalOnTrack;
+    const current = isDebt ? snap.debtCurrent : snap.capitalCurrent;
+
+    // Кумулятивна сума по тижнях — борг і капітал тепер рахуються ОДНАКОВО (зростання).
+    const cumSeries = [start];
+    let cum = start;
+    for (let i = 1; i <= WEEKS; i++){ cum += Number(state[i][amtKey]) || 0; cumSeries.push(cum); }
+
+    // 2. Динамічний діапазон з урахуванням і плану, і факту (щоб перевиконання не вилазило за межі)
+    const lo0 = Math.min(start, end), hi0 = Math.max(start, end);
+    const cumMax = Math.max.apply(null, cumSeries), cumMin = Math.min.apply(null, cumSeries);
+    const lo = Math.min(lo0, cumMin), hi = Math.max(hi0, cumMax);
+    const span = (hi - lo) || 1;
+    const yMin = lo - span * 0.12, yMax = hi + span * 0.12;
+
+    const x = i => padL + (w - padL - padR) * i / WEEKS;
+    const y = v => padT + (h - padT - padB) * (yMax - v) / (yMax - yMin);
+    const gridColor = cv('--border', '#E1E0D9'), mutedColor = cv('--text-muted', '#898781'), ringColor = cv('--surface-2', '#FFFFFF');
+
+    let grid = '';
+    const step = niceStep_(hi0 - lo0, 5);
+    for (let v = Math.ceil(lo0 / step) * step; v <= hi0 + step * 0.001; v += step){
+      grid += '<line x1="' + padL + '" y1="' + y(v) + '" x2="' + (w-padR) + '" y2="' + y(v) + '" stroke="' + gridColor + '" stroke-width="1" />' +
+        '<text x="' + (padL - 8) + '" y="' + (y(v)+3) + '" text-anchor="end" font-size="11" fill="' + mutedColor + '">$' + Math.round(v).toLocaleString() + '</text>';
+    }
+
+    let expPath = ''; for (let i = 0; i <= WEEKS; i++) expPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(expFn(i)) + ' ';
+
+    // 1. Старт — окремий маркер, 3. остання точка підписана значенням.
+    // Раніше лінія домальовувалась аж до ПОТОЧНОГО тижня навіть без запису
+    // в ньому (умова була "i > cur", тобто саме i === cur пропуск не
+    // спрацьовував) — виходив плаский хвостик у нікуди після останньої
+    // реальної точки, це й помітив користувач на скріншоті. Тепер лінія
+    // ніколи не тягнеться далі ОСТАННЬОГО тижня з реальним записом.
+    // Пропущені тижні ВСЕРЕДИНІ діапазону (наприклад, тиждень 3 без запису,
+    // а тиждень 4 — є) і далі місткуються плоскою лінією, як і раніше —
+    // це навмисна поведінка, не баг.
+    let lastDataWeek = 0;
+    for (let i = 1; i <= WEEKS; i++) if (state[i][amtKey]) lastDataWeek = i;
+    let actPath = '', dots = '', lastPoint = null;
+    for (let i = 0; i <= lastDataWeek; i++){
+      const v = cumSeries[i];
+      actPath += (i === 0 ? 'M' : 'L') + x(i) + ',' + y(v) + ' ';
+      if (i === 0){
+        dots += '<circle cx="' + x(0) + '" cy="' + y(v) + '" r="4" fill="' + cv('--surface-1','#1A1914') + '" stroke="' + color + '" stroke-width="2" />';
+      } else if (state[i][amtKey]) {
+        dots += '<circle cx="' + x(i) + '" cy="' + y(v) + '" r="4.5" fill="' + color + '" stroke="' + ringColor + '" stroke-width="1.5" class="' + (i === lastDataWeek ? 'chart-dot-live' : '') + '" />';
+        lastPoint = { i: i, v: v };
+      }
+    }
+    if (lastPoint) dots += '<text x="' + x(lastPoint.i) + '" y="' + (y(lastPoint.v) - 10) + '" text-anchor="middle" font-size="12" font-weight="600" fill="' + color + '">$' + Math.round(lastPoint.v).toLocaleString() + '</text>';
+
+    // 5. Заливка план/факт.
+    let shade = '';
+    if (lastPoint){
+      const shadeColor = onTrack ? 'rgba(47,190,147,0.14)' : 'rgba(240,185,77,0.14)';
+      let bandPath = 'M' + x(0) + ',' + y(cumSeries[0]) + ' ';
+      for (let i = 1; i <= lastPoint.i; i++) bandPath += 'L' + x(i) + ',' + y(cumSeries[i]) + ' ';
+      for (let i = lastPoint.i; i >= 0; i--) bandPath += 'L' + x(i) + ',' + y(expFn(i)) + ' ';
+      shade = '<path d="' + bandPath + 'Z" fill="' + shadeColor + '" stroke="none" />';
+    }
+
+    const targetY = y(end);
+    const xlabels = weekAxisLabels_(x, mutedColor, h, cur);
+    const remaining = Math.max(end - current, 0);
+
+    // 4. % прогресу над графіком
+    updateChartPct_(containerId + '-pct', kind, snap);
+
+    document.getElementById(containerId).innerHTML =
+      '<svg viewBox="0 0 ' + w + ' ' + h + '" style="width:100%; height:auto; display:block; overflow:visible;">' +
+        grid + shade +
+        '<line x1="' + padL + '" y1="' + targetY + '" x2="' + (w-padR) + '" y2="' + targetY + '" stroke="' + color + '" stroke-dasharray="3,3" stroke-width="1.2" />' +
+        '<text x="' + (w-padR) + '" y="' + (targetY - 6) + '" text-anchor="end" font-size="11" fill="' + color + '">ціль $' + Math.round(end).toLocaleString() + '</text>' +
+        '<path d="' + expPath + '" fill="none" stroke="' + cv('--border-strong', C_FUTURE_FALLBACK) + '" stroke-width="1.5" stroke-dasharray="4,4" />' +
+        '<path d="' + actPath + '" fill="none" stroke="' + color + '" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />' +
+        dots + xlabels +
+      '</svg>' +
+      // 7. Бар-спарклайн тижневих внесків, окремо від кумулятивної лінії.
+      weeklyBarsHtml_(amtKey, color) +
+      // 6 і 10. Підсумок людською мовою + скільки лишилось.
+      '<div style="font-size:var(--fs-sm); color:var(--text-secondary); margin-top:var(--sp-2); line-height:1.4;">' + chartSummary_(kind, snap) +
+        (snap.cur > 0 && !(isDebt ? snap.debtClosed : snap.capitalClosed) ? ' Залишилось $' + Math.round(remaining).toLocaleString() + '.' : '') + '</div>';
+  }
+
+  // Індекс сьогоднішнього дня всередині тижня weekIdx (0 = Пн ... 6 = Нд).
+  // null, якщо переглядається не поточний тиждень — тоді ні підсвітки
+  // "сьогодні", ні блокування майбутніх днів не потрібно.
+  function todayIndexIn(weekIdx){
+    if (weekIdx !== currentWeek()) return null;
+    const now = new Date();
+    const start = weekStart(weekIdx);
+    const diff = Math.floor((now - start) / 86400000);
+    return diff >= 0 && diff <= 6 ? diff : null;
+  }
+
+  function dailyToggle(weekIdx, label, getArr, goal, tacticId){
+    const arr = getArr();
+    const frac = dayFraction(arr), pct = Math.round(frac*100);
+    const todayIdx = todayIndexIn(weekIdx);
+    // Лічильник підсвічувався жовтим — тим самим кольором, що означає
+    // "відстаєш". Прогрес 57% не є попередженням, тому нейтральний тон.
+    const color = pct >= 85 ? C_DONE : pct > 0 ? C_NEUTRAL : 'var(--text-muted)';
+    const wrap = document.createElement('div'); wrap.className = 'daily-block';
+    // Той самий принцип тонування, що й metric-row/habit-row — картка
+    // забарвлена кольором своєї цілі, а не однорідним сірим.
+    const meta = GOAL_META[goal] || GOAL_META.general;
+    wrap.style.background = meta.soft;
+    wrap.style.borderColor = meta.color.startsWith('var(') ? 'var(--border)' : hexToRgba(meta.color, 0.3);
+    const head = document.createElement('div'); head.className = 'daily-head';
+    head.innerHTML = '<span style="display:inline-flex; align-items:center; gap:var(--sp-1); min-width:0;">' + (goal ? goalBadge(goal) : '') + '<span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + escHtml(label) + '</span></span><span style="color:' + color + '; font-weight:500; flex-shrink:0;">' + arr.filter(Boolean).length + '/7 (' + pct + '%)</span>';
+    wrap.appendChild(head);
+    const grid = document.createElement('div'); grid.className = 'daily-grid';
+    grid.setAttribute('role', 'group');
+    grid.setAttribute('aria-label', label);
+    arr.forEach((val, di) => {
+      const cell = document.createElement('div'); cell.className = 'day-cell';
+      // A3: раніше це був звичайний <div> з onclick — недосяжний з клавіатури
+      // й невидимий для скрінрідера. Тепер повноцінний чекбокс: роль, стан,
+      // місце у Tab-послідовності і реакція на Space/Enter.
+      // №1 і №2: день має знати своє місце в часі. todayIdx — 0-based індекс
+      // сьогоднішнього дня в межах ЦЬОГО тижня, або null якщо тиждень не поточний.
+      const isToday = todayIdx !== null && di === todayIdx;
+      const isFuture = todayIdx !== null && di > todayIdx;
+      if (isToday) cell.classList.add('is-today');
+      if (isFuture) cell.classList.add('is-future');
+
+      const sq = document.createElement('div');
+      const dayKey = 'daily:' + weekIdx + ':' + tacticId + ':' + di;
+      sq.className = 'day-square' + (val ? ' checked' : '') + (isToday ? ' is-today' : '') + (isFuture ? ' is-future' : '') + (dayKey === justToggledKey ? ' just-toggled' : '');
+      sq.setAttribute('role', 'checkbox');
+      sq.setAttribute('aria-checked', val ? 'true' : 'false');
+      sq.setAttribute('tabindex', isFuture ? '-1' : '0');
+      if (isFuture) sq.setAttribute('aria-disabled', 'true');
+      sq.setAttribute('aria-label', DAY_FULL[di] + ' — ' + label +
+        (isToday ? ', сьогодні' : '') + (isFuture ? ', ще не настав' : ''));
+      sq.title = DAY_FULL[di] + (isToday ? ' · сьогодні' : isFuture ? ' · ще не настав' : '');
+      // №3: плюс читався як "додати щось" — відкрити форму, ввести значення.
+      // Насправді це перемикач, тому порожній стан тепер саме порожній.
+      // №8: іконка 14px у 44-піксельній цілі — це 32% висоти, замало.
+      sq.innerHTML = val ? icon('check', 18) : '';
+      const toggle = () => {
+        if (isFuture) return;
+        const a = getArr();
+        a[di] = !a[di];
+        saveWeek(weekIdx); justToggledKey = dayKey; render();
+      };
+      sq.onclick = toggle;
+      sq.onkeydown = (e) => {
+        if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggle(); }
+      };
+      cell.appendChild(sq);
+      const lbl = document.createElement('div'); lbl.className = 'day-cell-label'; lbl.textContent = DAY_LABELS[di];
+      cell.appendChild(lbl);
+      grid.appendChild(cell);
+    });
+    wrap.appendChild(grid);
+    return wrap;
+  }
+  // Раніше тут були кнопки ±. Прибрані повністю: для грошей крок 5 давав 26+
+  // натискань на суму типу $133, а для ваги крок 0.1 кг — так само незручно
+  // порівняно з прямим набором. Лишилось поле вводу висотою 44px (мінімум
+  // Apple HIG) плюс кнопки "підставити"/"скопіювати" поруч.
+  function stepper(value, step, decimals, onLive, onCommit, min, unit){
+    if (min === undefined || min === null) min = 0;
+    const wrap = document.createElement('div'); wrap.className = 'stepper';
+    const input = document.createElement('input');
+    // Реальний фідбек: на iOS з українською розкладкою екранна клавіатура
+    // для type="number" показує КОМУ на місці десяткової крапки — а сам
+    // number-інпут за специфікацією приймає лише крапку незалежно від
+    // локалі. Браузер просто відмовлявся вводити кому, тож дробове число
+    // ввести було неможливо. text + inputmode="decimal" дає ту саму
+    // цифрову клавіатуру на екрані, але не накладає власних обмежень на
+    // символи — кому й крапку розбираємо самі в parseLocal нижче.
+    input.type = 'text';
+    input.step = step; input.min = min;
+    input.value = value !== null && value !== undefined ? value : '';
+    input.inputMode = decimals > 0 ? 'decimal' : 'numeric';
+    input.onfocus = () => input.select();
+    function parseLocal(raw){
+      if (!raw) return null;
+      const n = parseFloat(String(raw).replace(',', '.'));
+      return isNaN(n) ? null : n;
+    }
+    // While typing: only persist the value, never rebuild the DOM (that was causing focus loss / jank on every keystroke).
+    input.oninput = () => onLive(parseLocal(input.value));
+    // Full recalculation happens once editing is done — і тут же виправляємо, якщо ввели від'ємне число.
+    input.onblur = () => {
+      const v = parseLocal(input.value);
+      if (v !== null && v < min){ input.value = min; onLive(min); }
+      onCommit();
+    };
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
+    wrap.appendChild(input);
+    if (unit){
+      const u = document.createElement('span');
+      u.className = 'stepper-unit';
+      u.textContent = unit;
+      wrap.appendChild(u);
+    }
+    wrap._input = input;
+    return wrap;
+  }
+  // U7: раніше "план $150 · підставити" (текст із пунктирним підкресленням) стояв
+  // поруч з іконкою копіювання, і обидва читались як однакові дрібні контроли.
+  // Тепер: план — просто інформаційний текст угорі; дії — окремі кнопки під полем,
+  // де "підставити" має видиму рамку й підпис, а "копіювати" лишається іконкою.
+  // Для м'якого тонування фону карток кольором категорії (редизайн під
+  // референс) — перетворює C_WEIGHT/C_DEBT/... чи будь-який hex у rgba
+  // з потрібною прозорістю.
+  function hexToRgba(hex, alpha){
+    const h = hex.replace('#', '');
+    const r = parseInt(h.slice(0,2), 16), g = parseInt(h.slice(2,4), 16), b = parseInt(h.slice(4,6), 16);
+    return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+  }
+  function metricRow(label, color, inputEl, planText, fillLabel, onFill){
+    const row = document.createElement('div'); row.className = 'metric-row';
+    // Референс тонує фон кожної картки власним кольором замість маленької
+    // крапки-акценту збоку — того самого кольору тепер досить, щоб рядок
+    // читався як "цей про вагу/борг/капітал" з першого погляду.
+    row.style.background = hexToRgba(color, 0.16);
+    row.style.borderColor = hexToRgba(color, 0.3);
+    const body = document.createElement('div'); body.className = 'metric-body';
+    const top = document.createElement('div'); top.className = 'metric-top-row';
+    const lbl = document.createElement('span'); lbl.className = 'metric-label'; lbl.textContent = label; top.appendChild(lbl);
+    const plan = document.createElement('span'); plan.className = 'plan-note'; plan.textContent = planText; top.appendChild(plan);
+    body.appendChild(top);
+
+    const inputRow = document.createElement('div'); inputRow.className = 'metric-input-row';
+    inputRow.appendChild(inputEl);
+
+    if (onFill){
+      const fillBtn = document.createElement('button');
+      fillBtn.type = 'button';
+      fillBtn.className = 'fill-btn';
+      fillBtn.title = 'Підставити ' + fillLabel + ' у поле';
+      fillBtn.innerHTML = icon('fill', 13, 'flex-shrink:0;') + '<span>' + fillLabel + '</span>';
+      fillBtn.onclick = onFill;
+      inputRow.appendChild(fillBtn);
+    }
+    body.appendChild(inputRow);
+    row.appendChild(body);
+    return row;
+  }
+
+  // Компактна заміна metricRow для тижнів СТРОГО ПІСЛЯ закриття грошової
+  // цілі. Без цього поле вводу з "план $0" і кнопками заповнити/скопіювати
+  // лишалось видимим і після того, як платити вже нема чого — це і викликало
+  // сплутане "для чого ці поля" (скрін користувача) та безглузде "без змін
+  // з мин. тижня" в картці прогресу. Тиждень закриття (i === closedWeek) і
+  // всі попередні лишаються повністю редаговуваними — це реальна історія.
+  function closedMetricNote(label, color, closedWeek){
+    const row = document.createElement('div'); row.className = 'metric-row';
+    row.style.background = hexToRgba(color, 0.16);
+    row.style.borderColor = hexToRgba(color, 0.3);
+    const body = document.createElement('div'); body.className = 'metric-body';
+    const top = document.createElement('div'); top.className = 'metric-top-row';
+    const lbl = document.createElement('span'); lbl.className = 'metric-label'; lbl.textContent = label; top.appendChild(lbl);
+    body.appendChild(top);
+    const note = document.createElement('div');
+    note.style.cssText = 'font-size:var(--fs-sm); color:var(--accent-text); margin-top:var(--sp-1);';
+    note.textContent = '✓ Ціль досягнута достроково в тижні ' + closedWeek + ' — платити більше нічого.';
+    body.appendChild(note);
+    row.appendChild(body);
+    return row;
+  }
+
+  function buildWeekBody(i, snap){
+    const frag = document.createDocumentFragment();
+    const wTarget = fmt1(expWeight(i));
+    const wStep = stepper(state[i].weight, 0.1, 1,
+      (v) => { state[i].weight = v; saveWeek(i); },
+      () => render(), 0, 'кг');
+    frag.appendChild(metricRow('Вага', C_WEIGHT, wStep, 'план ' + wTarget + ' кг',
+      wTarget + ' кг', () => { state[i].weight = wTarget; saveWeek(i); render(); }));
+
+    if (GOALS.debtClosedWeek != null && i > GOALS.debtClosedWeek){
+      frag.appendChild(closedMetricNote('Борг · конверт готівкою', C_DEBT, GOALS.debtClosedWeek));
+    } else {
+      const planDebt = planFor_(i, 'debtAmt', GOALS.debtStart, GOALS.debtEnd);
+      const planDebtNote = 'план $' + planDebt;
+      const dStep = stepper(state[i].debtAmt, 5, 0,
+        (v) => { state[i].debtAmt = v; saveWeek(i); },
+        () => render(), 0, '$');
+      frag.appendChild(metricRow('Борг · конверт готівкою', C_DEBT, dStep, planDebtNote,
+        '$' + planDebt, () => { state[i].debtAmt = planDebt; saveWeek(i); render(); }));
+    }
+
+    if (GOALS.capitalClosedWeek != null && i > GOALS.capitalClosedWeek){
+      frag.appendChild(closedMetricNote('Капітал · Моно $ / OKX', C_CAPITAL, GOALS.capitalClosedWeek));
+    } else {
+      const planCapital = planFor_(i, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd);
+      const planCapNote = 'план $' + planCapital;
+      const cStep = stepper(state[i].capitalAmt, 5, 0,
+        (v) => { state[i].capitalAmt = v; saveWeek(i); },
+        () => render(), 0, '$');
+      frag.appendChild(metricRow('Капітал · Моно $ / OKX', C_CAPITAL, cStep, planCapNote,
+        '$' + planCapital, () => { state[i].capitalAmt = planCapital; saveWeek(i); render(); }));
+    }
+
+    // Дії тижня: гейтимо за tacticAppliesTo, щоб показане завжди збігалось
+    // із порахованим у score(). Секцію (і навіть заголовок) не малюємо
+    // взагалі, якщо для цього тижня немає жодної застосовної дії — щоб не
+    // лишати порожню рамку, якщо все заархівовано.
+    const weeklyTactics = TACTICS.filter(t => t.type === 'weekly' && tacticAppliesTo(t, i));
+    const dailyTactics = TACTICS.filter(t => t.type === 'daily' && tacticAppliesTo(t, i));
+    if (weeklyTactics.length || dailyTactics.length){
+      const habitLabel = document.createElement('div'); habitLabel.className = 'group-label'; habitLabel.textContent = 'Дії тижня';
+      frag.appendChild(habitLabel);
+    }
+    if (weeklyTactics.length){
+      weeklyTactics.forEach(t => {
+        const checked = tacticGetWeekly(i, t);
+        const meta = GOAL_META[t.goal] || GOAL_META.general;
+        // Кожна дія — своя тонована картка, як і metric-row вище: та сама
+        // мова "картка кольору своєї категорії" застосована послідовно.
+        const row = document.createElement('div'); row.className = 'habit-row';
+        row.style.background = meta.soft;
+        row.style.borderColor = meta.color.startsWith('var(') ? 'var(--border)' : hexToRgba(meta.color, 0.3);
+        row.insertAdjacentHTML('beforeend', goalBadge(t.goal));
+        const span = document.createElement('span'); span.className = 'habit-label'; span.textContent = t.label;
+        row.appendChild(span);
+        // Той самий доступний чекбокс-патерн, що й у щоденній сітці —
+        // роль, стан, Tab-послідовність, Space/Enter — замість нативного
+        // <input> ліворуч. Тепер кнопка кругла й праворуч, як у референсі.
+        const btn = document.createElement('div');
+        const weekKey = 'weekly:' + i + ':' + t.id;
+        btn.className = 'week-check' + (checked ? ' checked' : '') + (weekKey === justToggledKey ? ' just-toggled' : '');
+        btn.setAttribute('role', 'checkbox');
+        btn.setAttribute('aria-checked', checked ? 'true' : 'false');
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('aria-label', t.label);
+        btn.innerHTML = checked ? icon('check', 18) : '';
+        const toggle = () => { tacticSetWeekly(i, t, !tacticGetWeekly(i, t)); saveWeek(i); justToggledKey = weekKey; render(); };
+        btn.onclick = toggle;
+        btn.onkeydown = (e) => { if (e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); toggle(); } };
+        row.appendChild(btn);
+        frag.appendChild(row);
+      });
+    }
+    dailyTactics.forEach(t => {
+      frag.appendChild(dailyToggle(i, t.label, () => tacticGetDailyArr(i, t), t.goal, t.id));
+    });
+    return frag;
+  }
+
+  // U8: перелік того, що реально зникне при скиданні тижня — щоб підтвердження
+  // не було "наосліп". Порожні поля не показуємо.
+  function weekResetPreview(i){
+    const st = state[i];
+    const items = [];
+    if (st.weight) items.push('Вага: <b>' + fmt1(st.weight) + ' кг</b>');
+    if (st.debtAmt) items.push('Борг: <b>$' + Number(st.debtAmt).toLocaleString() + '</b>');
+    if (st.capitalAmt) items.push('Капітал: <b>$' + Number(st.capitalAmt).toLocaleString() + '</b>');
+    // Динамічно, а не жорстко "зважування/облік їжі/калорії" — інакше
+    // користувацькі дії тихо зникали б без попередження при скиданні.
+    TACTICS.forEach(t => {
+      if (t.type === 'weekly'){
+        if (tacticGetWeekly(i, t)) items.push(escHtml(t.label) + ': <b>відмічено</b>');
+      } else {
+        const n = tacticGetDailyArr(i, t).filter(Boolean).length;
+        if (n) items.push(escHtml(t.label) + ': <b>' + n + '/7 днів</b>');
+      }
+    });
+    if (st.notes) items.push('Нотатки: <b>є текст</b>');
+    return items;
+  }
+
+  function renderHero(snap){
+    const i = activeWeek();
+    const cur = currentWeek();
+    const isCurrent = i === cur;
+    const s = score(i);
+    const accentColor = statusColor(displayStatus(i));
+    const wasCelebrated = prevScores[i] !== undefined && prevScores[i] < 85 && s >= 85;
+    const wrap = document.getElementById('hero-wrap');
+    wrap.innerHTML = '';
+    const card = document.createElement('div');
+    // Пункт 17: перехід між тижнями був миттєвим — незрозуміло, що саме
+    // змінилось. Коротка поява знімає дезорієнтацію.
+    const weekChanged = lastRenderedWeek !== null && lastRenderedWeek !== i;
+    card.className = 'hero-card' + (wasCelebrated ? ' flash' : '') + (weekChanged ? ' week-enter' : '');
+    lastRenderedWeek = i;
+    card.style.borderTop = 'var(--bw-accent) solid ' + accentColor;
+
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:var(--sp-2); margin-bottom: var(--sp-1);';
+
+    const titleWrap = document.createElement('div');
+    titleWrap.style.cssText = 'display:flex; align-items:center; gap:var(--sp-2); flex-wrap:wrap; min-width:0;';
+    titleWrap.innerHTML =
+      (isCurrent ? '<span class="today-pill">Сьогодні</span>' : '')
+      + '<strong style="font-size:var(--fs-lg);">Тиждень ' + i + '</strong>'
+      + '<span style="color:var(--text-secondary); font-size:var(--fs-md);">' + weekDates(i) + '</span>';
+    header.appendChild(titleWrap);
+
+    const actions = document.createElement('div');
+    actions.style.cssText = 'display:flex; align-items:center; gap:var(--sp-1); flex-shrink:0;';
+
+    // U2: перемикання тижнів прямо в картці — більше не треба лізти в "Історію".
+    const prevBtn = document.createElement('button');
+    prevBtn.className = 'icon-btn'; prevBtn.type = 'button'; prevBtn.title = 'Попередній тиждень';
+    prevBtn.setAttribute('aria-label', 'Перейти до попереднього тижня');
+    prevBtn.innerHTML = icon('chevronLeft', 15);
+    prevBtn.disabled = i <= 1;
+    prevBtn.style.opacity = i <= 1 ? '0.3' : '1';
+    prevBtn.onclick = () => { if (i > 1){ selectedWeek = i - 1; render(); } };
+    actions.appendChild(prevBtn);
+
+    const nextBtn = document.createElement('button');
+    nextBtn.className = 'icon-btn'; nextBtn.type = 'button'; nextBtn.title = 'Наступний тиждень';
+    nextBtn.setAttribute('aria-label', 'Перейти до наступного тижня');
+    nextBtn.innerHTML = icon('chevronRight', 15);
+    nextBtn.disabled = i >= WEEKS;
+    nextBtn.style.opacity = i >= WEEKS ? '0.3' : '1';
+    nextBtn.onclick = () => { if (i < WEEKS){ selectedWeek = i + 1; render(); } };
+    actions.appendChild(nextBtn);
+
+    if (!isCurrent){
+      const todayBtn = document.createElement('button');
+      todayBtn.type = 'button';
+      todayBtn.title = 'Повернутись до поточного тижня';
+      todayBtn.textContent = 'Сьогодні';
+      todayBtn.style.cssText = 'padding:var(--sp-1) var(--sp-3); border-radius: var(--r-pill); border: var(--bw) solid var(--border-strong); background:var(--surface-1); color:var(--text-primary); font-size:var(--fs-sm); font-family:inherit; cursor:pointer; white-space:nowrap;';
+      todayBtn.onclick = () => { selectedWeek = null; render(); };
+      actions.appendChild(todayBtn);
+    }
+
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'icon-btn'; resetBtn.type = 'button'; resetBtn.title = 'Скинути тиждень';
+    resetBtn.setAttribute('aria-label', 'Скинути всі дані тижня ' + i); resetBtn.innerHTML = icon('reset', 15);
+    resetBtn.onclick = () => {
+      const items = weekResetPreview(i);
+      if (!items.length){
+        showAppAlert('У тижні ' + i + ' ще немає даних — скидати нічого.');
+        return;
+      }
+      showAppModal({
+        html: 'Скинути всі дані тижня ' + i + '? Буде втрачено:'
+          + '<ul style="margin:var(--sp-3) 0 0; padding-left:var(--sp-4); line-height:1.6; font-size:var(--fs-md);"><li>'
+          + items.join('</li><li>') + '</li></ul>',
+        okLabel: 'Скинути',
+        onOk: () => { state[i] = emptyWeek(); saveWeek(i); render(); }
+      });
+    };
+    actions.appendChild(resetBtn);
+
+    header.appendChild(actions);
+    card.appendChild(header);
+
+    const scoreRow = document.createElement('div');
+    scoreRow.style.cssText = 'display:flex; align-items:baseline; gap:var(--sp-3); margin: var(--sp-2) 0 var(--sp-0);';
+    const scoreNum = document.createElement('span');
+    scoreNum.className = 'hero-num' + (wasCelebrated ? ' celebrate' : '');
+    scoreNum.style.cssText = 'font-size:var(--fs-display); color:' + accentColor + ';';
+    scoreNum.textContent = s + '%';
+    scoreRow.appendChild(scoreNum);
+    const scoreLbl = document.createElement('span');
+    scoreLbl.style.cssText = 'font-size:var(--fs-md); color:var(--text-secondary);';
+    scoreLbl.textContent = 'виконання тижня' + (wasCelebrated ? ' · 🎉 ціль досягнута!' : '');
+    scoreRow.appendChild(scoreLbl);
+    card.appendChild(scoreRow);
+
+    // Пункт 8: пояснення методики на три рядки важило більше за саму метрику
+    // і показувалось щодня. Після трьох запусків згортаємо його в текстове
+    // посилання, яке розкриває пояснення на вимогу.
+    // Фідбек із реального пристрою: раніше тут була кругова кнопка "?" —
+    // сама по собі не подобалась, і пояснення під нею було суцільним
+    // реченням, не відповідало на "скільки відсотків дає який пункт".
+    // Тепер звичайне текстове посилання відкриває явний список (scoreBreakdownHtml).
+    const scoreCaption = document.createElement('div');
+    const showFull = launchCount() <= 3;
+    scoreCaption.style.cssText = 'font-size:var(--fs-xs); color:var(--text-muted); letter-spacing:var(--tr-caption); line-height:var(--lh-caption); margin: 0 0 var(--sp-4);';
+    // A8: скрінрідер, налаштований на українську, вимовляє англійський термін
+    // неправильно, якщо не позначити мову фрагмента.
+    // Раніше текст був жорстко "5 дій тижня: зважування, облік їжі, калорії,
+    // конверт на борг, переказ на капітал" — з появою користувацьких дій
+    // список і кількість більше не сталі, тому будуємо його з TACTICS.
+    const METHOD_TEXT = '<span lang="en">Weekly Execution Score</span> — ' + scoreCaptionText(i);
+    if (showFull){
+      scoreCaption.innerHTML = METHOD_TEXT;
+    } else {
+      const hint = document.createElement('button');
+      hint.type = 'button';
+      hint.className = 'tactic-action-link';
+      hint.style.padding = '0';
+      hint.textContent = 'як рахується?';
+      hint.setAttribute('aria-label', 'Як рахується відсоток виконання тижня — список пунктів і вага кожного');
+      hint.onclick = () => showAppModal({ html: scoreBreakdownHtml(i), okLabel: 'Зрозуміло', hideCancel: true });
+      scoreRow.appendChild(hint);
+      scoreCaption.style.margin = '0 0 var(--sp-3)';
+    }
+    card.appendChild(scoreCaption);
+
+    card.appendChild(buildWeekBody(i, snap));
+    wrap.appendChild(card);
+    prevScores[i] = s;
+  }
+
+  // Кома чи лапки в назві користувацької дії зламали б CSV — екрануємо
+  // тільки заголовки (значення в рядках даних завжди прості числа).
+  function csvEscape(v){ v = String(v); return /[,"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  function exportData(format){
+    let content, mime, filename;
+    if (format === 'json'){
+      const data = {}; for (let i = 1; i <= WEEKS; i++) data['week' + i] = state[i];
+      content = JSON.stringify(data, null, 2); mime = 'application/json'; filename = '12-week-tracker.json';
+    } else {
+      // Колонка на кожну дію з реєстру — і вбудовану, і користувацьку, і
+      // архівовану (щоб експорт лишався повним знімком історії, а не тільки
+      // того, що активне зараз). Раніше тут було 3 жорстко закодовані
+      // колонки (logDaysDone/calorieDaysDone/weighIn) — тепер стільки,
+      // скільки дій колись існувало.
+      const tacticCols = TACTICS.map(t => t.label + (t.type === 'daily' ? ' (днів)' : ''));
+      const header = ['week', 'dates', 'weight', 'debtAmt', 'capitalAmt'].concat(tacticCols).concat(['score']);
+      const rows = [header.map(csvEscape).join(',')];
+      for (let i = 1; i <= WEEKS; i++){
+        const st = state[i];
+        const tacticVals = TACTICS.map(t => {
+          if (!tacticAppliesTo(t, i)) return '';
+          return t.type === 'weekly' ? (tacticGetWeekly(i, t) ? 1 : 0) : tacticGetDailyArr(i, t).filter(Boolean).length;
+        });
+        rows.push([i, weekDates(i), st.weight || '', st.debtAmt || '', st.capitalAmt || ''].concat(tacticVals).concat([score(i)]).join(','));
+      }
+      content = rows.join('\n'); mime = 'text/csv'; filename = '12-week-tracker.csv';
+    }
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const $ = (id) => document.getElementById(id);
+  function setMenuOpen(open){
+    if ($('menu-panel')) $('menu-panel').classList.toggle('open', open);
+    if ($('menu-btn')) $('menu-btn').setAttribute('aria-expanded', open ? 'true' : 'false');
+  }
+  if ($('menu-btn')) $('menu-btn').onclick = (e) => {
+    e.stopPropagation();
+    setMenuOpen(!($('menu-panel') && $('menu-panel').classList.contains('open')));
+  };
+  document.addEventListener('click', () => setMenuOpen(false));
+  if ($('export-json')) $('export-json').onclick = () => exportData('json');
+  if ($('export-csv')) $('export-csv').onclick = () => exportData('csv');
+  if ($('import-json')) $('import-json').onclick = () => { if ($('import-file-input')) $('import-file-input').click(); };
+  if ($('import-file-input')) $('import-file-input').onchange = (e) => { if (e.target.files[0]) importData(e.target.files[0]); e.target.value = ''; };
+  // --- Налаштування дій тижня (у тій самій модалці, що й цілі) ---
+  // Дію можна повністю ВИДАЛИТИ, лише якщо по ній ще нема жодних даних
+  // (типова ситуація — щойно створив із друкарською помилкою). Якщо хоч
+  // раз щось відмічено — тільки архівувати: історія тижнів, коли дія
+  // реально трекалась, не повинна зникати заднім числом.
+  function renderTacticsSettings(){
+    const box = $('tactics-list');
+    if (!box) return;
+    box.innerHTML = '';
+    const active = TACTICS.filter(t => t.archivedWeek === null);
+    const archived = TACTICS.filter(t => t.archivedWeek !== null);
+
+    function buildRow(t, isArchived){
+      const row = document.createElement('div'); row.className = 'tactic-row';
+      // Пункт 2 фідбека: назва дії обрізалась без жодної ознаки, що текст
+      // не влазить (звичайний <input> просто ховає хвіст за краєм, без
+      // "..."). Тепер назва — на власному повноширинному рядку зверху,
+      // а решта контролів (мітка цілі, тип, дії) — окремим рядком знизу,
+      // де їм більше не доводиться ділити місце з довгим текстом.
+      const line1 = document.createElement('div'); line1.className = 'tactic-row-line1';
+      const input = document.createElement('input');
+      input.type = 'text'; input.value = t.label; input.maxLength = 80;
+      input.className = 'tactic-label-input' + (isArchived ? ' archived' : '');
+      input.setAttribute('aria-label', 'Назва дії');
+      input.onblur = () => {
+        // Критичний огляд, пункт 2 (і виявлена при його фіксі друга проблема):
+        // це поле втрачає фокус не лише коли людина свідомо клікає деінде,
+        // а й ЯК ПОБІЧНИЙ ЕФЕКT closeModal() для батьківської модалки —
+        // той викликає restoreTo.focus(), що синхронно блурить це поле
+        // ПОСЕРЕД ЩЕ НЕ завершеного закриття. Відкривати іншу модалку
+        // (алерт про дублікат) синхронно просто тут — це стан гонки з
+        // модалкою, яка й досі закривається. setTimeout(0) переносить усю
+        // логіку на наступний тік, коли стек викликів уже розмотався.
+        setTimeout(() => {
+          const v = input.value.trim();
+          if (!v || v === t.label){ input.value = t.label; return; }
+          const dup = TACTICS.some(o => o !== t && o.archivedWeek === null && o.label.toLowerCase() === v.toLowerCase());
+          if (dup){ showAppAlert('Дія з такою назвою вже є серед активних.'); input.value = t.label; return; }
+          t.label = v; saveTactics(); render();
+        }, 0);
+      };
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') input.blur(); });
+      line1.appendChild(input);
+      row.appendChild(line1);
+
+      const line2 = document.createElement('div'); line2.className = 'tactic-row-line2';
+
+      // Мітка цілі — та сама плашка-селектор, що й раніше.
+      const goalSelect = document.createElement('select');
+      goalSelect.className = 'goal-select';
+      goalSelect.setAttribute('aria-label', 'До якої цілі стосується дія «' + t.label + '»');
+      GOAL_ORDER.forEach(g => {
+        const opt = document.createElement('option');
+        opt.value = g; opt.textContent = GOAL_META[g].label;
+        if (g === (t.goal || 'general')) opt.selected = true;
+        goalSelect.appendChild(opt);
+      });
+      function paintGoalSelect(){
+        const meta = GOAL_META[t.goal] || GOAL_META.general;
+        goalSelect.style.background = meta.soft;
+        goalSelect.style.color = meta.color;
+      }
+      paintGoalSelect();
+      goalSelect.onchange = () => {
+        // Це чисто організаційна мітка — не зачіпає жодних записаних
+        // значень і не впливає на score(), тож підтвердження не потрібне,
+        // так само як і для перейменування.
+        t.goal = goalSelect.value;
+        paintGoalSelect();
+        saveTactics();
+        render(); // якщо ця дія показана в поточному тижні — оновить і там
+      };
+      line2.appendChild(goalSelect);
+
+      // Пункт 3 фідбека: тип тепер теж редагований. "Щодня" зберігає масив
+      // із 7 булевих значень на тиждень, "щотижня" — одне булеве значення —
+      // ці форми даних несумісні, тож чесно попереджаємо й ОЧИЩУЄМО стару
+      // історію дії при зміні типу, а не намагаємось "вгадати" конвертацію,
+      // яка все одно спотворила б те, що людина реально робила.
+      const typeSelect = document.createElement('select');
+      typeSelect.className = 'goal-select';
+      typeSelect.setAttribute('aria-label', 'Як часто відмічається дія «' + t.label + '»');
+      [['daily','щодня'],['weekly','щотижня']].forEach(([ty, lbl]) => {
+        const opt = document.createElement('option');
+        opt.value = ty; opt.textContent = lbl;
+        if (ty === t.type) opt.selected = true;
+        typeSelect.appendChild(opt);
+      });
+      typeSelect.style.background = 'var(--surface-3)';
+      typeSelect.style.color = 'var(--text-secondary)';
+      typeSelect.onchange = () => {
+        const newType = typeSelect.value;
+        if (newType === t.type) return;
+        const hasData = tacticHasAnyData(t);
+        const applyTypeChange = () => {
+          t.type = newType;
+          for (let i = 1; i <= WEEKS; i++){
+            if (state[i].custom && state[i].custom[t.id]){ delete state[i].custom[t.id]; saveWeek(i); }
+          }
+          saveTactics(); renderTacticsSettings(); render();
+        };
+        if (hasData){
+          showAppModal({
+            message: 'Змінити тип дії «' + t.label + '» на «' + (newType === 'daily' ? 'щодня' : 'щотижня') + '»? Записана історія цієї дії буде очищена — щоденний і щотижневий записи несумісні між собою.',
+            okLabel: 'Змінити й очистити',
+            onOk: applyTypeChange,
+            onCancel: () => { typeSelect.value = t.type; }
+          });
+        } else {
+          applyTypeChange();
+        }
+      };
+      line2.appendChild(typeSelect);
+
+      const spacer = document.createElement('div'); spacer.style.flex = '1'; line2.appendChild(spacer);
+
+      // Пункт 4 фідбека: іконка-без-підпису не пояснювала себе. Обидві
+      // кнопки тепер підписані текстом.
+      if (isArchived){
+        const restoreBtn = document.createElement('button');
+        restoreBtn.type = 'button'; restoreBtn.className = 'tactic-action-link';
+        restoreBtn.textContent = 'Відновити';
+        restoreBtn.setAttribute('aria-label', 'Відновити дію «' + t.label + '»');
+        restoreBtn.onclick = () => { t.archivedWeek = null; saveTactics(); renderTacticsSettings(); render(); };
+        line2.appendChild(restoreBtn);
+      } else {
+        const hasData = tacticHasAnyData(t);
+        const archiveBtn = document.createElement('button');
+        archiveBtn.type = 'button'; archiveBtn.className = 'tactic-action-link';
+        archiveBtn.textContent = 'Архівувати';
+        archiveBtn.setAttribute('aria-label', 'Архівувати дію «' + t.label + '»');
+        archiveBtn.onclick = () => {
+          showAppModal({
+            message: 'Архівувати «' + t.label + '»? Тижні до цього моменту збережуть історію — вона нікуди не зникне. Нові тижні більше не питатимуть про цю дію.',
+            okLabel: 'Архівувати',
+            onOk: () => { t.archivedWeek = currentWeek(); saveTactics(); renderTacticsSettings(); render(); }
+          });
+        };
+        // Архівувати без жодних даних немає сенсу — одразу пропонуємо
+        // видалення (нижче), а не порожній архів, який довелось би
+        // видаляти самим окремо ще раз.
+        if (hasData) line2.appendChild(archiveBtn);
+      }
+
+      // Пункт 5 фідбека: постійне видалення раніше було доступне ЛИШЕ для
+      // дій без жодних даних — щойно з'являлась хоч одна відмітка, єдиним
+      // варіантом лишалось архівувати. Тепер видалити можна завжди
+      // (архівовану дію теж), назавжди, і завжди з підтвердженням.
+      const deleteBtn = document.createElement('button');
+      deleteBtn.type = 'button'; deleteBtn.className = 'tactic-action-link tactic-action-danger';
+      deleteBtn.textContent = 'Видалити';
+      deleteBtn.setAttribute('aria-label', 'Видалити дію «' + t.label + '» назавжди');
+      deleteBtn.onclick = () => {
+        const hasData = tacticHasAnyData(t);
+        const doDelete = () => {
+          const idx = TACTICS.indexOf(t);
+          if (idx > -1) TACTICS.splice(idx, 1);
+          for (let i = 1; i <= WEEKS; i++){
+            if (state[i].custom && state[i].custom[t.id]){ delete state[i].custom[t.id]; saveWeek(i); }
+          }
+          saveTactics(); renderTacticsSettings(); render();
+        };
+        showAppModal({
+          message: hasData
+            ? 'Видалити «' + t.label + '» назавжди? Уся записана історія цієї дії буде втрачена без можливості відновлення.'
+            : 'Видалити «' + t.label + '»? Дію ще ніхто не позначав, тож видалення остаточне.',
+          okLabel: 'Видалити назавжди',
+          onOk: doDelete
+        });
+      };
+      line2.appendChild(deleteBtn);
+
+      row.appendChild(line2);
+      return row;
+    }
+
+    if (!active.length && !archived.length){
+      const empty = document.createElement('div');
+      empty.style.cssText = 'font-size:var(--fs-sm); color:var(--text-muted); padding:var(--sp-2) 0;';
+      empty.textContent = 'Дій ще немає — додай нижче.';
+      box.appendChild(empty);
+    }
+    active.forEach(t => box.appendChild(buildRow(t, false)));
+    if (archived.length){
+      const hdr = document.createElement('div');
+      hdr.style.cssText = 'font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-top:var(--sp-3); padding-top:var(--sp-2); border-top:var(--bw) solid var(--border);';
+      hdr.textContent = 'Архівовані';
+      box.appendChild(hdr);
+      archived.forEach(t => box.appendChild(buildRow(t, true)));
+    }
+  }
+
+  let newTacticType = 'daily';
+  function setNewTacticType(type){
+    newTacticType = type;
+    if ($('tactic-type-daily')) $('tactic-type-daily').setAttribute('aria-pressed', type === 'daily' ? 'true' : 'false');
+    if ($('tactic-type-weekly')) $('tactic-type-weekly').setAttribute('aria-pressed', type === 'weekly' ? 'true' : 'false');
+  }
+  if ($('tactic-type-daily')) $('tactic-type-daily').onclick = () => setNewTacticType('daily');
+  if ($('tactic-type-weekly')) $('tactic-type-weekly').onclick = () => setNewTacticType('weekly');
+
+  // Перемикач "до якої цілі стосується" нова дія. Кнопки будуються з
+  // GOAL_META, а не прописані в розмітці, — колір і назва йдуть з того
+  // самого об'єкта, що й крапки в картці тижня, тож нізвідки не розійдуться.
+  let newTacticGoal = 'general';
+  const GOAL_ORDER = ['weight', 'debt', 'capital', 'general'];
+  function buildGoalSelector(){
+    const box = $('tactic-goal-selector');
+    if (!box || box.children.length) return; // будуємо один раз, далі лише перемикаємо стан
+    GOAL_ORDER.forEach(g => {
+      const meta = GOAL_META[g];
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.id = 'tactic-goal-' + g; btn.className = 'btn btn-secondary tactic-goal-btn';
+      btn.setAttribute('aria-pressed', g === newTacticGoal ? 'true' : 'false');
+      btn.innerHTML = goalDot(g) + meta.label;
+      btn.onclick = () => setNewTacticGoal(g);
+      box.appendChild(btn);
+    });
+  }
+  function setNewTacticGoal(goal){
+    newTacticGoal = goal;
+    GOAL_ORDER.forEach(g => { const btn = $('tactic-goal-' + g); if (btn) btn.setAttribute('aria-pressed', g === goal ? 'true' : 'false'); });
+  }
+
+  if ($('tactic-add-btn')) $('tactic-add-btn').onclick = () => {
+    const input = $('tactic-new-label');
+    const label = (input.value || '').trim();
+    if (!label){ showAppAlert('Вкажи назву дії.'); return; }
+    if (label.length > 80){ showAppAlert('Занадто довга назва — до 80 символів.'); return; }
+    const dup = TACTICS.some(t => t.archivedWeek === null && t.label.toLowerCase() === label.toLowerCase());
+    if (dup){ showAppAlert('Дія з такою назвою вже є серед активних.'); return; }
+    TACTICS.push({ id: genTacticId(), label: label, type: newTacticType, goal: newTacticGoal, createdWeek: currentWeek(), archivedWeek: null, builtin: false });
+    saveTactics();
+    input.value = '';
+    setNewTacticType('daily');
+    setNewTacticGoal('general');
+    renderTacticsSettings();
+    render();
+  };
+
+  function openGoalsModal(){
+    // Пункт 20: синхронізація тепер живе в тому самому діалозі, що й цілі —
+    // це одне й те саме одноразове налаштування, а не дві різні дії.
+    if ($('goal-sync-url')) $('goal-sync-url').value = getWebAppUrl();
+    if ($('goal-sync-status')) $('goal-sync-status').textContent =
+      getWebAppUrl() ? 'Увімкнена — дані спільні на всіх пристроях.' : 'Вимкнена — дані лише в цьому браузері.';
+    $('goal-weight-start').value = GOALS.weightStart;
+    $('goal-weight-end').value = GOALS.weightEnd;
+    $('goal-debt-start').value = GOALS.debtStart;
+    $('goal-debt-end').value = GOALS.debtEnd;
+    $('goal-capital-start').value = GOALS.capitalStart;
+    $('goal-capital-end').value = GOALS.capitalEnd;
+    if ($('tactic-new-label')) $('tactic-new-label').value = '';
+    buildGoalSelector();
+    setNewTacticType('daily');
+    setNewTacticGoal('general');
+    renderTacticsSettings();
+    if ($('goals-overlay')) openModal($('goals-overlay'));
+  }
+  function closeGoalsModal(){ if ($('goals-overlay')) closeModal($('goals-overlay')); }
+  if ($('setup-goals')) $('setup-goals').onclick = openGoalsModal;
+  if ($('goals-cancel')) $('goals-cancel').onclick = closeGoalsModal;
+  if ($('goals-overlay')) $('goals-overlay').onclick = (e) => { if (e.target.id === 'goals-overlay') closeGoalsModal(); };
+  if ($('goals-save')) $('goals-save').onclick = async () => {
+    // Q2: раніше тут був лише parseFloat без жодної перевірки — можна було
+    // задати ціль ваги "-50" чи старт боргу "-999", і далі всі формули темпу,
+    // відсотків і графіків починали видавати безглузді значення без
+    // найменшого попередження.
+    // Та сама причина, що й у stepper() — крапка/кома розбираються самі,
+    // бо поля тепер type="text" (щоб на iOS з українською розкладкою кому
+    // взагалі можна було ввести).
+    const num = (id, fallback) => { const v = parseFloat(String($(id).value).replace(',', '.')); return isNaN(v) ? fallback : v; };
+    const next = {
+      weightStart: num('goal-weight-start', GOALS.weightStart),
+      weightEnd:   num('goal-weight-end', GOALS.weightEnd),
+      debtStart:   num('goal-debt-start', GOALS.debtStart),
+      debtEnd:     num('goal-debt-end', GOALS.debtEnd),
+      capitalStart:num('goal-capital-start', GOALS.capitalStart),
+      capitalEnd:  num('goal-capital-end', GOALS.capitalEnd)
+    };
+
+    const errors = [];
+    Object.keys(next).forEach(k => { if (next[k] < 0) errors.push('значення не можуть бути відʼємними'); });
+    if (next.weightStart > 0 && next.weightEnd > 0 && next.weightStart === next.weightEnd)
+      errors.push('старт і ціль ваги однакові — не буде що відстежувати');
+    if (next.debtStart === next.debtEnd)
+      errors.push('старт і ціль боргу однакові — не буде що відстежувати');
+    if (next.capitalStart === next.capitalEnd)
+      errors.push('старт і ціль капіталу однакові — не буде що відстежувати');
+    if (next.weightStart > 0 && next.weightStart > 400)
+      errors.push('вага понад 400 кг виглядає як помилка вводу');
+
+    const uniqueErrors = errors.filter((e, i) => errors.indexOf(e) === i);
+    if (uniqueErrors.length){
+      showAppAlert('Не вдалося зберегти:\n• ' + uniqueErrors.join('\n• '));
+      return;
+    }
+
+    // Скидати закриття тут вручну більше не треба: autoCloseCheck реактивний
+    // і сам перерахує правильний стан на наступному render() із НОВИМ
+    // цільовим числом — старе "закрито під числом, якого вже нема" не
+    // може застрягнути.
+    GOALS = Object.assign(GOALS, next);
+    await saveGoals();
+    // Пункт 20: URL синхронізації зберігається разом із цілями
+    if ($('goal-sync-url')){
+      const url = ($('goal-sync-url').value || '').trim();
+      if (url !== getWebAppUrl()){
+        setWebAppUrl(url);
+        updateSyncStatusUI();
+        closeGoalsModal();
+        load();   // перечитуємо дані з нового джерела
+        return;
+      }
+    }
+    closeGoalsModal();
+    render();
+  };
+
+  function render(){
+    try {
+      // Автоматичне закриття цілей перевіряється ПЕРЕД снапшотом, щоб той
+      // самий прохід рендеру вже показав свіжозакриту ціль, а не з
+      // запізненням на один цикл.
+      autoCloseCheck();
+      const snap = computeSnapshot();
+      renderDashboardLine(snap);
+      renderJourney();
+      renderStats(snap);
+      renderWeightChart(snap);
+      renderMoneyChart('chart-debt', expDebtPaid, 'debtAmt', GOALS.debtStart, GOALS.debtEnd, C_DEBT, 'debt', snap);
+      renderMoneyChart('chart-capital', expCapital, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd, C_CAPITAL, 'capital', snap);
+      renderHero(snap);
+      // Ключ був потрібен лише для ЦЬОГО проходу — щоб не переанімувати ту
+      // саму галочку вдруге на наступному ж рендері від чогось геть іншого.
+      justToggledKey = null;
+    } catch(err){
+      const root = document.getElementById('tracker-root');
+      if (root) root.innerHTML = '<div style="padding:var(--sp-5); font-family:sans-serif; color:#F0B94D;">Трекер не зміг відобразитись через помилку: ' + (err && err.message ? err.message : String(err)) + '. Спробуй відкрити цей артефакт у звичайному браузері телефону через кнопку "Publish".</div>';
+    }
+  }
+
+  // Графіки тепер малюються під виміряну ширину контейнера, тому при зміні
+  // розміру вікна (чи повороті телефона) їх треба перерахувати.
+  let resizeTimer = null;
+  let lastWidth = window.innerWidth;
+  window.addEventListener('resize', function(){
+    if (window.innerWidth === lastWidth) return; // iOS смикає resize при appearance/зникненні панелей
+    lastWidth = window.innerWidth;
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(function(){ render(); }, 150);
+  });
+
+  // I8: розмітка не може викликати icon(), тому іконки в ній позначені
+  // атрибутом data-icon і підставляються тут — з того самого обʼєкта ICONS.
+  document.querySelectorAll('#tracker-root [data-icon]').forEach(function(el){
+    const name = el.getAttribute('data-icon');
+    if (ICONS[name]) el.innerHTML = icon(name, parseInt(el.getAttribute('data-icon-size'), 10) || 14);
+  });
+
+  load();
+})();
+</script>
