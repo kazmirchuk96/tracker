@@ -346,14 +346,48 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 [data-icon] { display: inline-flex; align-items: center; flex-shrink: 0; }
 .menu-item { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-md); border-radius: var(--r-sm); cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
 .menu-item:hover { background: var(--surface-3); }
-@keyframes celebratePulse { 0% { transform: scale(1); } 35% { transform: scale(1.15); } 60% { transform: scale(0.95); } 100% { transform: scale(1); } }
-.celebrate { animation: celebratePulse 0.55s ease; }
+/* --- Досягнення цілі тижня (score перетнув 85%). Було різко й лякало: число
+   на найбільшому кеглі екрана стрибало 1 → 1.15 → 0.95 → 1 за 0.55 с, а вся
+   картка спалахувала майже білим (див. коментар нижче). Тепер три тихі
+   одноразові сигнали: легке "зітхання" числа, м'яка зелена підсвітка картки
+   й дуга кружечка, що дотягується до нового значення. Кожен із них ставиться
+   класом ЛИШЕ тому елементу, що справді змінився (рендер повний — див.
+   CLAUDE.md, урок про just-toggled), тож повторний render() без зміни score
+   нічого не програє вдруге. --- */
+@keyframes celebratePulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+.celebrate { animation: celebratePulse 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
 @keyframes weekEnter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .week-enter { animation: weekEnter 0.18s ease-out; }
 @keyframes chartDotPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.55; } }
 .chart-dot-live { animation: chartDotPulse 1.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
-@keyframes flashBg { 0% { background-color: #E1F5EE; } 100% { background-color: transparent; } }
-.flash { animation: flashBg 1.2s ease; }
+/* Колишня анімація спалаху заливала всю картку майже білим (до того ж
+   літералом, не токеном) на 1.2 с поверх темної картки — це і лякало. Замість
+   нього — окремий шар-підсвітка з тим самим радіальним градієнтом, що й
+   .hero-card::before, але кольором --accent-soft, і анімується лише його
+   opacity: ~0.4 с наростання (21% з 1.9 с), решта — згасання. Шар лежить ПІД
+   вмістом картки (z-index:-1 усередині isolation), тому текст ніколи не
+   тонується зверху. У спокої opacity:0 — саме цей стан лишається, коли
+   анімацію вимкнено (prefers-reduced-motion). */
+.hero-card.goal-reached { isolation: isolate; }
+.hero-card.goal-reached::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  background: radial-gradient(120% 80% at 50% 0%, var(--accent-soft), transparent 62%);
+  animation: goalGlow 1.9s ease-out; }
+@keyframes goalGlow { 0% { opacity: 0; } 21% { opacity: 1; } 100% { opacity: 0; } }
+/* Дуга кружечка тижня в стрічці. render() щоразу будує DOM з нуля, тож
+   CSS transition тут не спрацює (нема "попереднього" стану в тому самому
+   елементі) — початкове значення передається у змінних --arc-from* прямо в
+   елемент, а сама @keyframes-анімація одноразова. Базові атрибути кола
+   (stroke, stroke-dashoffset) уже містять КІНЦЕВИЙ стан — зелена дуга нового
+   розміру; анімація лише тимчасово перекриває їх, тож коли її вимкнено чи
+   вона скінчилась, на екрані рівно той самий кінцевий стан. Дуга спершу
+   дотягується у старому кольорі (до 86% з 0.7 с ≈ 0.6 с) і лише потім
+   плавно стає зеленою. */
+@keyframes arcReach {
+  0%   { stroke-dashoffset: var(--arc-from); stroke: var(--arc-from-color); }
+  86%  { stroke-dashoffset: var(--arc-to);   stroke: var(--arc-from-color); }
+  100% { stroke-dashoffset: var(--arc-to);   stroke: var(--arc-to-color); }
+}
+.arc-reach { animation: arcReach 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
 
 /* ---------------------------------------------------------------------
    Розділ 4 (Responsive). Раніше тут був один-єдиний медіа-запит на 520px,
@@ -412,9 +446,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
 /* Системне налаштування "зменшити рух". У трекері є нескінченна пульсація
    точки поточного тижня на графіках — саме такі анімації провокують
-   дискомфорт у людей із вестибулярними розладами. WCAG 2.3.3. */
+   дискомфорт у людей із вестибулярними розладами. WCAG 2.3.3.
+   Псевдоелементи (::before/::after) селектор `*` НЕ зачіпає — вони окремо,
+   бо підсвітка досягнення цілі (.goal-reached::after) живе саме в ::after. */
 @media (prefers-reduced-motion: reduce) {
-  #tracker-root *, #app-modal-overlay *, #goals-overlay * {
+  #tracker-root *, #tracker-root *::before, #tracker-root *::after,
+  #app-modal-overlay *, #goals-overlay * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -484,7 +521,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v55 · fix: weight-on-track badge ignored a hidden 0.15kg tolerance over plan</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v56 · feat: softer goal-reached animation (green glow, gentle pulse, arc catch-up)</div>
 </div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:210; align-items:center; justify-content:center; padding:var(--sp-4);">
@@ -1181,6 +1218,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     });
     return total > 0 ? Math.round((done / total) * 100) : 0;
   }
+  // Якщо тиждень n САМЕ ЗАРАЗ перетнув поріг 85% знизу вгору — повертає його
+  // попередній score (з нього дуга кружечка й дотягується), інакше null.
+  // Викликається і з renderJourney(), і з renderHero(), тому спирається на
+  // порядок у render(): journey малюється РАНІШЕ за hero, а prevScores[i]
+  // оновлює лише кінець renderHero — тож обидва бачать одне й те саме
+  // "було → стало". Синхронізація з сервером цього не викликає: load()
+  // перед render() оновлює prevScores (refreshPrevScores).
+  function goalReachedFrom_(n){
+    const prev = prevScores[n];
+    return (prev !== undefined && prev < 85 && score(n) >= 85) ? prev : null;
+  }
   function weekStatus(n){
     const now = new Date();
     if (now < weekStart(n)) return 'future';
@@ -1331,6 +1379,19 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       const isEmpty = s === 0 && !hasAnyData(i);
       const arcColor = s >= 85 ? C_DONE : (i < cur ? C_MISSED : C_NEUTRAL);
       const offset = CIRC * (1 - (isEmpty ? 0 : s) / 100);
+      // Одноразова анімація дуги — лише для АКТИВНОГО тижня, і лише в тому
+      // рендері, де він щойно перетнув 85% (див. goalReachedFrom_). Правки
+      // вносяться тільки в активному тижні, тож інші кружечки її не отримують
+      // ніколи; на наступному render() без зміни score prevScores уже
+      // дорівнює s, і клас не повертається. Початок — з попереднього score
+      // (не з порожнього кола), колір "було" — той, що дуга мала б без
+      // досягнення (як arcColor вище, але для score < 85).
+      const reachedFrom = i === sel ? goalReachedFrom_(i) : null;
+      const arcReachAttrs = reachedFrom === null ? '' :
+        ' class="arc-reach" style="--arc-from:' + (CIRC * (1 - reachedFrom / 100)).toFixed(1) +
+        '; --arc-to:' + offset.toFixed(1) +
+        '; --arc-from-color:' + (i < cur ? C_MISSED : C_NEUTRAL) +
+        '; --arc-to-color:' + arcColor + ';"';
       // Варіант C: замість другого кільця навколо (яке на 44px зливалось із
       // дугою прогресу в пляму — див. коментар у CSS) "сьогодні" сигналізує
       // сам ФОН кільця: трек тонується м'яким зеленим замість сірого. Одне
@@ -1344,7 +1405,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
           (isEmpty ? '' :
             '<circle cx="22" cy="22" r="' + R + '" fill="none" stroke="' + arcColor + '" stroke-width="3" ' +
             'stroke-linecap="round" stroke-dasharray="' + CIRC.toFixed(1) + '" stroke-dashoffset="' + offset.toFixed(1) + '" ' +
-            'transform="rotate(-90 22 22)"/>') +
+            'transform="rotate(-90 22 22)"' + arcReachAttrs + '/>') +
         '</svg>' +
         '<span class="journey-num-inner">' + s + '</span>';
       const num = document.createElement('span');
@@ -2085,14 +2146,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const isCurrent = i === cur;
     const s = score(i);
     const accentColor = statusColor(displayStatus(i));
-    const wasCelebrated = prevScores[i] !== undefined && prevScores[i] < 85 && s >= 85;
+    const wasCelebrated = goalReachedFrom_(i) !== null;
     const wrap = document.getElementById('hero-wrap');
     wrap.innerHTML = '';
     const card = document.createElement('div');
     // Пункт 17: перехід між тижнями був миттєвим — незрозуміло, що саме
     // змінилось. Коротка поява знімає дезорієнтацію.
     const weekChanged = lastRenderedWeek !== null && lastRenderedWeek !== i;
-    card.className = 'hero-card' + (wasCelebrated ? ' flash' : '') + (weekChanged ? ' week-enter' : '');
+    card.className = 'hero-card' + (wasCelebrated ? ' goal-reached' : '') + (weekChanged ? ' week-enter' : '');
     lastRenderedWeek = i;
     card.style.borderTop = 'var(--bw-accent) solid ' + accentColor;
 
