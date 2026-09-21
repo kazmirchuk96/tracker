@@ -30,6 +30,15 @@
   /* Пункт 13: підсвітка за карткою тижня — окремий токен, щоб літерал
      не осідав у правилі. */
   --accent-glow: rgba(47, 190, 147, 0.07);
+  /* Святкування досягнення цілі тижня: рівномірна заливка ВСІЄЇ картки й
+     сяйво контуру. --accent-soft (16%) і --accent-glow (7%) тут не годяться:
+     попередня версія на 16% і лише вгорі картки була непомітна, коли погляд
+     на чекбоксі внизу. 26% — помітно з будь-якого місця, але лишається
+     напівпрозорим зеленим на темній картці (жодних світлих заливок). */
+  --accent-celebrate: rgba(47, 190, 147, 0.26);
+  /* Темніший відтінок --accent — лише для конфеті, щоб шматочки не були
+     однотонними. --focus (#1D9E75) за змістом кільце фокуса, не декор. */
+  --accent-deep: #1A8A66;
   --accent-text: #6EE7C0;
   /* Кораловий "бренд"-акцент, доданий під час редизайну під референс,
      прибрано повністю: після кількох раундів фідбека ("сьогодні" читалось
@@ -346,33 +355,53 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 [data-icon] { display: inline-flex; align-items: center; flex-shrink: 0; }
 .menu-item { display: flex; align-items: center; gap: var(--sp-2); padding: var(--sp-2) var(--sp-3); font-size: var(--fs-md); border-radius: var(--r-sm); cursor: pointer; color: var(--text-primary); background: none; border: none; width: 100%; text-align: left; }
 .menu-item:hover { background: var(--surface-3); }
-/* --- Досягнення цілі тижня (score перетнув 85%). Було різко й лякало: число
-   на найбільшому кеглі екрана стрибало 1 → 1.15 → 0.95 → 1 за 0.55 с, а вся
-   картка спалахувала майже білим (див. коментар нижче). Тепер три тихі
-   одноразові сигнали: легке "зітхання" числа, м'яка зелена підсвітка картки
-   й дуга кружечка, що дотягується до нового значення. Кожен із них ставиться
-   класом ЛИШЕ тому елементу, що справді змінився (рендер повний — див.
-   CLAUDE.md, урок про just-toggled), тож повторний render() без зміни score
-   нічого не програє вдруге. --- */
-@keyframes celebratePulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
-.celebrate { animation: celebratePulse 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+/* --- Досягнення цілі тижня (score перетнув 85%). Історія: спершу було різко
+   й лякало (білий спалах картки + стрибок числа ×1.15), потім стало ЗАНАДТО
+   тихо — користувач дивиться на чекбокс, який щойно натиснув, а всі сигнали
+   були вгорі картки, тож без погляду на цифру нічого не помітно. Тепер
+   середина: видно з будь-якого місця екрана (заливка й контур УСІЄЇ картки,
+   конфеті з точки тапу, тост унизу), але без світлих спалахів і різких
+   стрибків. Кожен сигнал ставиться класом ЛИШЕ елементу, що змінився (рендер
+   повний — див. CLAUDE.md, урок про just-toggled).
+   render() може відбутись ще раз, поки анімація йде (кінець фонової
+   синхронізації, поворот екрана), тож картка/число/дуга отримують від'ємний
+   animation-delay через --goal-delay (скільки вже минуло): новий вузол
+   підхоплює анімацію з того самого місця, а не стартує з нуля й не
+   обривається. --- */
+@keyframes celebratePulse { 0% { transform: scale(1); } 50% { transform: scale(1.08); } 100% { transform: scale(1); } }
+@keyframes goalNumColor { from { color: var(--goal-prev-color); } }
+.celebrate { animation: celebratePulse 0.5s cubic-bezier(0.22, 1, 0.36, 1), goalNumColor 0.6s ease-out;
+  animation-delay: var(--goal-delay, 0ms); }
 @keyframes weekEnter { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 .week-enter { animation: weekEnter 0.18s ease-out; }
 @keyframes chartDotPulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.6); opacity: 0.55; } }
 .chart-dot-live { animation: chartDotPulse 1.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
 /* Колишня анімація спалаху заливала всю картку майже білим (до того ж
-   літералом, не токеном) на 1.2 с поверх темної картки — це і лякало. Замість
-   нього — окремий шар-підсвітка з тим самим радіальним градієнтом, що й
-   .hero-card::before, але кольором --accent-soft, і анімується лише його
-   opacity: ~0.4 с наростання (21% з 1.9 с), решта — згасання. Шар лежить ПІД
-   вмістом картки (z-index:-1 усередині isolation), тому текст ніколи не
-   тонується зверху. У спокої opacity:0 — саме цей стан лишається, коли
-   анімацію вимкнено (prefers-reduced-motion). */
-.hero-card.goal-reached { isolation: isolate; }
+   літералом, не токеном) на 1.2 с — це і лякало. Тепер (сумарно 2.3 с):
+   ~0.3 с наростання, ~0.8 с утримання, ~1.2 с згасання (13% / 48% / 100%).
+   - ::after — рівномірна заливка всієї картки --accent-celebrate (opacity).
+     Лежить ПІД вмістом (z-index:-1 усередині isolation), тож текст не
+     тонується. У спокої opacity:0 — цей стан лишається, коли анімацію
+     вимкнено (prefers-reduced-motion).
+   - goalCard — контур усієї картки стає --accent + box-shadow: кільце 2px і
+     м'яке зовнішнє сяйво. Бокові/нижня рамки окремо від верхньої: верхня
+     смужка має власний колір статусу (inline) і переходить окремо (goalTop)
+     від попереднього кольору (--goal-prev-color) до зеленого. Тіні
+     перелічені в тому самому порядку в усіх кроках (спочатку базова
+     --shadow-md), щоб браузер інтерполював їх попарно. */
+.hero-card.goal-reached { isolation: isolate; animation: goalCard 2.3s ease-out, goalTop 0.6s ease-out;
+  animation-delay: var(--goal-delay, 0ms); }
 .hero-card.goal-reached::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
-  background: radial-gradient(120% 80% at 50% 0%, var(--accent-soft), transparent 62%);
-  animation: goalGlow 1.9s ease-out; }
-@keyframes goalGlow { 0% { opacity: 0; } 21% { opacity: 1; } 100% { opacity: 0; } }
+  background: var(--accent-celebrate);
+  animation: goalGlow 2.3s ease-out; animation-delay: var(--goal-delay, 0ms); }
+@keyframes goalGlow { 0% { opacity: 0; } 13% { opacity: 1; } 48% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes goalCard {
+  0%, 100% { border-left-color: var(--border); border-right-color: var(--border); border-bottom-color: var(--border);
+             box-shadow: var(--shadow-md), 0 0 0 0 transparent, 0 0 0 0 transparent; }
+  13%, 48% { border-left-color: var(--accent); border-right-color: var(--accent); border-bottom-color: var(--accent);
+             box-shadow: var(--shadow-md), 0 0 0 2px var(--accent), 0 0 28px 4px var(--accent-celebrate); }
+}
+@keyframes goalTop { from { border-top-color: var(--goal-prev-color); } }
 /* Дуга кружечка тижня в стрічці. render() щоразу будує DOM з нуля, тож
    CSS transition тут не спрацює (нема "попереднього" стану в тому самому
    елементі) — початкове значення передається у змінних --arc-from* прямо в
@@ -387,7 +416,31 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   86%  { stroke-dashoffset: var(--arc-to);   stroke: var(--arc-from-color); }
   100% { stroke-dashoffset: var(--arc-to);   stroke: var(--arc-to-color); }
 }
-.arc-reach { animation: arcReach 0.7s cubic-bezier(0.22, 1, 0.36, 1); }
+.arc-reach { animation: arcReach 0.7s cubic-bezier(0.22, 1, 0.36, 1); animation-delay: var(--goal-delay, 0ms); }
+
+/* Тост «Тиждень N · ціль 85% досягнута». Живе в #goal-toast-wrap ПОЗА
+   #tracker-root, тож render() його не чіпає. z-index: над вмістом (меню 20),
+   але НИЖЧЕ модалок (200/210) — див. CLAUDE.md, урок про z-index. Стиль як
+   .today-pill (--accent-soft / --accent-text), але шрифт Inter задано явно
+   (як у модалок): поза #tracker-root він не успадковується, і тост інакше
+   набирався б браузерним засічковим. Фон підкладено непрозорим
+   --surface-2: тост лежить поверх довільного вмісту, а 16% зеленого без
+   підкладки просвічувало б його наскрізь. Один цикл 3.1 с: ~0.3 с виїзд
+   на 10px + fade-in, ~2.5 с утримання, ~0.3 с fade-out. */
+.goal-toast-wrap { position: fixed; left: 0; right: 0; bottom: max(var(--sp-5), env(safe-area-inset-bottom)); z-index: 120;
+  display: flex; justify-content: center; padding: 0 var(--sp-4); pointer-events: none; }
+.goal-toast { display: inline-flex; align-items: center; font-family: 'Inter', -apple-system, sans-serif; font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0.02em;
+  padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); text-align: center;
+  color: var(--accent-text); border: var(--bw) solid var(--accent-soft); box-shadow: var(--shadow-md);
+  background-color: var(--surface-2); background-image: linear-gradient(var(--accent-soft), var(--accent-soft));
+  animation: goalToast 3.1s ease-out both; }
+@keyframes goalToast {
+  0%   { opacity: 0; transform: translateY(10px); }
+  10%  { opacity: 1; transform: translateY(0); }
+  90%  { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
+}
+@keyframes goalToastFade { 0% { opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { opacity: 0; } }
 
 /* ---------------------------------------------------------------------
    Розділ 4 (Responsive). Раніше тут був один-єдиний медіа-запит на 520px,
@@ -457,6 +510,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+  /* Тост лежить поза переліченими вище контейнерами, тож блок вище його не
+     гасить (а якби гасив — 0.01 мс і він зник би, не встигнувши з'явитись).
+     Лишаємо показ, але без виїзду: тільки fade. Конфеті в цьому режимі не
+     запускається взагалі (див. launchConfetti). */
+  .goal-toast { animation-name: goalToastFade; }
 }
 </style>
 
@@ -521,8 +579,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v56 · feat: softer goal-reached animation (green glow, gentle pulse, arc catch-up)</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v57 · feat: visible goal-reached celebration (confetti from the tap, whole-card glow, toast)</div>
 </div>
+
+<div id="goal-toast-wrap" class="goal-toast-wrap" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:210; align-items:center; justify-content:center; padding:var(--sp-4);">
   <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:340px; width:100%; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
@@ -1220,24 +1280,162 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   }
   // Якщо тиждень n САМЕ ЗАРАЗ перетнув поріг 85% знизу вгору — повертає його
   // попередній score (з нього дуга кружечка й дотягується), інакше null.
-  // Викликається і з renderJourney(), і з renderHero(), тому спирається на
-  // порядок у render(): journey малюється РАНІШЕ за hero, а prevScores[i]
-  // оновлює лише кінець renderHero — тож обидва бачать одне й те саме
-  // "було → стало". Синхронізація з сервером цього не викликає: load()
-  // перед render() оновлює prevScores (refreshPrevScores).
+  // Спирається на prevScores, який оновлює лише кінець renderHero, тож
+  // викликати треба ОДИН раз на render() — це робить detectGoalReached_().
+  // Синхронізація з сервером цього не викликає: load() перед render()
+  // оновлює prevScores (refreshPrevScores).
   function goalReachedFrom_(n){
     const prev = prevScores[n];
     return (prev !== undefined && prev < 85 && score(n) >= 85) ? prev : null;
   }
+
+  // ═══ Святкування досягнення цілі тижня ═══════════════════════════════════
+  // Стан святкування живе ~2.4 с і переживає повторні render(): анімація
+  // картки/числа/дуги не обривається, якщо перемальовка (кінець фонової
+  // синхронізації, поворот екрана) трапилась посеред неї — нові вузли
+  // отримують від'ємний --goal-delay і продовжують з того самого місця.
+  // Конфеті й тост, навпаки, запускаються рівно один раз — у render(), де
+  // стався перехід (celebration.fresh), і живуть поза вузлами, що їх
+  // перебудовує render(), тож перемальовка їх не зачіпає.
+  const CELEBRATION_MS = 2400;        // трохи довше за анімацію картки (2.3 с)
+  const GOAL_TOAST_MS = 3100;         // повний цикл тосту — збігається з goalToast у CSS
+  // Кількість шматочків конфеті. 55 — варіант "Середньо", погоджений з
+  // користувачем за демо; якщо попросить більше чи менше — міняти лише тут.
+  const CONFETTI_COUNT = 55;
+  const CONFETTI_MS = 1800;           // перші 60% повна непрозорість, далі згасання
+  let celebration = null;             // { week, from, startedAt, fresh } або null
+
+  function detectGoalReached_(){
+    const w = activeWeek();
+    const from = goalReachedFrom_(w);
+    const now = performance.now();
+    if (from !== null){ celebration = { week: w, from: from, startedAt: now, fresh: true }; return; }
+    if (celebration && (celebration.week !== w || score(w) < 85 || now - celebration.startedAt > CELEBRATION_MS)) celebration = null;
+  }
+  // Скільки анімація вже йде, як від'ємний animation-delay ("0ms" — щойно почалась).
+  function goalDelayCss_(){
+    const elapsed = celebration && !celebration.fresh ? Math.round(performance.now() - celebration.startedAt) : 0;
+    return (elapsed > 0 ? -elapsed : 0) + 'ms';
+  }
+
+  function prefersReducedMotion_(){
+    try { return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); } catch(e){ return false; }
+  }
+  // Конфеті — не більше одного разу на тиждень. Прапорець лише локальний (не
+  // йде в storage.set, тож не синхронізується з бекендом); localGet/localSet
+  // уже обгорнуті в try/catch. "Скинути тиждень" його знімає.
+  function weekCelebratedKey_(n){ return 'celebrated:week:' + n; }
+  function wasWeekCelebrated_(n){ return localGet(weekCelebratedKey_(n)) === '1'; }
+  function markWeekCelebrated_(n){ localSet(weekCelebratedKey_(n), '1'); }
+  function clearWeekCelebrated_(n){ try { localStorage.removeItem('tracker:' + weekCelebratedKey_(n)); } catch(e) {} }
+
+  // Конфеті з точки (x, y) у координатах вікна. Власна реалізація на <canvas>
+  // без бібліотек: трекер — один файл і має працювати офлайн.
+  // - canvas створюється на час анімації і живе прямо в <body>, ПОЗА вузлами,
+  //   які перебудовує render(); після кінця (або якщо вкладку згорнули і
+  //   кадри зупинились) видаляється з DOM.
+  // - pointer-events:none — тапи нічого не блокують. z-index 150: вище за
+  //   вміст (меню 20, тост 120), але НИЖЧЕ модалок (200/210) — див. урок про
+  //   z-index у CLAUDE.md.
+  // - Рух прив'язаний до часу (performance.now), а не до кадрів: на 120 Гц не
+  //   вдвічі швидше. Одиниця фізики — "кадр на 60 Гц" (16.667 мс).
+  // - Віялом угору (−90° ± 55°), гравітація й опір повітря, обертання і
+  //   "перевертання" (висота шматочка множиться на |cos|).
+  // - Кольори лише з токенів (fallback — той самий зелений, що й у дуги):
+  //   жодних білих/світлих спалахів.
+  // Повертає true, якщо конфеті справді запущено.
+  function launchConfetti(x, y){
+    if (prefersReducedMotion_()) return false;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext ? canvas.getContext('2d') : null;
+    if (!ctx) return false;
+    const dpr = window.devicePixelRatio || 1;
+    const W = window.innerWidth, H = window.innerHeight;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    canvas.className = 'confetti-canvas';
+    canvas.setAttribute('aria-hidden', 'true');
+    canvas.setAttribute('data-origin-x', String(Math.round(x)));
+    canvas.setAttribute('data-origin-y', String(Math.round(y)));
+    canvas.setAttribute('data-count', String(CONFETTI_COUNT));
+    canvas.style.cssText = 'position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:150;';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const cs = getComputedStyle(document.documentElement);
+    const tok = (name) => cs.getPropertyValue(name).trim() || C_DONE;
+    // Зелені переважають; кремовий (--text-primary) і тепла нотка (--warn) — по одному з восьми.
+    const palette = [tok('--accent'), tok('--accent'), tok('--accent-text'), tok('--accent-text'),
+      tok('--accent-deep'), tok('--accent-deep'), tok('--text-primary'), tok('--warn')];
+    const rnd = (a, b) => a + Math.random() * (b - a);
+    const parts = [];
+    for (let n = 0; n < CONFETTI_COUNT; n++){
+      const ang = rnd(-145, -35) * Math.PI / 180, speed = rnd(4, 9);
+      parts.push({ x: x, y: y, vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed,
+        w: rnd(4, 8), h: rnd(6, 11), rot: rnd(0, Math.PI * 2), vr: rnd(-0.25, 0.25),
+        flip: rnd(0, Math.PI * 2), vf: rnd(0.12, 0.3), color: palette[Math.floor(Math.random() * palette.length)] });
+    }
+
+    const start = performance.now();
+    let last = start;
+    function frame(){
+      const now = performance.now();
+      const t = (now - start) / CONFETTI_MS;
+      if (t >= 1){ canvas.remove(); return; }
+      const dt = Math.min((now - last) / 16.667, 4); // кадри-на-60Гц; стеля — після паузи вкладки
+      last = now;
+      const drag = Math.pow(0.985, dt);
+      const alpha = t < 0.6 ? 1 : 1 - (t - 0.6) / 0.4;
+      ctx.clearRect(0, 0, W, H);
+      for (let n = 0; n < parts.length; n++){
+        const p = parts[n];
+        p.vx *= drag; p.vy = p.vy * drag + 0.18 * dt;
+        p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt; p.flip += p.vf * dt;
+        const h = p.h * Math.abs(Math.cos(p.flip));
+        ctx.save();
+        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.globalAlpha = alpha; ctx.fillStyle = p.color;
+        ctx.fillRect(-p.w / 2, -h / 2, p.w, h);
+        ctx.restore();
+      }
+      requestAnimationFrame(frame);
+    }
+    document.body.appendChild(canvas);
+    requestAnimationFrame(frame);
+    return true;
+  }
+
+  // Тост живе в #goal-toast-wrap (aria-live) поза #tracker-root. Не дублюється:
+  // поки попередній ще на екрані, новий не створюється.
+  function showGoalToast_(week){
+    const wrap = document.getElementById('goal-toast-wrap');
+    if (!wrap || wrap.querySelector('.goal-toast')) return;
+    const el = document.createElement('div');
+    el.className = 'goal-toast';
+    el.textContent = 'Тиждень ' + week + ' · ціль 85% досягнута';
+    wrap.appendChild(el);
+    setTimeout(function(){ el.remove(); }, GOAL_TOAST_MS);
+  }
+  // Одноразові сигнали моменту переходу. hero — уже вставлена в DOM картка:
+  // точку вильоту беремо з елемента, що спричинив перехід (той самий
+  // .just-toggled, що й для анімації галочки), інакше — з центру картки.
+  function startGoalCelebration_(week, hero){
+    showGoalToast_(week);
+    if (wasWeekCelebrated_(week)) return;   // reduced-motion перевіряє сам launchConfetti
+    const src = hero.querySelector('.just-toggled') || hero;
+    const r = src.getBoundingClientRect();
+    if (launchConfetti(r.left + r.width / 2, r.top + r.height / 2)) markWeekCelebrated_(week);
+  }
+  // ═════════════════════════════════════════════════════════════════════════
   function weekStatus(n){
     const now = new Date();
     if (now < weekStart(n)) return 'future';
     if (now <= weekEnd(n)) return 'current';
     return score(n) >= 85 ? 'done' : 'missed';
   }
-  function displayStatus(n){
+  function displayStatus(n){ return displayStatusFor_(n, score(n)); }
+  // Той самий вибір статусу, але для заданого score — потрібен, щоб знати,
+  // яким кольором була верхня смужка картки ДО переходу через 85%.
+  function displayStatusFor_(n, s){
     const dateSt = weekStatus(n);
-    const s = score(n);
     if (dateSt === 'future'){
       if (s >= 85) return 'done';
       if (s > 0) return 'inprogress';
@@ -1379,19 +1577,21 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       const isEmpty = s === 0 && !hasAnyData(i);
       const arcColor = s >= 85 ? C_DONE : (i < cur ? C_MISSED : C_NEUTRAL);
       const offset = CIRC * (1 - (isEmpty ? 0 : s) / 100);
-      // Одноразова анімація дуги — лише для АКТИВНОГО тижня, і лише в тому
-      // рендері, де він щойно перетнув 85% (див. goalReachedFrom_). Правки
-      // вносяться тільки в активному тижні, тож інші кружечки її не отримують
-      // ніколи; на наступному render() без зміни score prevScores уже
-      // дорівнює s, і клас не повертається. Початок — з попереднього score
-      // (не з порожнього кола), колір "було" — той, що дуга мала б без
-      // досягнення (як arcColor вище, але для score < 85).
-      const reachedFrom = i === sel ? goalReachedFrom_(i) : null;
+      // Анімація дуги — лише для АКТИВНОГО тижня, який щойно перетнув 85%
+      // (стан celebration, див. detectGoalReached_): він живе ~2.4 с, тож
+      // повторний render() посеред анімації не обриває її (--goal-delay), а
+      // після — клас не повертається. Правки вносяться тільки в активному
+      // тижні, тож інші кружечки її не отримують ніколи (після імпорту чужий
+      // тиждень теж може перетнути 85%, але celebration стосується лише
+      // активного). Початок — з попереднього score (не з порожнього кола),
+      // колір "було" — той, що дуга мала б без досягнення (як arcColor вище,
+      // але для score < 85).
+      const reachedFrom = (celebration && celebration.week === i) ? celebration.from : null;
       const arcReachAttrs = reachedFrom === null ? '' :
         ' class="arc-reach" style="--arc-from:' + (CIRC * (1 - reachedFrom / 100)).toFixed(1) +
         '; --arc-to:' + offset.toFixed(1) +
         '; --arc-from-color:' + (i < cur ? C_MISSED : C_NEUTRAL) +
-        '; --arc-to-color:' + arcColor + ';"';
+        '; --arc-to-color:' + arcColor + '; --goal-delay:' + goalDelayCss_() + ';"';
       // Варіант C: замість другого кільця навколо (яке на 44px зливалось із
       // дугою прогресу в пляму — див. коментар у CSS) "сьогодні" сигналізує
       // сам ФОН кільця: трек тонується м'яким зеленим замість сірого. Одне
@@ -2146,7 +2346,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const isCurrent = i === cur;
     const s = score(i);
     const accentColor = statusColor(displayStatus(i));
-    const wasCelebrated = goalReachedFrom_(i) !== null;
+    const celeb = (celebration && celebration.week === i) ? celebration : null;
+    const wasCelebrated = celeb !== null;
     const wrap = document.getElementById('hero-wrap');
     wrap.innerHTML = '';
     const card = document.createElement('div');
@@ -2156,6 +2357,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     card.className = 'hero-card' + (wasCelebrated ? ' goal-reached' : '') + (weekChanged ? ' week-enter' : '');
     lastRenderedWeek = i;
     card.style.borderTop = 'var(--bw-accent) solid ' + accentColor;
+    if (wasCelebrated){
+      // Верхня смужка й число плавно переходять від кольору ДО переходу до зеленого.
+      card.style.setProperty('--goal-prev-color', statusColor(displayStatusFor_(i, celeb.from)));
+      card.style.setProperty('--goal-delay', goalDelayCss_());
+    }
 
     const header = document.createElement('div');
     header.style.cssText = 'display:flex; justify-content:space-between; align-items:center; gap:var(--sp-2); margin-bottom: var(--sp-1);';
@@ -2214,7 +2420,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
           + '<ul style="margin:var(--sp-3) 0 0; padding-left:var(--sp-4); line-height:1.6; font-size:var(--fs-md);"><li>'
           + items.join('</li><li>') + '</li></ul>',
         okLabel: 'Скинути',
-        onOk: () => { state[i] = emptyWeek(); saveWeek(i); render(); }
+        onOk: () => { state[i] = emptyWeek(); clearWeekCelebrated_(i); saveWeek(i); render(); }
       });
     };
     actions.appendChild(resetBtn);
@@ -2268,6 +2474,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
     card.appendChild(buildWeekBody(i, snap));
     wrap.appendChild(card);
+    // Конфеті й тост — лише в render(), де стався перехід; повторні render()
+    // посеред анімації (fresh вже false) їх не запускають вдруге.
+    if (celeb && celeb.fresh){ celeb.fresh = false; startGoalCelebration_(i, card); }
     prevScores[i] = s;
   }
 
@@ -2643,6 +2852,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       // самий прохід рендеру вже показав свіжозакриту ціль, а не з
       // запізненням на один цикл.
       autoCloseCheck();
+      detectGoalReached_();
       const snap = computeSnapshot();
       renderDashboardLine(snap);
       renderJourney();

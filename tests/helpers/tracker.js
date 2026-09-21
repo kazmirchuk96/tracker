@@ -36,16 +36,26 @@ const bodyHtml = fs.readFileSync(BODY_HTML_PATH, 'utf8');
  *   (tracker:weburl у localStorage) — тоді треба передати й fetchImpl.
  * @param {Function} [opts.fetchImpl] - мок window.fetch(url, init).
  * @param {number} [opts.clientWidth] - фіксована ширина для будь-якого елемента.
- * @returns {JSDOM}
+ * @param {boolean} [opts.reducedMotion] - що поверне matchMedia('(prefers-reduced-motion: reduce)').
+ * @param {boolean} [opts.fakeTime] - підмінити requestAnimationFrame / setTimeout /
+ *   performance.now керованим годинником (dom.clock.advance(ms)). Потрібно тестам
+ *   конфеті й тосту: інакше довелось би чекати справжні 2–3 секунди.
+ * @returns {JSDOM} з додатковими полями: dom.clock (лише при fakeTime) і
+ *   dom.canvasLog — { created: скільки разів запитано 2d-контекст, contexts: [ctx…] }.
  */
 function mountTracker({
   now = new Date(2026, 6, 27, 12, 0, 0), // понеділок 12:00, перший тиждень (START = 27.07.2026)
   seed = {},
+  reducedMotion = false,
+  fakeTime = false,
   weburl = '',
   fetchImpl = null,
   clientWidth = 600,
 } = {}) {
   const html = '<!DOCTYPE html><html><head></head><body>' + bodyHtml + '</body></html>';
+
+  const canvasLog = { created: 0, contexts: [] };
+  const clock = fakeTime ? createClock() : null;
 
   const dom = new JSDOM(html, {
     url: 'http://localhost/',
@@ -77,13 +87,81 @@ function mountTracker({
         get() { return clientWidth; },
       });
 
+      // jsdom не має matchMedia. Тест сам вирішує, чи "користувач попросив
+      // менше руху"; решта запитів (не reduced-motion) — завжди false.
+      window.matchMedia = (query) => ({
+        matches: reducedMotion && /prefers-reduced-motion:\s*reduce/.test(query),
+        media: query,
+        addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {},
+      });
+
+      // jsdom без пакета canvas не малює (getContext → null + шум у консолі).
+      // Мок-контекст лише РЕЄСТРУЄ виклики: ctx.log.frame — fillRect поточного
+      // кадру (px/py — позиція шматочка) (обнуляється на clearRect), ctx.log.frames — скільки кадрів
+      // намальовано. Так тест бачить і кількість шматочків, і що анімація йде.
+      window.HTMLCanvasElement.prototype.getContext = function (type) {
+        if (type !== '2d') return null;
+        canvasLog.created++;
+        const log = { frame: [], frames: 0 };
+        const ctx = {
+          log, canvas: this, globalAlpha: 1, fillStyle: '', tx: 0, ty: 0,
+          setTransform() {}, save() {}, restore() {}, rotate() {},
+          // Шматочок малюється як translate(позиція) + fillRect(-w/2, -h/2, w, h),
+          // тож світову позицію (px, py) беремо з останнього translate.
+          translate(x, y) { ctx.tx = x; ctx.ty = y; },
+          clearRect() { log.frames++; log.frame = []; },
+          fillRect(x, y, w, h) { log.frame.push({ px: ctx.tx, py: ctx.ty, w, h, alpha: ctx.globalAlpha, color: ctx.fillStyle }); },
+        };
+        canvasLog.contexts.push(ctx);
+        return ctx;
+      };
+
+      if (clock) clock.install(window);
+
       window.fetch = fetchImpl || (() => Promise.reject(new Error(
         'fetch вимкнено в тесті: передай fetchImpl у mountTracker(), якщо тест перевіряє синхронізацію'
       )));
     },
   });
 
+  dom.canvasLog = canvasLog;
+  dom.clock = clock;
   return dom;
+}
+
+/**
+ * Керований годинник для тестів анімацій. Підміняє те, чим користується
+ * застосунок: requestAnimationFrame, setTimeout/clearTimeout, performance.now.
+ * clock.advance(ms, step) рухає час кроками по step мс (типово 16 — кадри 60 Гц): на кожному кроці
+ * спершу спрацьовують таймери, що настали, потім кадри анімації.
+ */
+function createClock() {
+  const clock = { now: 1000, timers: [], frames: [], nextId: 1 };
+  clock.install = (window) => {
+    window.setTimeout = (fn, ms = 0) => {
+      const id = clock.nextId++;
+      clock.timers.push({ id, at: clock.now + Math.max(0, ms), fn });
+      return id;
+    };
+    window.clearTimeout = (id) => { clock.timers = clock.timers.filter((t) => t.id !== id); };
+    window.requestAnimationFrame = (fn) => { const id = clock.nextId++; clock.frames.push({ id, fn }); return id; };
+    window.cancelAnimationFrame = (id) => { clock.frames = clock.frames.filter((f) => f.id !== id); };
+    Object.defineProperty(window, 'performance', { value: { now: () => clock.now }, configurable: true });
+  };
+  // step — довжина кадру в мс: 16 ≈ 60 Гц (типово), 8 ≈ 120 Гц.
+  clock.advance = (ms, step = 16) => {
+    const end = clock.now + ms;
+    while (clock.now < end) {
+      clock.now = Math.min(clock.now + step, end);
+      const due = clock.timers.filter((t) => t.at <= clock.now).sort((a, b) => a.at - b.at);
+      clock.timers = clock.timers.filter((t) => t.at > clock.now);
+      due.forEach((t) => t.fn());
+      const frames = clock.frames;
+      clock.frames = [];
+      frames.forEach((f) => f.fn(clock.now));
+    }
+  };
+  return clock;
 }
 
 /** Чекає кілька мікро/макро-тіків — досить, щоб await-ланцюжки (load(), saveWeek()) розсмокталися. */
