@@ -30,7 +30,7 @@ const bodyHtml = fs.readFileSync(BODY_HTML_PATH, 'utf8');
 /**
  * @param {object} opts
  * @param {Date} [opts.now] - зафіксований "поточний момент" для Date/Date.now().
- * @param {object} [opts.seed] - { goals, tactics, weeks: { [weekNum]: weekObj } }
+ * @param {object} [opts.seed] - { goals, tactics, weeks: { [weekNum]: weekObj }, raw: { [key]: rawString } }
  *   попередньо кладеться в localStorage під тими ж ключами, що й сама сторінка.
  * @param {string} [opts.weburl] - якщо задано, вмикає гілку синхронізації
  *   (tracker:weburl у localStorage) — тоді треба передати й fetchImpl.
@@ -65,6 +65,10 @@ function mountTracker({
       if (weburl) window.localStorage.setItem('tracker:weburl', weburl);
       if (seed.goals) window.localStorage.setItem('tracker:goals', JSON.stringify(seed.goals));
       if (seed.tactics) window.localStorage.setItem('tracker:tactics', JSON.stringify(seed.tactics));
+      // Сирі ключі (під префіксом tracker:) — щоб покласти cycle, archive:N чи навмисно зіпсований рядок.
+      if (seed.raw) {
+        Object.keys(seed.raw).forEach((k) => window.localStorage.setItem('tracker:' + k, seed.raw[k]));
+      }
       if (seed.weeks) {
         Object.keys(seed.weeks).forEach((n) => {
           window.localStorage.setItem('tracker:week:' + n, JSON.stringify(seed.weeks[n]));

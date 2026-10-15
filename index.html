@@ -54,6 +54,10 @@
   /* Темніший відтінок --accent — лише для конфеті, щоб шматочки не були
      однотонними. --focus (#1D9E75) за змістом кільце фокуса, не декор. */
   --accent-deep: #1A8A66;
+  /* Затемнення за модальними аркушами архіву й нового циклу. Те саме значення,
+     що вже стоїть інлайном у двох старіших модалках (goals / app-modal), але
+     тут винесене в токен, бо аркушів стало більше. */
+  --scrim: rgba(10, 9, 6, 0.62);
   --accent-text: #6EE7C0;
   /* Кораловий "бренд"-акцент, доданий під час редизайну під референс,
      прибрано повністю: після кількох раундів фідбека ("сьогодні" читалось
@@ -304,6 +308,8 @@ input[type=number] { -moz-appearance: textfield; appearance: textfield; }
    заокругленням і не змінює розміри елемента (тобто не зсуває layout). */
 #tracker-root :focus-visible,
 #app-modal-overlay :focus-visible,
+#archive-overlay :focus-visible,
+#cycle-overlay :focus-visible,
 #goals-overlay :focus-visible {
   outline: 2px solid var(--accent-text);
   outline-offset: 2px;
@@ -433,6 +439,47 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 }
 .arc-reach { animation: arcReach 0.7s cubic-bezier(0.22, 1, 0.36, 1); animation-delay: var(--goal-delay, 0ms); }
 
+/* --- Цикли: аркуші "Архів циклів" і "Новий цикл" та банер завершення.
+   z-index 200 — як у модалки налаштувань: усі підтвердження (app-modal, 210)
+   мусять відкриватись ПОВЕРХ них (див. CLAUDE.md, урок про z-index). --- */
+.sheet-overlay { position: fixed; inset: 0; background: var(--scrim); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  z-index: 200; align-items: center; justify-content: center; padding: var(--sp-4); }
+.sheet-panel { background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
+  max-width: 440px; width: 100%; max-height: 88vh; overflow: auto; padding: var(--sp-5); box-sizing: border-box;
+  font-family: 'Inter', sans-serif; color: var(--text-primary); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.sheet-panel h2 { font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 600; margin: 0; }
+.sheet-title { margin: 0 0 var(--sp-3) !important; }
+.sheet-text { font-size: var(--fs-sm); color: var(--text-secondary); line-height: var(--lh-body); margin-bottom: var(--sp-4); }
+.sheet-label { display: block; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: var(--sp-2); }
+.sheet-input { width: 100%; box-sizing: border-box; padding: var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong);
+  background: var(--surface-3); color: var(--text-primary); font-size: var(--fs-lg); font-family: inherit; color-scheme: dark; }
+.sheet-error { min-height: var(--sp-4); font-size: var(--fs-sm); color: var(--warn-text); margin: var(--sp-2) 0 var(--sp-3); }
+.sheet-actions { display: flex; justify-content: flex-end; gap: var(--sp-2); flex-wrap: wrap; }
+.arch-item { display: block; width: 100%; text-align: left; font-family: inherit; color: inherit; cursor: pointer; margin-bottom: var(--sp-3);
+  background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4); }
+.arch-item:hover { background: var(--surface-3); }
+.arch-title { font-weight: 600; font-size: var(--fs-md); }
+.arch-sub { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1); }
+.arch-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); margin: var(--sp-3) 0; }
+.arch-tile { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-3); }
+.arch-tile b { display: block; font-family: 'Fraunces', serif; font-size: var(--fs-xl); font-weight: 500; line-height: var(--lh-heading); }
+.arch-tile span { font-size: var(--fs-xs); color: var(--text-muted); }
+.arch-h { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin: var(--sp-4) 0 var(--sp-2); }
+.arch-rings { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
+.arch-ring { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); font-size: var(--fs-xs); color: var(--text-muted); }
+.arch-week { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-md); margin-bottom: var(--sp-2); }
+.arch-week summary { cursor: pointer; padding: var(--sp-3); font-size: var(--fs-sm); list-style: none; display: flex; justify-content: space-between; gap: var(--sp-2); }
+.arch-week summary::-webkit-details-marker { display: none; }
+.arch-week-body { padding: 0 var(--sp-3) var(--sp-3); font-size: var(--fs-sm); color: var(--text-secondary); line-height: var(--lh-body); }
+.arch-week-body div { display: flex; justify-content: space-between; gap: var(--sp-2); }
+.cycle-banner { border-left: var(--bw-accent) solid var(--accent); border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-5);
+  background: var(--surface-1); border-top: var(--bw) solid var(--border); border-right: var(--bw) solid var(--border); border-bottom: var(--bw) solid var(--border); }
+.cycle-banner b { display: block; font-size: var(--fs-md); margin-bottom: var(--sp-1); }
+.cycle-banner p { margin: 0 0 var(--sp-3); font-size: var(--fs-sm); color: var(--text-secondary); }
+.cycle-banner .sheet-actions { justify-content: flex-start; }
+.cycle-banner .btn-secondary { border: var(--bw) solid var(--border-strong); }
+
 /* Тост «Тиждень N · ціль 85% досягнута». Живе в #goal-toast-wrap ПОЗА
    #tracker-root, тож render() його не чіпає. z-index: над вмістом (меню 20),
    але НИЖЧЕ модалок (200/210) — див. CLAUDE.md, урок про z-index. Стиль як
@@ -519,7 +566,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
    бо підсвітка досягнення цілі (.goal-reached::after) живе саме в ::after. */
 @media (prefers-reduced-motion: reduce) {
   #tracker-root *, #tracker-root *::before, #tracker-root *::after,
-  #app-modal-overlay *, #goals-overlay * {
+  #app-modal-overlay *, #goals-overlay *, #archive-overlay *, #cycle-overlay * {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
@@ -543,7 +590,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </svg>
       <div>
         <h1 style="margin: 0 0 var(--sp-1); font-size: var(--fs-h1);">12 тижнів</h1>
-        <p style="color: var(--text-secondary); font-size: var(--fs-sm); margin: 0;">27 липня — 18 жовтня 2026 <span id="sync-badge" style="color: var(--text-muted); font-size: var(--fs-xs);"></span></p>
+        <p style="color: var(--text-secondary); font-size: var(--fs-sm); margin: 0;"><span id="cycle-range">27 липня — 18 жовтня 2026</span> <span id="sync-badge" style="color: var(--text-muted); font-size: var(--fs-xs);"></span></p>
       </div>
     </div>
     <div class="menu-wrap">
@@ -552,6 +599,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </button>
       <div class="menu-panel" id="menu-panel">
         <button class="menu-item" id="setup-goals"><span data-icon="target"></span>Налаштування</button>
+        <button class="menu-item" id="open-archive"><span data-icon="archive"></span>Архів циклів</button>
+        <button class="menu-item" id="new-cycle"><span data-icon="plus"></span>Новий цикл…</button>
         <button class="menu-item" id="export-json"><span data-icon="download"></span>Експорт JSON</button>
         <button class="menu-item" id="export-csv"><span data-icon="download"></span>Експорт CSV</button>
         <button class="menu-item" id="import-json"><span data-icon="upload"></span>Імпорт JSON</button>
@@ -561,6 +610,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
     </div>
   </div>
+
+  <div id="cycle-banner"></div>
 
   <div id="journey-wrap" style="margin-bottom: var(--sp-5);"></div>
 
@@ -594,7 +645,31 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v57 · feat: visible goal-reached celebration (confetti from the tap, whole-card glow, toast)</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v58 · feat: cycles — archive of finished cycles, new cycle with own start date, full backup</div>
+</div>
+
+<div id="archive-overlay" class="sheet-overlay" role="dialog" aria-modal="true" aria-labelledby="archive-title" style="display:none;">
+  <div class="sheet-panel">
+    <div class="sheet-head">
+      <h2 id="archive-title">Архів циклів</h2>
+      <button id="archive-close" type="button" class="icon-btn" aria-label="Закрити архів" title="Закрити"><span data-icon="x" data-icon-size="16"></span></button>
+    </div>
+    <div id="archive-body"></div>
+  </div>
+</div>
+
+<div id="cycle-overlay" class="sheet-overlay" role="dialog" aria-modal="true" aria-labelledby="cycle-title" style="display:none;">
+  <div class="sheet-panel" style="max-width:380px;">
+    <h2 id="cycle-title" class="sheet-title">Новий цикл</h2>
+    <div id="cycle-info" class="sheet-text"></div>
+    <label for="cycle-start-input" class="sheet-label">Дата початку (понеділок)</label>
+    <input id="cycle-start-input" type="date" class="sheet-input">
+    <div id="cycle-error" class="sheet-error" role="alert"></div>
+    <div class="sheet-actions">
+      <button id="cycle-cancel" type="button" class="btn btn-secondary">Скасувати</button>
+      <button id="cycle-confirm" type="button" class="btn btn-primary">Почати цикл</button>
+    </div>
+  </div>
 </div>
 
 <div id="goal-toast-wrap" class="goal-toast-wrap" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -665,7 +740,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
 <script>
 (function(){
-  const START = new Date(2026, 6, 27);
+  // Дата старту поточного циклу: змінюється ключем `cycle` (див. блок "Цикли" нижче).
+  let START = new Date(2026, 6, 27);
   const WEEKS = 12;
   let GOALS = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800,
     // Дострокове закриття цілі: номер тижня, у якому закрито, або null —
@@ -841,7 +917,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     fill: '<path d="M8 2v9m0 0l-3.2-3.2M8 11l3.2-3.2M3 14h10" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     chevronLeft: '<path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
     chevronRight: '<path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
-    chevronDown: '<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
+    chevronDown: '<path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+    archive: '<path d="M2.5 4h11v2.5h-11zM3.5 6.5V13h9V6.5M6.5 9h3" stroke="currentColor" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'
   };
   function icon(name, size, extraStyle){ size = size || 14; return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 16 16" style="display:block;' + (extraStyle||'') + '">' + ICONS[name] + '</svg>'; }
 
@@ -1039,7 +1116,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function localGet(key){ try { return localStorage.getItem('tracker:' + key); } catch(e){ return null; } }
   function localSet(key, value){ try { localStorage.setItem('tracker:' + key, value); } catch(e) {} }
 
-  const ALL_KEYS = (function(){ const k = ['goals', 'tactics']; for (let i = 1; i <= WEEKS; i++) k.push('week:' + i); return k; })();
+  const ALL_KEYS = (function(){ const k = ['cycle', 'goals', 'tactics']; for (let i = 1; i <= WEEKS; i++) k.push('week:' + i); return k; })();
 
   // Забирає ВСІ ключі одним запитом (action=getall). Якщо бекенд старої
   // версії такої дії не знає — падає на паралельні запити. Раніше тут було
@@ -1061,6 +1138,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       }));
       const map = {};
       results.forEach(function(pair){ if (pair[1]) map[pair[0]] = pair[1]; });
+      // Запасний шлях не вміє перелічити ключі, тож архіви беремо за номером
+      // циклу: архіви лежать під archive:1 … archive:<номер поточного циклу>.
+      const c = parseCycle_(map['cycle']);
+      if (c){
+        const more = await Promise.all(Array.from({ length: c.id }, function(_, n){
+          const key = 'archive:' + (n + 1);
+          return fetch(url + '?action=get&key=' + encodeURIComponent(key)).then(function(r){ return r.json(); })
+            .then(function(d){ return [key, (d && d.value) ? d.value : null]; }).catch(function(){ return [key, null]; });
+        }));
+        more.forEach(function(pair){ if (pair[1]) map[pair[0]] = pair[1]; });
+      }
       return map;
     } catch(e){ return null; }
   }
@@ -1109,11 +1197,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     bumpLaunchCount();
     // Крок 1 — миттєво малюємо з локального кешу, БЕЗ мережі.
     // Користувач бачить трекер одразу, а не через 20 секунд.
+    // Цикл — ПЕРШИМ: від його дати старту залежать тижні, відсотки й плани.
+    applyCycleRaw(localGet('cycle'));
     applyGoalsRaw(localGet('goals'));
     applyTacticsRaw(localGet('tactics'));
     for (let i = 1; i <= WEEKS; i++) applyWeekRaw(i, localGet('week:' + i));
     refreshPrevScores();
     updateSyncStatusUI();
+    syncCurrentCycleArchive_();
     render();
 
     // Крок 2 — синхронізація у фоні; екран уже показано, чекати нема чого.
@@ -1125,14 +1216,26 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const remote = await remoteFetchAll(url);
     syncInFlight = false;
     if (!remote){ setSyncBadge('офлайн'); return; }
-    if (remote['goals'] && !editedDuringSync.has('goals')){ localSet('goals', remote['goals']); applyGoalsRaw(remote['goals']); }
-    if (remote['tactics'] && !editedDuringSync.has('tactics')){ localSet('tactics', remote['tactics']); applyTacticsRaw(remote['tactics']); }
-    for (let i = 1; i <= WEEKS; i++){
-      if (editedDuringSync.has(i)) continue; // саме тут гасився дотик користувача — тепер пропускаємо
-      const raw = remote['week:' + i];
-      if (raw){ localSet('week:' + i, raw); applyWeekRaw(i, raw); }
+    // Віддалений цикл СТАРІШИЙ за локальний (новий цикл створили без зв'язку,
+    // і до хмари він не дійшов): слухати хмару не можна — вона затерла б
+    // новий цикл старими тижнями. Навпаки, штовхаємо туди локальне.
+    // Відсутній ключ `cycle` у хмарі = цикл №1.
+    const remoteCycle = parseCycle_(remote['cycle']);
+    if ((remoteCycle ? remoteCycle.id : 1) < CYCLE.id){
+      pushLiveCycle_();
+    } else {
+      if (remote['cycle'] && remoteCycle && !editedDuringSync.has('cycle')){ localSet('cycle', remote['cycle']); applyCycleRaw(remote['cycle']); }
+      if (remote['goals'] && !editedDuringSync.has('goals')){ localSet('goals', remote['goals']); applyGoalsRaw(remote['goals']); }
+      if (remote['tactics'] && !editedDuringSync.has('tactics')){ localSet('tactics', remote['tactics']); applyTacticsRaw(remote['tactics']); }
+      for (let i = 1; i <= WEEKS; i++){
+        if (editedDuringSync.has(i)) continue; // саме тут гасився дотик користувача — тепер пропускаємо
+        const raw = remote['week:' + i];
+        if (raw){ localSet('week:' + i, raw); applyWeekRaw(i, raw); }
+      }
     }
+    mergeArchives_(remote);
     refreshPrevScores();
+    syncCurrentCycleArchive_();
     setSyncBadge('');
     render();
   }
@@ -1201,25 +1304,66 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         showAppAlert('Це не схоже на файл трекера — очікується обʼєкт із ключами week1…week12.');
         return;
       }
+      // Три види файлів: повний бекап (week1…week12 + cycle/goals/tactics/archives),
+      // старий експорт (лише week1…week12) і знімок ОДНОГО завершеного циклу
+      // (кнопка "Завантажити JSON циклу" в архіві) — він іде лише в архів.
+      const asSnap = (parsed.v === 1 && parsed.weeks && typeof parsed.weeks === 'object') ? parseSnapshot_(parsed) : null;
+      const hasWeeks = [];
+      for (let i = 1; i <= WEEKS; i++){ const raw = parsed['week' + i]; if (raw && typeof raw === 'object' && !Array.isArray(raw)) hasWeeks.push(i); }
+
+      let archivesImported = 0;
+      const archiveSnaps = [];
+      if (asSnap) archiveSnaps.push(asSnap);
+      if (parsed.archives && typeof parsed.archives === 'object' && !Array.isArray(parsed.archives)){
+        Object.keys(parsed.archives).forEach(k => { const sn = parseSnapshot_(parsed.archives[k]); if (sn) archiveSnaps.push(sn); });
+      }
+      if (!hasWeeks.length && !archiveSnaps.length){
+        showAppAlert('У файлі не знайдено жодного тижня (очікуються ключі week1…week12).');
+        return;
+      }
+
+      const notes = [];
+      if (hasWeeks.length){
+        // Цикл із файлу замінює поточний: якщо це інший цикл і в поточному є
+        // дані, спершу зберігаємо його в архів — нічого не губиться мовчки.
+        const c = parseCycle_(parsed.cycle);
+        if (c && c.id !== CYCLE.id){
+          if (liveHasData_()){
+            await storage.set(archiveKey_(CYCLE.id), JSON.stringify(buildSnapshot_(cycleFinished_() ? {} : { endedEarly: true, endedAt: toISODate_(new Date()) })));
+            notes.push('Попередній цикл ' + CYCLE.id + ' збережено в архів.');
+          }
+          CYCLE = c; START = parseISODate_(c.start);
+          for (let i = 1; i <= WEEKS; i++) state[i] = emptyWeek();
+          await saveCycle();
+        }
+        if (parsed.goals !== undefined){ GOALS = sanitizeGoals_(parsed.goals); await saveGoals(); }
+        if (parsed.tactics !== undefined){ const t = sanitizeTactics_(parsed.tactics); if (t){ TACTICS = t; await saveTactics(); } else notes.push('Список дій у файлі не розпізнано — лишився поточний.'); }
+      }
       let imported = 0;
       const allSkipped = [];
-      for (let i = 1; i <= WEEKS; i++){
-        const raw = parsed['week' + i];
-        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) continue;
-        const res = sanitizeWeek(raw);
+      for (const i of hasWeeks){
+        const res = sanitizeWeek(parsed['week' + i]);
         state[i] = res.clean;
         await saveWeek(i);
         imported++;
         res.skipped.forEach(f => { if (allSkipped.indexOf(f) === -1) allSkipped.push(f); });
       }
-      if (!imported){
-        showAppAlert('У файлі не знайдено жодного тижня (очікуються ключі week1…week12).');
-        return;
+      for (const sn of archiveSnaps){
+        const existing = parseSnapshot_(localGet(archiveKey_(sn.id)));
+        if (existing && existing.savedAt > sn.savedAt) continue; // у застосунку вже новіший
+        await storage.set(archiveKey_(sn.id), JSON.stringify(sn));
+        archivesImported++;
       }
+      // Імпорт не є "досягненням тижня": без цього відсотки, що стрибнули від
+      // імпортованих даних, святкувались би як перехід через 85%.
+      refreshPrevScores();
       render();
       showSaveStatus('Імпортовано ✓');
-      if (allSkipped.length){
-        showAppAlert('Імпортовано тижнів: ' + imported + '.\nДеякі поля пропущено через некоректні значення: ' + allSkipped.join(', ') + '.');
+      const parts = [];
+      if (imported) parts.push('тижнів: ' + imported);
+      if (archivesImported) parts.push('циклів в архів: ' + archivesImported);
+      if (allSkipped.length || notes.length){
+        showAppAlert('Імпортовано ' + parts.join(', ') + '.' + (allSkipped.length ? '\nДеякі поля пропущено через некоректні значення: ' + allSkipped.join(', ') + '.' : '') + (notes.length ? '\n' + notes.join('\n') : ''));
       }
     } catch(err){ showAppAlert('Не вдалося прочитати файл: ' + (err && err.message ? err.message : err)); }
   }
@@ -2501,7 +2645,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function exportData(format){
     let content, mime, filename;
     if (format === 'json'){
-      const data = {}; for (let i = 1; i <= WEEKS; i++) data['week' + i] = state[i];
+      // Повний бекап: окрім тижнів — цикл (дата старту), цілі, список дій і всі
+      // збережені завершені цикли. Без цілей і дій тижні не відтворити: від них
+      // залежать плани й відсотки. Старий імпорт читає лише weekN і ігнорує решту.
+      const data = { format: '12-week-tracker', version: 2, cycle: CYCLE, goals: GOALS, tactics: TACTICS };
+      for (let i = 1; i <= WEEKS; i++) data['week' + i] = state[i];
+      data.archives = {}; listArchives_().forEach(sn => { data.archives[sn.id] = sn; });
       content = JSON.stringify(data, null, 2); mime = 'application/json'; filename = '12-week-tracker.json';
     } else {
       // Колонка на кожну дію з реєстру — і вбудовану, і користувацьку, і
@@ -2522,10 +2671,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       }
       content = rows.join('\n'); mime = 'text/csv'; filename = '12-week-tracker.csv';
     }
-    const blob = new Blob([content], { type: mime });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
+    downloadFile_(content, mime, filename);
   }
 
   const $ = (id) => document.getElementById(id);
@@ -2866,6 +3012,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       // Автоматичне закриття цілей перевіряється ПЕРЕД снапшотом, щоб той
       // самий прохід рендеру вже показав свіжозакриту ціль, а не з
       // запізненням на один цикл.
+      renderCycleHeader_();
+      renderCycleBanner_();
       autoCloseCheck();
       detectGoalReached_();
       const snap = computeSnapshot();
@@ -2885,6 +3033,435 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     }
   }
 
+  // ═══ Цикли: дата старту, підсумок завершеного циклу, архів, новий цикл ═══
+  // Одна програма = 12 тижнів. Раніше дата старту була константою в коді, а всі
+  // дані жили під ключами goals / tactics / week:1..12 — тож новий цикл міг би
+  // лише затерти старий. Модель тепер така:
+  //  - ПОТОЧНИЙ цикл лишається в тих самих ключах (goals, tactics, week:N) —
+  //    уже синхронізовані дані не мігрують і не ризикують;
+  //  - новий ключ `cycle` = { id, start: 'РРРР-ММ-ДД' }. Немає ключа — це цикл
+  //    №1 зі стартом 27.07.2026 (тож усе, що було до цієї версії, працює як було);
+  //  - ЗАВЕРШЕНИЙ цикл зберігається знімком `archive:<id>`: тижні, цілі, дії та
+  //    ВЖЕ ПОРАХОВАНІ відсотки. Відсотки заморожені свідомо: score() залежить від
+  //    поточної дати (planFor_), тож через місяць перерахунок дав би інші числа.
+  // Знімок створюється сам, щойно цикл закінчився (див. syncCurrentCycleArchive_),
+  // і ще раз — безпосередньо перед стартом нового циклу, до того, як живі дані
+  // скинуться. Архів лише для читання.
+  const DEFAULT_CYCLE_START = '2026-07-27';
+  const MONTHS_GEN = ['січня','лютого','березня','квітня','травня','червня','липня','серпня','вересня','жовтня','листопада','грудня'];
+  let CYCLE = { id: 1, start: DEFAULT_CYCLE_START };
+
+  function pad2_(n){ return (n < 10 ? '0' : '') + n; }
+  function toISODate_(d){ return d.getFullYear() + '-' + pad2_(d.getMonth() + 1) + '-' + pad2_(d.getDate()); }
+  function parseISODate_(s){
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s || ''));
+    if (!m) return null;
+    const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+    // new Date переносить "31 лютого" на березень — такі дати відкидаємо.
+    return (d.getFullYear() === Number(m[1]) && d.getMonth() === Number(m[2]) - 1 && d.getDate() === Number(m[3])) ? d : null;
+  }
+  function addDays_(d, n){ const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+  function fmtLongDate_(d, withYear){ return d.getDate() + ' ' + MONTHS_GEN[d.getMonth()] + (withYear ? ' ' + d.getFullYear() : ''); }
+  function fmtRange_(startD, endD){
+    return startD.getFullYear() === endD.getFullYear()
+      ? fmtLongDate_(startD, false) + ' — ' + fmtLongDate_(endD, true)
+      : fmtLongDate_(startD, true) + ' — ' + fmtLongDate_(endD, true);
+  }
+  function fmtShortDate_(iso){ const d = parseISODate_(iso); return d ? pad2_(d.getDate()) + '.' + pad2_(d.getMonth() + 1) + '.' + d.getFullYear() : ''; }
+
+  function parseCycle_(raw){
+    try {
+      const o = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!o || typeof o !== 'object') return null;
+      const id = Number(o.id);
+      if (!Number.isInteger(id) || id < 1 || id > 999 || !parseISODate_(o.start)) return null;
+      return { id: id, start: o.start };
+    } catch(e){ return null; }
+  }
+  function applyCycleRaw(raw){ const c = parseCycle_(raw); if (c){ CYCLE = c; START = parseISODate_(c.start); } }
+  async function saveCycle(){
+    if (syncInFlight) editedDuringSync.add('cycle');
+    try { await storage.set('cycle', JSON.stringify(CYCLE)); } catch(e) {}
+  }
+  function cycleFinished_(){ return new Date() > weekEnd(WEEKS); }
+  function cycleNotStarted_(){ return new Date() < weekStart(1); }
+  function renderCycleHeader_(){
+    const el = document.getElementById('cycle-range');
+    if (!el) return;
+    el.textContent = (CYCLE.id > 1 ? 'Цикл ' + CYCLE.id + ' · ' : '') + fmtRange_(weekStart(1), weekEnd(WEEKS));
+  }
+
+  // Чи є в тижні (об'єкті, не індексі — працює і для знімка) хоч якісь дані.
+  // hasAnyData(n) вище не бачить користувацьких дій (state[i].custom).
+  function weekHasData_(w){
+    if (!w) return false;
+    if (w.weight || w.debtAmt || w.capitalAmt) return true;
+    if (w.checks && Object.keys(w.checks).some(k => w.checks[k])) return true;
+    if ((w.logDays || []).some(Boolean) || (w.calorieDays || []).some(Boolean)) return true;
+    return !!(w.custom && Object.keys(w.custom).some(k => Array.isArray(w.custom[k]) ? w.custom[k].some(Boolean) : w.custom[k]));
+  }
+  function liveHasData_(){ for (let i = 1; i <= WEEKS; i++) if (weekHasData_(state[i])) return true; return false; }
+
+  // --- Перевірка вхідних даних (імпорт, віддалена синхронізація, знімки) ---
+  function sanitizeGoals_(raw){
+    const g = { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800,
+      weightClosedWeek: null, debtClosedWeek: null, capitalClosedWeek: null };
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return g;
+    ['weightStart','weightEnd','debtStart','debtEnd','capitalStart','capitalEnd'].forEach(k => {
+      const v = raw[k];
+      if (v === null || v === undefined || v === '') return;
+      const n = Number(v);
+      if (isFinite(n) && n >= 0 && n <= 10000000) g[k] = n;
+    });
+    ['weightClosedWeek','debtClosedWeek','capitalClosedWeek'].forEach(k => {
+      g[k] = (Number.isInteger(raw[k]) && raw[k] >= 1 && raw[k] <= WEEKS) ? raw[k] : null;
+    });
+    return g;
+  }
+  function sanitizeTactics_(raw){
+    if (!Array.isArray(raw)) return null;
+    const out = [], seen = {};
+    raw.forEach(t => {
+      if (!t || typeof t !== 'object') return;
+      const id = typeof t.id === 'string' ? t.id.slice(0, 40) : '';
+      const label = typeof t.label === 'string' ? t.label.trim().slice(0, 80) : '';
+      if (!id || !label || seen[id] || (t.type !== 'daily' && t.type !== 'weekly')) return;
+      seen[id] = true;
+      out.push({
+        id: id, label: label, type: t.type,
+        goal: GOAL_META[t.goal] ? t.goal : (BUILTIN_GOAL_BY_ID[id] || 'general'),
+        createdWeek: (Number.isInteger(t.createdWeek) && t.createdWeek >= 1 && t.createdWeek <= WEEKS) ? t.createdWeek : 1,
+        archivedWeek: (Number.isInteger(t.archivedWeek) && t.archivedWeek >= 1 && t.archivedWeek <= WEEKS) ? t.archivedWeek : null,
+        builtin: !!BUILTIN_GOAL_BY_ID[id] && !!t.builtin
+      });
+    });
+    return out.length ? out : null;
+  }
+
+  // --- Знімок завершеного циклу ---
+  function archiveKey_(id){ return 'archive:' + id; }
+  function buildSnapshot_(extra){
+    const weeks = {}, scores = [];
+    for (let i = 1; i <= WEEKS; i++){ weeks[i] = JSON.parse(JSON.stringify(state[i])); scores.push(score(i)); }
+    return Object.assign({
+      v: 1, id: CYCLE.id, start: CYCLE.start, end: toISODate_(weekEnd(WEEKS)),
+      endedEarly: false, savedAt: new Date().toISOString(),
+      goals: JSON.parse(JSON.stringify(GOALS)), tactics: JSON.parse(JSON.stringify(TACTICS)),
+      weeks: weeks, scores: scores
+    }, extra || {});
+  }
+  function parseSnapshot_(raw){
+    try {
+      const o = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (!o || typeof o !== 'object' || o.v !== 1 || !o.weeks || typeof o.weeks !== 'object') return null;
+      const id = Number(o.id), startD = parseISODate_(o.start);
+      if (!Number.isInteger(id) || id < 1 || id > 999 || !startD) return null;
+      const weeks = {}, scores = [];
+      for (let i = 1; i <= WEEKS; i++){
+        const w = o.weeks[i];
+        weeks[i] = (w && typeof w === 'object' && !Array.isArray(w)) ? sanitizeWeek(w).clean : emptyWeek();
+        const sc = Array.isArray(o.scores) ? Number(o.scores[i - 1]) : 0;
+        scores.push(isFinite(sc) ? Math.max(0, Math.min(100, Math.round(sc))) : 0);
+      }
+      return {
+        v: 1, id: id, start: o.start,
+        end: parseISODate_(o.end) ? o.end : toISODate_(addDays_(startD, WEEKS * 7 - 1)),
+        endedEarly: !!o.endedEarly, endedAt: parseISODate_(o.endedAt) ? o.endedAt : null,
+        savedAt: typeof o.savedAt === 'string' ? o.savedAt : '',
+        goals: sanitizeGoals_(o.goals), tactics: sanitizeTactics_(o.tactics) || defaultTactics(),
+        weeks: weeks, scores: scores
+      };
+    } catch(e){ return null; }
+  }
+  function listArchiveKeys_(){
+    const keys = [];
+    try {
+      for (let k = 0; k < localStorage.length; k++){
+        const key = localStorage.key(k);
+        if (key && key.indexOf('tracker:archive:') === 0) keys.push(key.slice('tracker:'.length));
+      }
+    } catch(e) {}
+    return keys;
+  }
+  function listArchives_(){
+    return listArchiveKeys_().map(k => parseSnapshot_(localGet(k))).filter(Boolean).sort((a, b) => b.id - a.id);
+  }
+  function snapshotSig_(snap){ return JSON.stringify(Object.assign({}, snap, { savedAt: '' })); }
+  // Знімок поточного циклу, коли той закінчився: створюється сам при першому
+  // відкритті після кінця й оновлюється, якщо в завершений цикл потім щось
+  // дописали. Порівнюємо без savedAt, щоб не слати в хмару однакове.
+  function syncCurrentCycleArchive_(){
+    if (!cycleFinished_() || !liveHasData_()) return;
+    const snap = buildSnapshot_();
+    const stored = parseSnapshot_(localGet(archiveKey_(CYCLE.id)));
+    // Порівнюємо ПІСЛЯ однакової нормалізації (parseSnapshot_ чистить дані): сирий
+    // знімок і збережений відрізнялись би дрібницями (null-поля, форма checks) і
+    // знімок писався б у хмару при кожному відкритті, хоч нічого не змінилось.
+    if (stored && snapshotSig_(stored) === snapshotSig_(parseSnapshot_(snap))) return;
+    storage.set(archiveKey_(CYCLE.id), JSON.stringify(snap));
+  }
+  // Усе живе (цикл, цілі, дії, тижні) → у сховище. Потрібно, коли віддалена
+  // копія відстає від локальної (новий цикл створили без зв'язку).
+  function pushLiveCycle_(){
+    storage.set('cycle', JSON.stringify(CYCLE));
+    storage.set('goals', JSON.stringify(GOALS));
+    storage.set('tactics', JSON.stringify(TACTICS));
+    for (let i = 1; i <= WEEKS; i++) storage.set('week:' + i, JSON.stringify(state[i]));
+  }
+  // Архіви з хмари → локально, і навпаки. Перемагає новіший savedAt.
+  function mergeArchives_(remote){
+    Object.keys(remote).forEach(k => {
+      if (k.indexOf('archive:') !== 0) return;
+      const r = parseSnapshot_(remote[k]);
+      if (!r) return;
+      const l = parseSnapshot_(localGet(k));
+      if (!l || r.savedAt > l.savedAt) localSet(k, typeof remote[k] === 'string' ? remote[k] : JSON.stringify(remote[k]));
+    });
+    listArchiveKeys_().forEach(k => {
+      const l = parseSnapshot_(localGet(k));
+      const r = parseSnapshot_(remote[k]);
+      if (l && (!r || l.savedAt > r.savedAt)) storage.set(k, localGet(k));
+    });
+  }
+
+  function downloadFile_(content, mime, filename){
+    const blob = new Blob([content], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  // --- Підсумок знімка (чисті обчислення з самого знімка, без живого стану) ---
+  function snapshotStats_(snap){
+    const G = snap.goals;
+    let debtTotal = 0, capTotal = 0, lastWeight = null, hits = 0, withData = 0, scoreSum = 0, best = 0, bestScore = 0;
+    for (let i = 1; i <= WEEKS; i++){
+      if (weekHasData_(snap.weeks[i])){ withData++; scoreSum += snap.scores[i - 1]; }
+      if (snap.scores[i - 1] >= 85) hits++;
+      if (snap.scores[i - 1] > bestScore){ bestScore = snap.scores[i - 1]; best = i; }
+      const wk = snap.weeks[i];
+      if (wk.debtAmt) debtTotal += Number(wk.debtAmt);
+      if (wk.capitalAmt) capTotal += Number(wk.capitalAmt);
+      if (wk.weight) lastWeight = wk.weight;
+    }
+    return {
+      avg: withData ? Math.round(scoreSum / withData) : 0, hits: hits, withData: withData, best: best,
+      lastWeight: lastWeight, debtTotal: debtTotal, capTotal: capTotal,
+      weightGoalReached: lastWeight !== null && (G.weightStart >= G.weightEnd ? lastWeight <= G.weightEnd : lastWeight >= G.weightEnd),
+      debtGoal: G.debtEnd - G.debtStart, capGoal: G.capitalEnd - G.capitalStart
+    };
+  }
+  function snapTacticValue_(snap, i, t){
+    const w = snap.weeks[i];
+    if (t.type === 'weekly') return t.id === 'w1' ? !!(w.checks && w.checks.w1) : !!(w.custom && w.custom[t.id]);
+    const arr = t.id === 'logDays' ? w.logDays : t.id === 'calorieDays' ? w.calorieDays : (w.custom && w.custom[t.id]);
+    return Array.isArray(arr) ? arr : [];
+  }
+  // Невелика лінійна діаграма: факт (суцільна) і план (пунктир). Порожні тижні
+  // пропускаються, а не малюються нулем.
+  function archiveChartSvg_(actual, planStart, planEnd, color, unit){
+    const W = 320, H = 110, PX = 28, PY = 12;
+    const vals = actual.filter(v => v !== null);
+    const all = vals.concat([planStart, planEnd]);
+    let lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+    if (hi === lo){ hi += 1; lo -= 1; }
+    // Відступ знизу не тягнемо в мінус, якщо всі значення невідʼємні (гроші): вісь "-180 $" читається як помилка.
+    const pad = (hi - lo) * 0.1; lo = (lo >= 0 && lo - pad < 0) ? 0 : lo - pad; hi += pad;
+    const X = i => PX + (W - PX - 6) * i / WEEKS, Y = v => PY + (H - 2 * PY) * (1 - (v - lo) / (hi - lo));
+    let pts = '', dots = '';
+    actual.forEach((v, idx) => { if (v === null) return; pts += (pts ? ' ' : '') + X(idx + 1).toFixed(1) + ',' + Y(v).toFixed(1); dots += '<circle cx="' + X(idx + 1).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="2.5" fill="' + color + '"/>'; });
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Діаграма: ' + escHtml(unit) + ' по тижнях" style="display:block;">' +
+      '<line x1="' + X(0).toFixed(1) + '" y1="' + Y(planStart).toFixed(1) + '" x2="' + X(WEEKS).toFixed(1) + '" y2="' + Y(planEnd).toFixed(1) + '" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4 4"/>' +
+      (pts ? '<polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' : '') + dots +
+      '<text x="2" y="' + (PY + 3) + '" font-size="9" fill="var(--text-muted)">' + fmt1(hi) + '</text>' +
+      '<text x="2" y="' + (H - PY + 3) + '" font-size="9" fill="var(--text-muted)">' + fmt1(lo) + '</text></svg>';
+  }
+  function ringHtml_(score, label){
+    const R = 15, C = 2 * Math.PI * R, off = C * (1 - score / 100);
+    const col = score >= 85 ? C_DONE : C_NEUTRAL;
+    return '<div class="arch-ring"><svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="' + R + '" fill="none" stroke="var(--surface-3)" stroke-width="3"/>' +
+      (score > 0 ? '<circle cx="19" cy="19" r="' + R + '" fill="none" stroke="' + col + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 19 19)"/>' : '') +
+      '<text x="19" y="23" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-primary)">' + score + '</text></svg><span>' + label + '</span></div>';
+  }
+
+  function archiveDetailHtml_(snap){
+    const st = snapshotStats_(snap), G = snap.goals;
+    const startD = parseISODate_(snap.start), endD = parseISODate_(snap.end);
+    const wkAt = i => addDays_(startD, (i - 1) * 7);
+    const range = i => pad2_(wkAt(i).getDate()) + '.' + pad2_(wkAt(i).getMonth() + 1) + ' – ' + pad2_(addDays_(wkAt(i), 6).getDate()) + '.' + pad2_(addDays_(wkAt(i), 6).getMonth() + 1);
+    const weights = [], debts = [], caps = [];
+    let cd = 0, cc = 0;
+    for (let i = 1; i <= WEEKS; i++){
+      const w = snap.weeks[i];
+      weights.push(w.weight ? Number(w.weight) : null);
+      if (w.debtAmt) cd += Number(w.debtAmt); if (w.capitalAmt) cc += Number(w.capitalAmt);
+      debts.push(weekHasData_(w) ? G.debtStart + cd : null);
+      caps.push(weekHasData_(w) ? G.capitalStart + cc : null);
+    }
+    let h = '';
+    h += '<div class="arch-sub" style="margin-bottom:var(--sp-2);">' + escHtml(fmtRange_(startD, endD)) + (snap.endedEarly ? ' · завершено достроково' + (snap.endedAt ? ' ' + escHtml(fmtShortDate_(snap.endedAt)) : '') : '') + '</div>';
+    h += '<div class="arch-tiles">' +
+      '<div class="arch-tile"><b>' + st.avg + '%</b><span>середнє виконання тижня</span></div>' +
+      '<div class="arch-tile"><b>' + st.hits + ' з ' + WEEKS + '</b><span>тижнів із ціллю 85%+</span></div>' +
+      '<div class="arch-tile"><b>' + (st.lastWeight !== null ? fmt1(st.lastWeight) + ' кг' : '—') + '</b><span>вага: старт ' + fmt1(G.weightStart) + ' → ціль ' + fmt1(G.weightEnd) + (st.weightGoalReached ? ' ✓' : '') + '</span></div>' +
+      '<div class="arch-tile"><b>$' + Math.round(st.debtTotal).toLocaleString() + '</b><span>борг виплачено з $' + Math.round(st.debtGoal).toLocaleString() + '</span></div>' +
+      '<div class="arch-tile"><b>$' + Math.round(st.capTotal).toLocaleString() + '</b><span>капітал (внески) з $' + Math.round(st.capGoal).toLocaleString() + '</span></div>' +
+      '<div class="arch-tile"><b>' + (st.best ? 'Тиждень ' + st.best : '—') + '</b><span>найкращий тиждень' + (st.best ? ' · ' + snap.scores[st.best - 1] + '%' : '') + '</span></div></div>';
+    h += '<div class="arch-h">Виконання по тижнях</div><div class="arch-rings">' + snap.scores.map((sc, idx) => ringHtml_(sc, String(idx + 1))).join('') + '</div>';
+    h += '<div class="arch-h">Вага, кг</div>' + archiveChartSvg_(weights, G.weightStart, G.weightEnd, C_WEIGHT, 'вага');
+    h += '<div class="arch-h">Борг виплачено, $ (накопичено)</div>' + archiveChartSvg_(debts, G.debtStart, G.debtEnd, C_DEBT, 'борг');
+    h += '<div class="arch-h">Капітал, $ (накопичено)</div>' + archiveChartSvg_(caps, G.capitalStart, G.capitalEnd, C_CAPITAL, 'капітал');
+    h += '<div class="arch-h">Тижні</div>';
+    for (let i = 1; i <= WEEKS; i++){
+      const w = snap.weeks[i];
+      let body = '<div><span>Вага</span><span>' + (w.weight ? fmt1(w.weight) + ' кг' : '—') + '</span></div>' +
+        '<div><span>Борг</span><span>' + (w.debtAmt ? '$' + Math.round(w.debtAmt).toLocaleString() : '—') + '</span></div>' +
+        '<div><span>Капітал</span><span>' + (w.capitalAmt ? '$' + Math.round(w.capitalAmt).toLocaleString() : '—') + '</span></div>';
+      snap.tactics.forEach(t => {
+        if (!tacticAppliesTo(t, i)) return;
+        const v = snapTacticValue_(snap, i, t);
+        body += '<div><span>' + escHtml(t.label) + '</span><span>' + (t.type === 'weekly' ? (v ? '✓' : '—') : v.filter(Boolean).length + '/7') + '</span></div>';
+      });
+      h += '<details class="arch-week"><summary><span>Тиждень ' + i + ' · ' + range(i) + '</span><b>' + snap.scores[i - 1] + '%</b></summary><div class="arch-week-body">' + body + '</div></details>';
+    }
+    h += '<div class="sheet-actions" style="margin-top:var(--sp-4);">' +
+      '<button type="button" class="btn btn-secondary" id="archive-back">← До списку</button>' +
+      '<button type="button" class="btn btn-secondary" id="archive-export">Завантажити JSON циклу</button></div>';
+    return h;
+  }
+
+  function renderArchiveList_(){
+    const body = $('archive-body');
+    if (!body) return;
+    $('archive-title').textContent = 'Архів циклів';
+    const list = listArchives_();
+    if (!list.length){
+      body.innerHTML = '<div class="sheet-text">Поки що порожньо. Підсумок циклу зберігається сюди автоматично, щойно закінчиться 12-й тиждень, а також перед стартом нового циклу.</div>';
+      return;
+    }
+    body.innerHTML = '';
+    list.forEach(snap => {
+      const st = snapshotStats_(snap);
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.className = 'arch-item';
+      btn.innerHTML = '<div class="arch-title">Цикл ' + snap.id + '</div>' +
+        '<div class="arch-sub">' + escHtml(fmtRange_(parseISODate_(snap.start), parseISODate_(snap.end))) + (snap.endedEarly ? ' · достроково' : '') + '</div>' +
+        '<div class="arch-sub">Середнє ' + st.avg + '% · ' + st.hits + ' з ' + WEEKS + ' тижнів 85%+' + (st.lastWeight !== null ? ' · ' + fmt1(st.lastWeight) + ' кг' : '') + '</div>';
+      btn.onclick = () => renderArchiveDetail_(snap);
+      body.appendChild(btn);
+    });
+  }
+  function renderArchiveDetail_(snap){
+    const body = $('archive-body');
+    $('archive-title').textContent = 'Цикл ' + snap.id;
+    body.innerHTML = archiveDetailHtml_(snap);
+    $('archive-back').onclick = renderArchiveList_;
+    $('archive-export').onclick = () => downloadFile_(JSON.stringify(snap, null, 2), 'application/json', '12-week-tracker-cycle-' + snap.id + '.json');
+    const panel = body.parentNode; if (panel) panel.scrollTop = 0;
+  }
+  function openArchive_(id){
+    renderArchiveList_();
+    if (id !== undefined){
+      const snap = listArchives_().filter(s => s.id === id)[0];
+      if (snap) renderArchiveDetail_(snap);
+    }
+    if ($('archive-overlay')) openModal($('archive-overlay'));
+  }
+  function closeArchive_(){ if ($('archive-overlay')) closeModal($('archive-overlay')); }
+
+  // --- Банер: цикл завершено / ще не стартував ---
+  function renderCycleBanner_(){
+    const box = $('cycle-banner');
+    if (!box) return;
+    box.innerHTML = '';
+    let html = '';
+    if (cycleNotStarted_()){
+      html = '<b>Цикл ' + CYCLE.id + ' стартує ' + escHtml(fmtLongDate_(weekStart(1), true)) + '</b><p>Дані можна вносити вже зараз — тижні почнуть рахуватися з цієї дати.</p>';
+    } else if (cycleFinished_()){
+      const archived = !!parseSnapshot_(localGet(archiveKey_(CYCLE.id)));
+      html = '<b>Цикл ' + CYCLE.id + ' завершено</b><p>' + (archived
+        ? 'Підсумок збережено в архів — його можна переглянути будь-коли.'
+        : 'У цьому циклі не було записів, тож у архів нічого не потрапило.') +
+        '</p><div class="sheet-actions">' +
+        (archived ? '<button type="button" class="btn btn-secondary" id="banner-open-archive">Переглянути підсумок</button>' : '') +
+        '<button type="button" class="btn btn-primary" id="banner-new-cycle">Почати новий цикл</button></div>';
+    }
+    if (!html) return;
+    const card = document.createElement('div');
+    card.className = 'cycle-banner'; card.setAttribute('role', 'status');
+    card.innerHTML = html;
+    box.appendChild(card);
+    const a = $('banner-open-archive'); if (a) a.onclick = () => openArchive_(CYCLE.id);
+    const n = $('banner-new-cycle'); if (n) n.onclick = openNewCycleModal_;
+  }
+
+  // --- Новий цикл ---
+  function nextMondayISO_(){
+    const d = new Date(); d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() + ((8 - d.getDay()) % 7));
+    return toISODate_(d);
+  }
+  function validateCycleStart_(iso){
+    const d = parseISODate_(iso);
+    if (!d) return 'Вкажи дату початку.';
+    if (d.getDay() !== 1) return 'Цикл має починатися з понеділка — тижні в трекері йдуть Пн–Нд.';
+    if (d <= parseISODate_(CYCLE.start)) return 'Дата має бути пізнішою за початок поточного циклу (' + fmtShortDate_(CYCLE.start) + ').';
+    return '';
+  }
+  function openNewCycleModal_(){
+    const hasData = liveHasData_();
+    const early = !cycleFinished_();
+    $('cycle-info').innerHTML = (hasData
+      ? 'Поточний цикл ' + CYCLE.id + (early ? ' ще не закінчився — він збережеться в архів як <b>достроково завершений</b>' : ' збережеться в архів') +
+        ', і ти зможеш переглянути його будь-коли. Тижні, відмітки й суми почнуться з чистого аркуша. Список дій і цілі підуть у новий цикл як заготовка — їх можна змінити.'
+      : 'Поточний цикл порожній, тож в архів нічого не збережеться. Новий почнеться з чистого аркуша.');
+    $('cycle-start-input').value = nextMondayISO_();
+    $('cycle-error').textContent = '';
+    openModal($('cycle-overlay'), { focusEl: $('cycle-start-input') });
+  }
+  function closeNewCycleModal_(){ if ($('cycle-overlay')) closeModal($('cycle-overlay')); }
+
+  async function startNewCycle_(iso){
+    // 1. Спершу знімок старого циклу — і лише потім скидання живих даних.
+    if (liveHasData_()){
+      const snap = buildSnapshot_(cycleFinished_() ? {} : { endedEarly: true, endedAt: toISODate_(new Date()) });
+      await storage.set(archiveKey_(CYCLE.id), JSON.stringify(snap));
+    }
+    // 2. Заготовка нового циклу з поточних даних.
+    let lastW = null;
+    for (let i = 1; i <= WEEKS; i++) if (state[i].weight) lastW = state[i].weight;
+    const carriedTactics = TACTICS.filter(t => t.archivedWeek === null)
+      .map(t => Object.assign({}, t, { createdWeek: 1, archivedWeek: null }));
+    if (syncInFlight){ editedDuringSync.add('goals'); editedDuringSync.add('tactics'); for (let i = 1; i <= WEEKS; i++) editedDuringSync.add(i); }
+    CYCLE = { id: CYCLE.id + 1, start: iso };
+    START = parseISODate_(iso);
+    GOALS = Object.assign({}, GOALS, {
+      weightStart: lastW || GOALS.weightStart, debtStart: 0, capitalStart: 0,
+      weightClosedWeek: null, debtClosedWeek: null, capitalClosedWeek: null
+    });
+    TACTICS = carriedTactics.length ? carriedTactics : defaultTactics();
+    for (let i = 1; i <= WEEKS; i++){ state[i] = emptyWeek(); clearWeekCelebrated_(i); }
+    selectedWeek = null; lastRenderedWeek = null; lastJourneySelectedWeek = null; celebration = null; prevScores = {};
+    refreshPrevScores();
+    await saveCycle(); await saveGoals(); await saveTactics();
+    for (let i = 1; i <= WEEKS; i++) await saveWeek(i);
+    render();
+  }
+  if ($('cycle-cancel')) $('cycle-cancel').onclick = closeNewCycleModal_;
+  if ($('cycle-overlay')) $('cycle-overlay').onclick = (e) => { if (e.target.id === 'cycle-overlay') closeNewCycleModal_(); };
+  if ($('cycle-confirm')) $('cycle-confirm').onclick = async () => {
+    const iso = $('cycle-start-input').value;
+    const err = validateCycleStart_(iso);
+    if (err){ $('cycle-error').textContent = err; return; }
+    closeNewCycleModal_();
+    await startNewCycle_(iso);
+    showAppModal({ message: 'Цикл ' + CYCLE.id + ' створено (старт ' + fmtShortDate_(CYCLE.start) + '). Тепер задай цілі на новий цикл.', okLabel: 'Задати цілі', hideCancel: true, onOk: openGoalsModal });
+  };
+  if ($('open-archive')) $('open-archive').onclick = () => openArchive_();
+  if ($('new-cycle')) $('new-cycle').onclick = openNewCycleModal_;
+  if ($('archive-close')) $('archive-close').onclick = closeArchive_;
+  if ($('archive-overlay')) $('archive-overlay').onclick = (e) => { if (e.target.id === 'archive-overlay') closeArchive_(); };
+
   // Графіки тепер малюються під виміряну ширину контейнера, тому при зміні
   // розміру вікна (чи повороті телефона) їх треба перерахувати.
   let resizeTimer = null;
@@ -2898,7 +3475,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 
   // I8: розмітка не може викликати icon(), тому іконки в ній позначені
   // атрибутом data-icon і підставляються тут — з того самого обʼєкта ICONS.
-  document.querySelectorAll('#tracker-root [data-icon]').forEach(function(el){
+  document.querySelectorAll('#tracker-root [data-icon], .sheet-overlay [data-icon]').forEach(function(el){
     const name = el.getAttribute('data-icon');
     if (ICONS[name]) el.innerHTML = icon(name, parseInt(el.getAttribute('data-icon-size'), 10) || 14);
   });
