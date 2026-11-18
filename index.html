@@ -16,8 +16,14 @@
 <body>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap');
 :root {
+  /* Шрифт — системний (на iPhone це SF Pro, на Android — Roboto). Раніше
+     стояла пара Fraunces (засічковий для заголовків і чисел) + Inter: типове
+     поєднання "згенерованого" дизайну, і користувач саме так його й прочитав.
+     Системний шрифт виглядає як рідний застосунок, не тягнеться з Google Fonts
+     і працює офлайн. Числа — тим самим шрифтом, жирніше й з tabular-nums. */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-num: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   /* --- Пункт 2: сходинки глибини. Кожен наступний шар світліший за попередній:
      сторінка -> картка -> рядок усередині картки -> контрол.
      До цього шари йшли навпаки, і глибина читалась навиворіт. --- */
@@ -149,7 +155,7 @@
 }
 
 #tracker-root {
-  font-family: 'Inter', -apple-system, sans-serif;
+  font-family: var(--font-ui);
   color: var(--text-primary);
   width: 100%;
   max-width: 720px;
@@ -165,20 +171,15 @@
   border-radius: var(--r-xl);
   overflow-x: clip;
 }
-#tracker-root h1 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: var(--tr-heading); line-height: var(--lh-heading); }
+#tracker-root h1 { font-family: var(--font-num); font-weight: 600; letter-spacing: var(--tr-heading); line-height: var(--lh-heading); }
 /* --- Пункт 4: базовий вертикальний ритм; окремі елементи перекривають своїм --- */
 #tracker-root { line-height: var(--lh-body); }
 /* --- Пункт 18: на десктопі рядок сягав ~90 символів при комфортних 60-75.
    Обмежуємо саме текстові блоки, не контейнери з контролами. --- */
 #tracker-root p { max-width: 68ch; }
-/* --- Пункт 11: Fraunces підключений як варіативний (opsz 9..144), але жодна
-   вісь не використовувалась. opsz auto дає правильні пропорції на різних
-   кеглях, SOFT згладжує кути, WONK вмикає характерні альтернативні форми. --- */
-#tracker-root h1, #tracker-root .hero-num, #tracker-root .section-label {
-  font-optical-sizing: auto;
-  font-variation-settings: 'SOFT' 20, 'WONK' 1;
-}
-.section-label { font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 500; line-height: var(--lh-heading); letter-spacing: var(--tr-heading); margin-bottom: var(--sp-3); }
+/* Заголовки й великі числа системним шрифтом — щільніше й жирніше, ніж текст. */
+#tracker-root h1, #tracker-root .hero-num { font-weight: 700; }
+.section-label { font-family: var(--font-num); font-size: var(--fs-lg); font-weight: 600; line-height: var(--lh-heading); letter-spacing: var(--tr-heading); margin-bottom: var(--sp-3); }
 /* 3.1: раніше вся стрічка була одним SVG з viewBox 680px, який стискався під
    ширину картки — на iPhone кружечок виходив 14.6px, а цифра всередині 5.3px.
    Тепер це звичайні HTML-елементи фіксованого розміру 44px (мінімум Apple HIG),
@@ -215,7 +216,7 @@
    тонований трек самого прогрес-кільця (див. JS, arcColor/trackColor),
    без жодного другого шару геометрії. */
 .card { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-xl); padding: var(--sp-5); box-shadow: var(--shadow-sm); }
-.hero-num { font-family: 'Fraunces', serif; font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: var(--tr-display); line-height: var(--lh-display); transition: color 0.3s; }
+.hero-num { font-family: var(--font-num); font-weight: 500; font-variant-numeric: tabular-nums; letter-spacing: var(--tr-display); line-height: var(--lh-display); transition: color 0.3s; }
 /* I7: усі індикатори стану — один патерн "пігулка". Відрізняються
    лише кольором (нейтральний / у графіку / відстає), не формою. */
 .chip, .badge, .today-pill { display: inline-flex; align-items: center; font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-1) var(--sp-3); border-radius: var(--r-pill); letter-spacing: 0.02em; white-space: nowrap; }
@@ -446,9 +447,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   z-index: 200; align-items: center; justify-content: center; padding: var(--sp-4); }
 .sheet-panel { background: var(--surface-2); border: var(--bw) solid var(--border); border-radius: var(--r-lg); box-shadow: var(--shadow-lg);
   max-width: 440px; width: 100%; max-height: 88vh; overflow: auto; padding: var(--sp-5); box-sizing: border-box;
-  font-family: 'Inter', sans-serif; color: var(--text-primary); }
+  font-family: var(--font-ui); color: var(--text-primary); }
 .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-2); margin-bottom: var(--sp-3); }
-.sheet-panel h2 { font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 600; margin: 0; }
+.sheet-panel h2 { font-family: var(--font-num); font-size: var(--fs-lg); font-weight: 600; margin: 0; }
 .sheet-title { margin: 0 0 var(--sp-3) !important; }
 .sheet-text { font-size: var(--fs-sm); color: var(--text-secondary); line-height: var(--lh-body); margin-bottom: var(--sp-4); }
 .sheet-label { display: block; font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: var(--sp-2); }
@@ -469,7 +470,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .arch-card-ring { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
 .arch-card-ring svg { position: absolute; inset: 0; }
 .arch-card-ring b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
-  font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
+  font-family: var(--font-num); font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
 .arch-card-meta { flex: 1; min-width: 0; }
 .arch-card-meta .arch-title { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; font-size: var(--fs-lg); }
 .arch-pill { font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill);
@@ -492,23 +493,26 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   padding-top: var(--sp-3); border-top: var(--bw) solid var(--border); font-size: var(--fs-sm); color: var(--text-secondary); }
 .arch-card-foot .more { color: var(--accent-text); font-weight: 600; white-space: nowrap; }
 /* --- Сторінка деталей циклу (та сама мова, що й картка списку) --- */
+.cycle-num { display: inline-flex; vertical-align: middle; margin-left: var(--sp-1); font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: 600;
+  padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent-text); letter-spacing: 0; }
+.cycle-num[hidden] { display: none; }
 .arch-back { background: none; border: none; padding: var(--sp-1) 0; margin: 0 0 var(--sp-3); font-family: inherit; font-size: var(--fs-sm);
   color: var(--accent-text); cursor: pointer; min-height: var(--tap); }
 .arch-hero { display: flex; align-items: center; gap: var(--sp-4); }
 .arch-hero .arch-card-ring b { font-size: var(--fs-xl); }
 .arch-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin-top: var(--sp-4); }
 .arch-stats > div { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-3); }
-.arch-stats b { display: block; font-family: 'Fraunces', serif; font-size: var(--fs-xl); font-weight: 500; line-height: var(--lh-heading); }
-.arch-stats b small { font-family: 'Inter', sans-serif; font-size: var(--fs-xs); color: var(--text-muted); font-weight: 400; }
+.arch-stats b { display: block; font-family: var(--font-num); font-size: var(--fs-xl); font-weight: 500; line-height: var(--lh-heading); }
+.arch-stats b small { font-family: var(--font-ui); font-size: var(--fs-xs); color: var(--text-muted); font-weight: 400; }
 .arch-stats span { font-size: var(--fs-xs); color: var(--text-muted); }
 .arch-bars-nums { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--sp-1); text-align: center; font-size: var(--fs-xs); color: var(--text-muted); }
 .arch-goal-card { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-3); }
 .arch-goal-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); }
 .arch-goal-name { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-md); font-weight: 600; }
 .arch-goal-name i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.arch-goal-result { font-family: 'Fraunces', serif; font-size: var(--fs-xl); font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
-.arch-ok { font-family: 'Inter', sans-serif; font-size: var(--fs-xs); font-weight: 600; color: var(--accent-text); background: var(--accent-soft);
-  padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill); vertical-align: middle; }
+.arch-goal-result { font-family: var(--font-num); font-size: var(--fs-xl); font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.arch-ok { font-family: var(--font-ui); font-size: var(--fs-xs); font-weight: 600; color: var(--accent-text); background: var(--accent-soft);
+  padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill); vertical-align: middle; white-space: nowrap; }
 .arch-goal-path { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1); }
 .arch-goal-note { font-size: var(--fs-xs); color: var(--warn-text); margin-top: var(--sp-2); line-height: var(--lh-caption); }
 .arch-goal-card svg { margin-top: var(--sp-3); }
@@ -546,7 +550,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .arch-sub { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1); }
 .arch-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); margin: var(--sp-3) 0; }
 .arch-tile { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-3); }
-.arch-tile b { display: block; font-family: 'Fraunces', serif; font-size: var(--fs-xl); font-weight: 500; line-height: var(--lh-heading); }
+.arch-tile b { display: block; font-family: var(--font-num); font-size: var(--fs-xl); font-weight: 500; line-height: var(--lh-heading); }
 .arch-tile span { font-size: var(--fs-xs); color: var(--text-muted); }
 .arch-h { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); margin: var(--sp-4) 0 var(--sp-2); }
 .arch-rings { display: flex; gap: var(--sp-2); flex-wrap: wrap; }
@@ -573,7 +577,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
    на 10px + fade-in, ~2.5 с утримання, ~0.3 с fade-out. */
 .goal-toast-wrap { position: fixed; left: 0; right: 0; bottom: max(var(--sp-5), env(safe-area-inset-bottom)); z-index: 120;
   display: flex; justify-content: center; padding: 0 var(--sp-4); pointer-events: none; }
-.goal-toast { display: inline-flex; align-items: center; font-family: 'Inter', -apple-system, sans-serif; font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0.02em;
+.goal-toast { display: inline-flex; align-items: center; font-family: var(--font-ui); font-size: var(--fs-sm); font-weight: 600; letter-spacing: 0.02em;
   padding: var(--sp-2) var(--sp-4); border-radius: var(--r-pill); text-align: center;
   color: var(--accent-text); border: var(--bw) solid var(--accent-soft); box-shadow: var(--shadow-md);
   background-color: var(--surface-2); background-image: linear-gradient(var(--accent-soft), var(--accent-soft));
@@ -665,13 +669,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 <div id="tracker-root">
   <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: var(--sp-5);">
     <div style="display:flex; gap:var(--sp-3); align-items:center;">
-      <svg width="38" height="38" viewBox="0 0 40 40" style="flex-shrink:0;">
-        <path d="M4 30 L14 14 L20 22 L26 10 L36 30" fill="none" stroke="#9089E0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity="0.65"/>
-        <circle cx="36" cy="30" r="2.5" fill="#2FBE93"/>
-        <path d="M4 30 L36 30" stroke="#34322B" stroke-width="1" stroke-dasharray="1,3"/>
+      <!-- Іконка застосунку. Раніше тут була тонка бузкова лінія-"гора" на
+           темному тлі — блідо й безлико. Тепер яскрава зелена плитка (той самий
+           --accent, що "виконано" скрізь у трекері) з жирним "12". -->
+      <svg class="app-icon" width="40" height="40" viewBox="0 0 40 40" aria-hidden="true" style="flex-shrink:0;">
+        <rect x="0" y="0" width="40" height="40" rx="11" style="fill:var(--accent);"/>
+        <text x="20" y="27.5" text-anchor="middle" style="fill:var(--surface-0); font-family:var(--font-num); font-size:20px; font-weight:800; letter-spacing:-0.04em;">12</text>
       </svg>
       <div>
-        <h1 style="margin: 0 0 var(--sp-1); font-size: var(--fs-h1);">12 тижнів</h1>
+        <h1 style="margin: 0 0 var(--sp-1); font-size: var(--fs-h1);">12 тижнів <span id="cycle-num" class="cycle-num" hidden></span></h1>
         <p style="color: var(--text-secondary); font-size: var(--fs-sm); margin: 0;"><span id="cycle-range">27 липня — 18 жовтня 2026</span> <span id="sync-badge" style="color: var(--text-muted); font-size: var(--fs-xs);"></span></p>
       </div>
     </div>
@@ -707,27 +713,27 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     <div style="margin-bottom: var(--sp-4);">
       <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-0);">
         <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Вага за 12 тижнів</div>
-        <span id="chart-weight-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
+        <span id="chart-weight-pct" style="font-family: var(--font-num); font-size:var(--fs-lg); font-weight:600;"></span>
       </div>
         <div id="chart-weight"></div>
       </div>
       <div style="margin-bottom: var(--sp-4);">
         <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-0);">
           <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Борг</div>
-          <span id="chart-debt-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
+          <span id="chart-debt-pct" style="font-family: var(--font-num); font-size:var(--fs-lg); font-weight:600;"></span>
         </div>
         <div id="chart-debt"></div>
       </div>
       <div style="margin-bottom: var(--sp-2);">
         <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:var(--sp-0);">
           <div class="section-label" style="font-size:var(--fs-md); margin-bottom:0;">Капітал</div>
-          <span id="chart-capital-pct" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600;"></span>
+          <span id="chart-capital-pct" style="font-family: var(--font-num); font-size:var(--fs-lg); font-weight:600;"></span>
         </div>
         <div id="chart-capital"></div>
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v60 · feat: redesigned cycle details page + editing weeks of finished cycles</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">версія 63</div>
 </div>
 
 <div id="archive-overlay" class="sheet-overlay" role="dialog" aria-modal="true" aria-labelledby="archive-title" style="display:none;">
@@ -757,7 +763,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 <div id="goal-toast-wrap" class="goal-toast-wrap" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <div id="app-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="app-modal-message" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:210; align-items:center; justify-content:center; padding:var(--sp-4);">
-  <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:340px; width:100%; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
+  <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:340px; width:100%; padding:var(--sp-5); font-family: var(--font-ui); color:var(--text-primary, #F3F1E8);">
     <div id="app-modal-message" style="font-size:var(--fs-md); line-height:1.5; margin-bottom:var(--sp-4);"></div>
     <div id="app-modal-input-wrap" style="display:none; margin-bottom:var(--sp-4);">
       <input id="app-modal-input" type="text" style="width:100%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
@@ -770,9 +776,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 </div>
 
 <div id="goals-overlay" role="dialog" aria-modal="true" aria-labelledby="goals-title" style="display:none; position:fixed; inset:0; background:rgba(10,9,6,0.62); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); z-index:200; align-items:center; justify-content:center; padding:var(--sp-4);">
-  <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:var(--sp-5); font-family:'Inter', sans-serif; color:var(--text-primary, #F3F1E8);">
-    <h2 id="goals-title" style="font-family:'Fraunces', serif; font-size:var(--fs-lg); font-weight:600; margin:0 0 var(--sp-1);">Точка А і ціль</h2>
-    <div style="font-size:var(--fs-sm); color:var(--text-secondary, #B7B4A6); margin-bottom:var(--sp-4);">Звідки стартуємо і куди прийти за 12 тижнів. Порожнє поле = без змін.</div>
+  <div style="background:var(--surface-2, #232119); border: var(--bw) solid var(--border, #3A3830); border-radius: var(--r-lg); box-shadow: var(--shadow-lg); max-width:380px; width:100%; max-height:85vh; overflow:auto; padding:var(--sp-5); font-family: var(--font-ui); color:var(--text-primary, #F3F1E8);">
+    <h2 id="goals-title" style="font-family: var(--font-num); font-size:var(--fs-lg); font-weight:600; margin:0 0 var(--sp-1);">Точка А і ціль</h2>
+    <div style="font-size:var(--fs-sm); color:var(--text-secondary, #B7B4A6); margin-bottom:var(--sp-4);">Звідки стартуєш і куди хочеш прийти за 12 тижнів. Порожнє поле не змінюється.</div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Вага, кг</div>
     <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-4);">
@@ -785,17 +791,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       <input id="goal-debt-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
       <input id="goal-debt-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
-    <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Тут не залишок боргу, а СКІЛЬКИ ПЛАНУЄШ ВИПЛАТИТИ за 12 тижнів. Старт (А) зазвичай 0, ціль (Б) — сума всіх запланованих платежів (наприклад 0 → 1800).</div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Скільки плануєш виплатити за 12 тижнів, а не залишок боргу. Зазвичай старт 0, ціль – сума всіх платежів, наприклад 1800.</div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted, #8C8977); margin-bottom:var(--sp-2);">Капітал, $</div>
     <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-2);">
       <input id="goal-capital-start" type="number" step="1" placeholder="старт (А)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
       <input id="goal-capital-end" type="number" step="1" placeholder="ціль (Б)" style="width:50%; box-sizing:border-box; padding:var(--sp-3) var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg);">
     </div>
-    <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Ціль (Б) = старт + скільки САМ плануєш докласти за 12 тижнів. Ринковий ріст портфеля сюди свідомо не включаємо — це не дія, яку ти контролюєш, тому "Капітал" у трекері рахує лише твої внески, а не реальний баланс рахунку.</div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted, #8C8977); line-height:1.4; margin-bottom:var(--sp-4);">Ціль – старт плюс те, що сам плануєш внести за 12 тижнів. Ріст ринку сюди не входить: трекер рахує лише твої внески, а не баланс рахунку.</div>
 
     <div style="font-size:var(--fs-xs); text-transform:uppercase; letter-spacing:0.04em; color:var(--text-muted); margin-bottom:var(--sp-2); padding-top:var(--sp-3); border-top:var(--bw) solid var(--border);">Дії тижня</div>
-    <div style="font-size:var(--fs-xs); color:var(--text-muted); line-height:1.4; margin-bottom:var(--sp-3);">Кожна дія важить порівну у відсотку виконання тижня. Нова дія стосується тижнів починаючи з цього — минулі тижні не постраждають.</div>
+    <div style="font-size:var(--fs-xs); color:var(--text-muted); line-height:1.4; margin-bottom:var(--sp-3);">Усі дії важать однаково. Нова дія рахується з цього тижня, минулих не чіпає.</div>
     <div id="tactics-list" style="margin-bottom:var(--sp-3);"></div>
     <input id="tactic-new-label" type="text" placeholder="Напр. Білок 120г щодня" maxlength="80" style="width:100%; box-sizing:border-box; padding:var(--sp-3); border-radius: var(--r-md); border: var(--bw) solid var(--border-strong, #7C7766); background:var(--surface-3, #2C2921); color:var(--text-primary, #F3F1E8); font-size:var(--fs-lg); margin-bottom:var(--sp-2);">
     <div style="display:flex; gap:var(--sp-2); margin-bottom:var(--sp-2);">
@@ -1383,7 +1389,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       const text = await file.text();
       const parsed = JSON.parse(text);
       if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)){
-        showAppAlert('Це не схоже на файл трекера — очікується обʼєкт із ключами week1…week12.');
+        showAppAlert('Це не схоже на файл трекера.');
         return;
       }
       // Три види файлів: повний бекап (week1…week12 + cycle/goals/tactics/archives),
@@ -1400,7 +1406,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         Object.keys(parsed.archives).forEach(k => { const sn = parseSnapshot_(parsed.archives[k]); if (sn) archiveSnaps.push(sn); });
       }
       if (!hasWeeks.length && !archiveSnaps.length){
-        showAppAlert('У файлі не знайдено жодного тижня (очікуються ключі week1…week12).');
+        showAppAlert('У файлі немає жодного тижня.');
         return;
       }
 
@@ -1419,7 +1425,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
           await saveCycle();
         }
         if (parsed.goals !== undefined){ GOALS = sanitizeGoals_(parsed.goals); await saveGoals(); }
-        if (parsed.tactics !== undefined){ const t = sanitizeTactics_(parsed.tactics); if (t){ TACTICS = t; await saveTactics(); } else notes.push('Список дій у файлі не розпізнано — лишився поточний.'); }
+        if (parsed.tactics !== undefined){ const t = sanitizeTactics_(parsed.tactics); if (t){ TACTICS = t; await saveTactics(); } else notes.push('Список дій у файлі не вдалося прочитати, лишився поточний.'); }
       }
       let imported = 0;
       const allSkipped = [];
@@ -1477,8 +1483,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   // вже показана нижче в "Дії тижня", + вага у відсотках навпроти кожної.
   function scoreBreakdownHtml(n){
     const items = [
-      { goal: 'debt', label: 'Борг · конверт готівкою' },
-      { goal: 'capital', label: 'Капітал · переказ' }
+      { goal: 'debt', label: 'Борг (конверт готівкою)' },
+      { goal: 'capital', label: 'Капітал (переказ)' }
     ];
     TACTICS.forEach(t => { if (tacticAppliesTo(t, n)) items.push({ goal: t.goal, label: t.label }); });
     const total = items.length;
@@ -1651,7 +1657,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     if (!wrap || wrap.querySelector('.goal-toast')) return;
     const el = document.createElement('div');
     el.className = 'goal-toast';
-    el.textContent = 'Тиждень ' + week + ' · ціль 85% досягнута';
+    el.textContent = 'Тиждень ' + week + ': ціль 85% досягнута';
     wrap.appendChild(el);
     setTimeout(function(){ el.remove(); }, GOAL_TOAST_MS);
   }
@@ -1962,11 +1968,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   }
   function chartSummary_(kind, snap){
     if (kind === 'weight'){
-      if (snap.weightClosed) return '🎯 Ціль закрита достроково в тижні ' + GOALS.weightClosedWeek + ' з ' + WEEKS + '.';
-      if (snap.cur === 0) return 'Ще немає замірів — внеси вагу за перший тиждень.';
-      if (snap.weightAhead) return 'Випереджаєш темп схуднення — вистачить ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень до кінця.';
-      if (!snap.weightOnTrack) return 'Темп відстає — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень, щоб встигнути.';
-      return 'У графіку — тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень.';
+      if (snap.weightClosed) return 'Ціль досягнута достроково, на тижні ' + GOALS.weightClosedWeek + '.';
+      if (snap.cur === 0) return 'Замірів ще немає. Внеси вагу за перший тиждень.';
+      if (snap.weightAhead) return 'Йдеш швидше за план. Далі вистачить ~' + fmt1(Math.max(snap.neededWeeklyLoss,0)) + ' кг/тиждень до кінця.';
+      if (!snap.weightOnTrack) return 'Відстаєш від плану. Треба ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень, щоб встигнути.';
+      return 'За планом. Тримай ~' + fmt1(snap.neededWeeklyLoss) + ' кг/тиждень.';
     }
     const isDebt = kind === 'debt';
     const ahead = isDebt ? snap.debtAhead : snap.capitalAhead;
@@ -1975,11 +1981,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const closedWeek = isDebt ? GOALS.debtClosedWeek : GOALS.capitalClosedWeek;
     const needed = isDebt ? snap.neededWeeklyDebt : snap.neededWeeklyCapital;
     const noun = isDebt ? 'виплат боргу' : 'внесків капіталу';
-    if (closed) return '🎯 Ціль закрита достроково в тижні ' + closedWeek + ' з ' + WEEKS + '.';
-    if (snap.cur === 0) return 'Ще немає внесків — почни з першого тижня.';
-    if (ahead) return 'Випереджаєш план ' + noun + ' — вистачить ~$' + Math.max(Math.round(needed),0) + '/тиждень.';
-    if (!onTrack) return 'Темп відстає — потрібно ~$' + Math.round(needed) + '/тиждень ' + noun + ', щоб встигнути.';
-    return 'У графіку — тримай ~$' + Math.round(needed) + '/тиждень.';
+    if (closed) return 'Ціль досягнута достроково, на тижні ' + closedWeek + '.';
+    if (snap.cur === 0) return 'Внесків ще немає. Почни з першого тижня.';
+    if (ahead) return 'Випереджаєш план ' + noun + '. Далі вистачить ~$' + Math.max(Math.round(needed),0) + '/тиждень.';
+    if (!onTrack) return 'Відстаєш від плану. Треба ~$' + Math.round(needed) + '/тиждень ' + noun + ', щоб встигнути.';
+    return 'За планом. Тримай ~$' + Math.round(needed) + '/тиждень.';
   }
   function niceStep_(span, targetLines){
     const raw = span / (targetLines || 5);
@@ -2020,7 +2026,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     }
     return '<div style="border-top: var(--bw) solid ' + cv('--border', '#34322B') + '; margin-top:var(--sp-2); padding-top:var(--sp-2);">' +
       '<div style="display:flex; gap:var(--sp-1); align-items:flex-end;">' + bars + '</div>' +
-      '<div style="font-size:var(--fs-xs); color:var(--text-muted); margin-top:var(--sp-1);">внески по тижнях' + (maxAmt > 1 ? ' · макс $' + maxAmt.toLocaleString() : '') + '</div>' +
+      '<div style="font-size:var(--fs-xs); color:var(--text-muted); margin-top:var(--sp-1);">внески по тижнях' + (maxAmt > 1 ? ', максимум $' + maxAmt.toLocaleString() : '') + '</div>' +
     '</div>';
   }
 
@@ -2031,7 +2037,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const cur = currentWeek();
     const remaining = Math.max(WEEKS - cur, 0);
     const word = remaining === 1 ? 'тиждень' : (remaining >= 2 && remaining <= 4 ? 'тижні' : 'тижнів');
-    el.innerHTML = '<span style="font-weight:600; color:var(--text-primary);">Тиждень ' + cur + ' з ' + WEEKS + '</span><span>·</span><span>лишилось ' + remaining + ' ' + word + '</span>';
+    el.innerHTML = '<span style="font-weight:600; color:var(--text-primary);">Тиждень ' + cur + ' з ' + WEEKS + '</span><span>лишилось ' + remaining + ' ' + word + '</span>';
   }
 
   function renderStats(snap){
@@ -2067,10 +2073,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       banner.innerHTML = '';
     } else if (behind.length > 0){
       const rows = behind.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:var(--fs-md); padding:var(--sp-1) 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
-      banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_CURRENT + '; border-radius: var(--r-lg); padding: var(--sp-4);"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: var(--sp-2);">Темп відстає — новий орієнтир</div>' + rows + '</div>';
+      banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_CURRENT + '; border-radius: var(--r-lg); padding: var(--sp-4);"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: var(--sp-2);">Відстаєш від плану</div>' + rows + '</div>';
     } else {
       const rows = ahead.map(([k,v]) => '<div style="display:flex; justify-content:space-between; font-size:var(--fs-md); padding:var(--sp-1) 0;"><span style="color:var(--text-secondary);">' + k + '</span><span style="font-weight:500;">' + v + '</span></div>').join('');
-      banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_DONE + '; border-radius: var(--r-lg); padding: var(--sp-4);"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: var(--sp-2);">🎉 Випереджаєш план</div>' + rows + '</div>';
+      banner.innerHTML = '<div class="card" style="border-left: var(--bw-accent) solid ' + C_DONE + '; border-radius: var(--r-lg); padding: var(--sp-4);"><div style="font-size: var(--fs-md); font-weight: 500; margin-bottom: var(--sp-2);">Випереджаєш план</div>' + rows + '</div>';
     }
   }
 
@@ -2349,7 +2355,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       if (isFuture) sq.setAttribute('aria-disabled', 'true');
       sq.setAttribute('aria-label', DAY_FULL[di] + ' — ' + label +
         (isToday ? ', сьогодні' : '') + (isFuture ? ', ще не настав' : ''));
-      sq.title = DAY_FULL[di] + (isToday ? ' · сьогодні' : isFuture ? ' · ще не настав' : '');
+      sq.title = DAY_FULL[di] + (isToday ? ', сьогодні' : isFuture ? ', ще не настав' : '');
       // №3: плюс читався як "додати щось" — відкрити форму, ввести значення.
       // Насправді це перемикач, тому порожній стан тепер саме порожній.
       // №8: іконка 14px у 44-піксельній цілі — це 32% висоти, замало.
@@ -2474,7 +2480,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     body.appendChild(top);
     const note = document.createElement('div');
     note.style.cssText = 'font-size:var(--fs-sm); color:var(--accent-text); margin-top:var(--sp-1);';
-    note.textContent = '✓ Ціль досягнута достроково в тижні ' + closedWeek + ' — платити більше нічого.';
+    note.textContent = 'Ціль досягнута на тижні ' + closedWeek + '. Більше вносити не треба.';
     body.appendChild(note);
     row.appendChild(body);
     return row;
@@ -2490,26 +2496,26 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       wTarget + ' кг', () => { state[i].weight = wTarget; saveWeek(i); render(); }));
 
     if (GOALS.debtClosedWeek != null && i > GOALS.debtClosedWeek){
-      frag.appendChild(closedMetricNote('Борг · конверт готівкою', C_DEBT, GOALS.debtClosedWeek));
+      frag.appendChild(closedMetricNote('Борг (конверт готівкою)', C_DEBT, GOALS.debtClosedWeek));
     } else {
       const planDebt = planFor_(i, 'debtAmt', GOALS.debtStart, GOALS.debtEnd);
       const planDebtNote = 'план $' + planDebt;
       const dStep = stepper(state[i].debtAmt, 5, 0,
         (v) => { state[i].debtAmt = v; saveWeek(i); },
         () => render(), 0, '$');
-      frag.appendChild(metricRow('Борг · конверт готівкою', C_DEBT, dStep, planDebtNote,
+      frag.appendChild(metricRow('Борг (конверт готівкою)', C_DEBT, dStep, planDebtNote,
         '$' + planDebt, () => { state[i].debtAmt = planDebt; saveWeek(i); render(); }));
     }
 
     if (GOALS.capitalClosedWeek != null && i > GOALS.capitalClosedWeek){
-      frag.appendChild(closedMetricNote('Капітал · Моно $ / OKX', C_CAPITAL, GOALS.capitalClosedWeek));
+      frag.appendChild(closedMetricNote('Капітал (Моно $ / OKX)', C_CAPITAL, GOALS.capitalClosedWeek));
     } else {
       const planCapital = planFor_(i, 'capitalAmt', GOALS.capitalStart, GOALS.capitalEnd);
       const planCapNote = 'план $' + planCapital;
       const cStep = stepper(state[i].capitalAmt, 5, 0,
         (v) => { state[i].capitalAmt = v; saveWeek(i); },
         () => render(), 0, '$');
-      frag.appendChild(metricRow('Капітал · Моно $ / OKX', C_CAPITAL, cStep, planCapNote,
+      frag.appendChild(metricRow('Капітал (Моно $ / OKX)', C_CAPITAL, cStep, planCapNote,
         '$' + planCapital, () => { state[i].capitalAmt = planCapital; saveWeek(i); render(); }));
     }
 
@@ -2653,7 +2659,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     resetBtn.onclick = () => {
       const items = weekResetPreview(i);
       if (!items.length){
-        showAppAlert('У тижні ' + i + ' ще немає даних — скидати нічого.');
+        showAppAlert('У тижні ' + i + ' ще немає даних, скидати нічого.');
         return;
       }
       showAppModal({
@@ -2678,7 +2684,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     scoreRow.appendChild(scoreNum);
     const scoreLbl = document.createElement('span');
     scoreLbl.style.cssText = 'font-size:var(--fs-md); color:var(--text-secondary);';
-    scoreLbl.textContent = 'виконання тижня' + (wasCelebrated ? ' · 🎉 ціль досягнута!' : '');
+    scoreLbl.textContent = 'виконання тижня' + (wasCelebrated ? ', ціль досягнута' : '');
     scoreRow.appendChild(scoreLbl);
     card.appendChild(scoreRow);
 
@@ -2697,7 +2703,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     // Раніше текст був жорстко "5 дій тижня: зважування, облік їжі, калорії,
     // конверт на борг, переказ на капітал" — з появою користувацьких дій
     // список і кількість більше не сталі, тому будуємо його з TACTICS.
-    const METHOD_TEXT = '<span lang="en">Weekly Execution Score</span> — ' + scoreCaptionText(i);
+    const METHOD_TEXT = 'Відсоток тижня: ' + scoreCaptionText(i);
     if (showFull){
       scoreCaption.innerHTML = METHOD_TEXT;
     } else {
@@ -2706,7 +2712,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       hint.className = 'tactic-action-link';
       hint.style.padding = '0';
       hint.textContent = 'як рахується?';
-      hint.setAttribute('aria-label', 'Як рахується відсоток виконання тижня — список пунктів і вага кожного');
+      hint.setAttribute('aria-label', 'Як рахується відсоток тижня');
       hint.onclick = () => showAppModal({ html: scoreBreakdownHtml(i), okLabel: 'Зрозуміло', hideCancel: true });
       scoreRow.appendChild(hint);
       scoreCaption.style.margin = '0 0 var(--sp-3)';
@@ -2873,7 +2879,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         };
         if (hasData){
           showAppModal({
-            message: 'Змінити тип дії «' + t.label + '» на «' + (newType === 'daily' ? 'щодня' : 'щотижня') + '»? Записана історія цієї дії буде очищена — щоденний і щотижневий записи несумісні між собою.',
+            message: 'Змінити тип дії «' + t.label + '» на «' + (newType === 'daily' ? 'щодня' : 'щотижня') + '»? Записи цієї дії буде стерто.',
             okLabel: 'Змінити й очистити',
             onOk: applyTypeChange,
             onCancel: () => { typeSelect.value = t.type; }
@@ -2903,7 +2909,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         archiveBtn.setAttribute('aria-label', 'Архівувати дію «' + t.label + '»');
         archiveBtn.onclick = () => {
           showAppModal({
-            message: 'Архівувати «' + t.label + '»? Тижні до цього моменту збережуть історію — вона нікуди не зникне. Нові тижні більше не питатимуть про цю дію.',
+            message: 'Архівувати «' + t.label + '»? Минулі тижні її збережуть, у нових її не буде.',
             okLabel: 'Архівувати',
             onOk: () => { t.archivedWeek = currentWeek(); saveTactics(); renderTacticsSettings(); render(); }
           });
@@ -2934,8 +2940,8 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         };
         showAppModal({
           message: hasData
-            ? 'Видалити «' + t.label + '» назавжди? Уся записана історія цієї дії буде втрачена без можливості відновлення.'
-            : 'Видалити «' + t.label + '»? Дію ще ніхто не позначав, тож видалення остаточне.',
+            ? 'Видалити «' + t.label + '» назавжди? Усі її записи зникнуть, відновити не вийде.'
+            : 'Видалити «' + t.label + '»? Записів у неї ще немає.',
           okLabel: 'Видалити назавжди',
           onOk: doDelete
         });
@@ -2949,7 +2955,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     if (!active.length && !archived.length){
       const empty = document.createElement('div');
       empty.style.cssText = 'font-size:var(--fs-sm); color:var(--text-muted); padding:var(--sp-2) 0;';
-      empty.textContent = 'Дій ще немає — додай нижче.';
+      empty.textContent = 'Дій ще немає, додай першу нижче.';
       box.appendChild(empty);
     }
     active.forEach(t => box.appendChild(buildRow(t, false)));
@@ -2998,7 +3004,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const input = $('tactic-new-label');
     const label = (input.value || '').trim();
     if (!label){ showAppAlert('Вкажи назву дії.'); return; }
-    if (label.length > 80){ showAppAlert('Занадто довга назва — до 80 символів.'); return; }
+    if (label.length > 80){ showAppAlert('Назва задовга, максимум 80 символів.'); return; }
     const dup = TACTICS.some(t => t.archivedWeek === null && t.label.toLowerCase() === label.toLowerCase());
     if (dup){ showAppAlert('Дія з такою назвою вже є серед активних.'); return; }
     TACTICS.push({ id: genTacticId(), label: label, type: newTacticType, goal: newTacticGoal, createdWeek: currentWeek(), archivedWeek: null, builtin: false });
@@ -3015,7 +3021,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     // це одне й те саме одноразове налаштування, а не дві різні дії.
     if ($('goal-sync-url')) $('goal-sync-url').value = getWebAppUrl();
     if ($('goal-sync-status')) $('goal-sync-status').textContent =
-      getWebAppUrl() ? 'Увімкнена — дані спільні на всіх пристроях.' : 'Вимкнена — дані лише в цьому браузері.';
+      getWebAppUrl() ? 'Увімкнена: дані спільні для всіх пристроїв.' : 'Вимкнена: дані лише в цьому браузері.';
     $('goal-weight-start').value = GOALS.weightStart;
     $('goal-weight-end').value = GOALS.weightEnd;
     $('goal-debt-start').value = GOALS.debtStart;
@@ -3054,13 +3060,13 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const errors = [];
     Object.keys(next).forEach(k => { if (next[k] < 0) errors.push('значення не можуть бути відʼємними'); });
     if (next.weightStart > 0 && next.weightEnd > 0 && next.weightStart === next.weightEnd)
-      errors.push('старт і ціль ваги однакові — не буде що відстежувати');
+      errors.push('старт і ціль ваги однакові');
     if (next.debtStart === next.debtEnd)
-      errors.push('старт і ціль боргу однакові — не буде що відстежувати');
+      errors.push('старт і ціль боргу однакові');
     if (next.capitalStart === next.capitalEnd)
-      errors.push('старт і ціль капіталу однакові — не буде що відстежувати');
+      errors.push('старт і ціль капіталу однакові');
     if (next.weightStart > 0 && next.weightStart > 400)
-      errors.push('вага понад 400 кг виглядає як помилка вводу');
+      errors.push('вага понад 400 кг, перевір число');
 
     const uniqueErrors = errors.filter((e, i) => errors.indexOf(e) === i);
     if (uniqueErrors.length){
@@ -3111,7 +3117,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       justToggledKey = null;
     } catch(err){
       const root = document.getElementById('tracker-root');
-      if (root) root.innerHTML = '<div style="padding:var(--sp-5); font-family:sans-serif; color:#F0B94D;">Трекер не зміг відобразитись через помилку: ' + (err && err.message ? err.message : String(err)) + '. Спробуй відкрити цей артефакт у звичайному браузері телефону через кнопку "Publish".</div>';
+      if (root) root.innerHTML = '<div style="padding:var(--sp-5); font-family:sans-serif; color:#F0B94D;">Трекер не зміг відобразитись через помилку: ' + (err && err.message ? err.message : String(err)) + '. Спробуй оновити сторінку.</div>';
     }
   }
 
@@ -3170,7 +3176,11 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function renderCycleHeader_(){
     const el = document.getElementById('cycle-range');
     if (!el) return;
-    el.textContent = (CYCLE.id > 1 ? 'Цикл ' + CYCLE.id + ' · ' : '') + fmtRange_(weekStart(1), weekEnd(WEEKS));
+    el.textContent = fmtRange_(weekStart(1), weekEnd(WEEKS));
+    // Номер циклу — окремою позначкою біля назви, а не префіксом до дат
+    // ("Цикл 2, 2 листопада…" читалось як збіг двох двійок і не влазило в рядок).
+    const num = document.getElementById('cycle-num');
+    if (num){ num.hidden = CYCLE.id < 2; num.textContent = 'Цикл ' + CYCLE.id; }
   }
 
   // Чи є в тижні (об'єкті, не індексі — працює і для знімка) хоч якісь дані.
@@ -3350,13 +3360,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     // Відступ знизу не тягнемо в мінус, якщо всі значення невідʼємні (гроші): вісь "-180 $" читається як помилка.
     const pad = (hi - lo) * 0.1; lo = (lo >= 0 && lo - pad < 0) ? 0 : lo - pad; hi += pad;
     const X = i => PX + (W - PX - 6) * i / WEEKS, Y = v => PY + (H - 2 * PY) * (1 - (v - lo) / (hi - lo));
+    // Вага — з десятими, гроші — цілими ("2633.4 $" на осі виглядає як збій).
+    const axis = v => unit === 'вага' ? fmt1(v) : String(Math.round(v));
     let pts = '', dots = '';
     actual.forEach((v, idx) => { if (v === null) return; pts += (pts ? ' ' : '') + X(idx + 1).toFixed(1) + ',' + Y(v).toFixed(1); dots += '<circle cx="' + X(idx + 1).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="2.5" fill="' + color + '"/>'; });
     return '<svg viewBox="0 0 ' + W + ' ' + H + '" width="100%" role="img" aria-label="Діаграма: ' + escHtml(unit) + ' по тижнях" style="display:block;">' +
       '<line x1="' + X(0).toFixed(1) + '" y1="' + Y(planStart).toFixed(1) + '" x2="' + X(WEEKS).toFixed(1) + '" y2="' + Y(planEnd).toFixed(1) + '" stroke="var(--text-muted)" stroke-width="1" stroke-dasharray="4 4"/>' +
       (pts ? '<polyline points="' + pts + '" fill="none" stroke="' + color + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' : '') + dots +
-      '<text x="2" y="' + (PY + 3) + '" font-size="9" fill="var(--text-muted)">' + fmt1(hi) + '</text>' +
-      '<text x="2" y="' + (H - PY + 3) + '" font-size="9" fill="var(--text-muted)">' + fmt1(lo) + '</text></svg>';
+      '<text x="2" y="' + (PY + 3) + '" font-size="9" fill="var(--text-muted)">' + axis(hi) + '</text>' +
+      '<text x="2" y="' + (H - PY + 3) + '" font-size="9" fill="var(--text-muted)">' + axis(lo) + '</text></svg>';
   }
   // --- Сторінка деталей циклу. Фідбек: "не гарно й не інформативно" — були
   // шість однакових плиток, 12 кружечків і три голі графіки один під одним.
@@ -3401,15 +3413,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     let h = '<button type="button" class="arch-back" id="archive-back">‹ Усі цикли</button>';
 
     // Підсумок
-    h += '<div class="arch-hero">' + scoreRingHtml_(st.avg, 68) +
+    h += '<div class="arch-hero">' + scoreRingHtml_(goalsPct_(snap), 68) +
       '<div class="arch-card-meta">' +
         '<div class="arch-title">' + (snap.endedEarly ? '<span class="arch-pill">завершено достроково</span>' : '<span class="arch-pill ok">завершено</span>') + '</div>' +
-        '<div class="arch-sub">' + escHtml(fmtRange_(startD, endD)) + (snap.endedEarly && snap.endedAt ? ' · завершено достроково ' + escHtml(fmtShortDate_(snap.endedAt)) : '') + '</div>' +
-        '<div class="arch-sub">середнє виконання тижня</div></div></div>';
+        '<div class="arch-sub">' + escHtml(fmtRange_(startD, endD)) + (snap.endedEarly && snap.endedAt ? ', завершено достроково ' + escHtml(fmtShortDate_(snap.endedAt)) : '') + '</div>' +
+        '<div class="arch-sub">цілей досягнуто</div></div></div>';
     h += '<div class="arch-stats">' +
       '<div><b>' + st.hits + '<small> з ' + WEEKS + '</small></b><span>тижнів 85%+</span></div>' +
-      '<div><b>' + (st.best ? snap.scores[st.best - 1] + '%' : '—') + '</b><span>пік' + (st.best ? ' — тиждень ' + st.best : '') + '</span></div>' +
-      '<div><b>' + st.withData + '<small> з ' + WEEKS + '</small></b><span>тижнів із записами</span></div></div>';
+      '<div><b>' + (st.best ? snap.scores[st.best - 1] + '%' : '—') + '</b><span>найкращий' + (st.best ? ', тиждень ' + st.best : '') + '</span></div>' +
+      '<div><b>' + st.avg + '%</b><span>дії в середньому за тиждень</span></div></div>';
     h += weekBarsHtml_(snap, true);
 
     // Цілі: результат + шлях + смужка + графік в одній картці
@@ -3421,10 +3433,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         (note ? '<div class="arch-goal-note">' + note + '</div>' : '') + chart + '</div>';
     h += '<div class="arch-h">Цілі</div>';
     h += goalCard('Вага', C_WEIGHT, st.lastWeight !== null ? fmt1(st.lastWeight) + ' кг' : '—',
-      'старт ' + fmt1(G.weightStart) + ' кг → ціль ' + fmt1(G.weightEnd) + ' кг' + (st.lastWeight !== null ? ' · ' + (st.lastWeight <= G.weightStart ? '−' : '+') + fmt1(Math.abs(G.weightStart - st.lastWeight)) + ' кг' : ''),
+      'старт ' + fmt1(G.weightStart) + ' кг → ціль ' + fmt1(G.weightEnd) + ' кг' + (st.lastWeight !== null ? ', ' + (st.lastWeight <= G.weightStart ? '−' : '+') + fmt1(Math.abs(G.weightStart - st.lastWeight)) + ' кг' : ''),
       goalProgress_(G.weightStart, G.weightEnd, st.lastWeight),
       archiveChartSvg_(weights, G.weightStart, G.weightEnd, C_WEIGHT, 'вага'),
-      lastWW && lastWW < WEEKS ? 'Останнє зважування — тиждень ' + lastWW + '. Забуте можна внести нижче, у самому тижні.' : '');
+      lastWW && lastWW < WEEKS ? 'Останнє зважування на тижні ' + lastWW + '. Вагу за пізніші тижні можна додати нижче.' : '');
     h += goalCard('Борг виплачено', C_DEBT, money(st.debtTotal), 'план ' + money(st.debtGoal) + ' за 12 тижнів',
       goalProgress_(0, st.debtGoal, st.debtTotal), archiveChartSvg_(debts, G.debtStart, G.debtEnd, C_DEBT, 'борг'), '');
     h += goalCard('Капітал (внески)', C_CAPITAL, money(st.capTotal), 'план ' + money(st.capGoal) + ' за 12 тижнів',
@@ -3459,7 +3471,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
         : '<span class="arch-dots" aria-hidden="true">' + [0,1,2,3,4,5,6].map(d => '<i class="' + (v[d] ? 'on' : '') + '"></i>').join('') + '</span><span class="arch-count">' + v.filter(Boolean).length + '/7</span>';
       h += '<div class="arch-tactic"><span class="arch-tactic-l">' + escHtml(t.label) + '</span><span class="arch-tactic-v">' + val + '</span></div>';
     });
-    h += '<div class="arch-week-actions"><button type="button" class="btn btn-secondary arch-edit-btn" data-edit-week="' + i + '">✎ Доредагувати тиждень</button></div>';
+    h += '<div class="arch-week-actions"><button type="button" class="btn btn-secondary arch-edit-btn" data-edit-week="' + i + '">Редагувати тиждень</button></div>';
     return h;
   }
 
@@ -3510,7 +3522,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const nums = {};
     for (const key of ['weight', 'debtAmt', 'capitalAmt']){
       const r = parseNumField_(box.querySelector('[data-field="' + key + '"]').value);
-      if (!r.ok) return { error: 'Перевір поле «' + (key === 'weight' ? 'Вага' : key === 'debtAmt' ? 'Борг' : 'Капітал') + '»: тут має бути число (кома чи крапка — обидві підходять).' };
+      if (!r.ok) return { error: 'Перевір поле «' + (key === 'weight' ? 'Вага' : key === 'debtAmt' ? 'Борг' : 'Капітал') + '»: потрібне число.' };
       nums[key] = r.value;
     }
     const raw = JSON.parse(JSON.stringify(snap.weeks[i]));
@@ -3605,6 +3617,17 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const pct = Math.max(0, Math.min(100, Math.round((actual - start) / total * 100)));
     return { pct: pct, reached: (actual - start) / total >= 1 };
   }
+  // Головна цифра циклу — наскільки досягнуто ЦІЛІ (а не середній відсоток дій
+  // по тижнях, як було спершу: користувач закрив борг і капітал на 100%, вагу
+  // майже, а кільце показувало 84%). Середнє трьох смужок прогресу; ціль, де
+  // старт дорівнює цілі, не рахується.
+  function goalsPct_(snap){
+    const st = snapshotStats_(snap), G = snap.goals, parts = [];
+    if (G.weightEnd !== G.weightStart) parts.push(goalProgress_(G.weightStart, G.weightEnd, st.lastWeight).pct);
+    if (st.debtGoal) parts.push(goalProgress_(0, st.debtGoal, st.debtTotal).pct);
+    if (st.capGoal) parts.push(goalProgress_(0, st.capGoal, st.capTotal).pct);
+    return parts.length ? Math.round(parts.reduce((a, b) => a + b, 0) / parts.length) : 0;
+  }
   function archiveGoalRow_(label, valueText, prog, color){
     return '<div><div class="arch-goal-top"><span>' + label + '</span><b>' + valueText + (prog.reached ? ' <span style="color:var(--accent-text);">✓</span>' : '') + '</b></div>' +
       '<div class="arch-goal-track"><div class="arch-goal-fill" style="width:' + prog.pct + '%; background:' + color + ';"></div></div></div>';
@@ -3612,7 +3635,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function archiveCardHtml_(snap){
     const st = snapshotStats_(snap), G = snap.goals;
     const startD = parseISODate_(snap.start), endD = parseISODate_(snap.end);
-    const ring = scoreRingHtml_(st.avg, 56);
+    const ring = scoreRingHtml_(goalsPct_(snap), 56);
     const status = snap.endedEarly
       ? '<span class="arch-pill">завершено достроково</span>'
       : '<span class="arch-pill ok">завершено</span>';
@@ -3622,15 +3645,15 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const money = v => '$' + Math.round(v).toLocaleString();
     return '<div class="arch-card-head">' + ring +
         '<div class="arch-card-meta"><div class="arch-title">Цикл ' + snap.id + status + '</div>' +
-        '<div class="arch-sub">' + escHtml(fmtRange_(startD, endD)) + '</div></div></div>' +
+        '<div class="arch-sub">' + escHtml(fmtRange_(startD, endD)) + '</div><div class="arch-sub">цілей досягнуто</div></div></div>' +
       weekBarsHtml_(snap, false) +
-      '<div class="arch-bars-cap"><span>тиждень 1</span><span>' + st.hits + ' з ' + WEEKS + ' тижнів 85%+</span><span>12</span></div>' +
+      '<div class="arch-bars-cap" style="justify-content:center;"><span>' + st.hits + ' з ' + WEEKS + ' тижнів 85%+, дії в середньому ' + st.avg + '%</span></div>' +
       '<div class="arch-goals">' +
-        archiveGoalRow_('Вага', st.lastWeight !== null ? fmt1(G.weightStart) + ' → ' + fmt1(st.lastWeight) + ' кг <span style="color:var(--text-muted); font-weight:400;">· ціль ' + fmt1(G.weightEnd) + '</span>' : '—', wProg, C_WEIGHT) +
+        archiveGoalRow_('Вага', st.lastWeight !== null ? fmt1(G.weightStart) + ' → ' + fmt1(st.lastWeight) + ' кг<span style="color:var(--text-muted); font-weight:400;">, ціль ' + fmt1(G.weightEnd) + '</span>' : '—', wProg, C_WEIGHT) +
         archiveGoalRow_('Борг виплачено', money(st.debtTotal) + ' <span style="color:var(--text-muted); font-weight:400;">з ' + money(st.debtGoal) + '</span>', dProg, C_DEBT) +
         archiveGoalRow_('Капітал (внески)', money(st.capTotal) + ' <span style="color:var(--text-muted); font-weight:400;">з ' + money(st.capGoal) + '</span>', cProg, C_CAPITAL) +
       '</div>' +
-      '<div class="arch-card-foot"><span>' + (st.best ? 'Пік — тиждень ' + st.best + ' (' + snap.scores[st.best - 1] + '%)' : 'Без записів') + '</span><span class="more">Детальніше ›</span></div>';
+      '<div class="arch-card-foot"><span>' + (st.best ? 'Пік: тиждень ' + st.best + ' (' + snap.scores[st.best - 1] + '%)' : 'Без записів') + '</span><span class="more">Детальніше ›</span></div>';
   }
 
   function renderArchiveList_(){
@@ -3639,14 +3662,14 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     $('archive-title').textContent = 'Архів циклів';
     const list = listArchives_();
     if (!list.length){
-      body.innerHTML = '<div class="sheet-text">Поки що порожньо. Підсумок циклу зберігається сюди автоматично, щойно закінчиться 12-й тиждень, а також перед стартом нового циклу.</div>';
+      body.innerHTML = '<div class="sheet-text">Тут поки порожньо. Цикл потрапить сюди сам, коли закінчиться 12-й тиждень.</div>';
       return;
     }
     body.innerHTML = '';
     list.forEach(snap => {
       const btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'arch-item';
-      btn.setAttribute('aria-label', 'Цикл ' + snap.id + ', ' + fmtRange_(parseISODate_(snap.start), parseISODate_(snap.end)) + ' — відкрити підсумок');
+      btn.setAttribute('aria-label', 'Цикл ' + snap.id + ', ' + fmtRange_(parseISODate_(snap.start), parseISODate_(snap.end)) + ', відкрити');
       btn.innerHTML = archiveCardHtml_(snap);
       btn.onclick = () => renderArchiveDetail_(snap);
       body.appendChild(btn);
@@ -3669,12 +3692,12 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     box.innerHTML = '';
     let html = '';
     if (cycleNotStarted_()){
-      html = '<b>Цикл ' + CYCLE.id + ' стартує ' + escHtml(fmtLongDate_(weekStart(1), true)) + '</b><p>Дані можна вносити вже зараз — тижні почнуть рахуватися з цієї дати.</p>';
+      html = '<b>Цикл ' + CYCLE.id + ' стартує ' + escHtml(fmtLongDate_(weekStart(1), true)) + '</b><p>Вносити дані можна вже зараз.</p>';
     } else if (cycleFinished_()){
       const archived = !!parseSnapshot_(localGet(archiveKey_(CYCLE.id)));
       html = '<b>Цикл ' + CYCLE.id + ' завершено</b><p>' + (archived
-        ? 'Підсумок збережено в архів — його можна переглянути будь-коли.'
-        : 'У цьому циклі не було записів, тож у архів нічого не потрапило.') +
+        ? 'Підсумок збережено в архіві.'
+        : 'Записів у циклі не було, тож в архіві його немає.') +
         '</p><div class="sheet-actions">' +
         (archived ? '<button type="button" class="btn btn-secondary" id="banner-open-archive">Переглянути підсумок</button>' : '') +
         '<button type="button" class="btn btn-primary" id="banner-new-cycle">Почати новий цикл</button></div>';
@@ -3697,7 +3720,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function validateCycleStart_(iso){
     const d = parseISODate_(iso);
     if (!d) return 'Вкажи дату початку.';
-    if (d.getDay() !== 1) return 'Цикл має починатися з понеділка — тижні в трекері йдуть Пн–Нд.';
+    if (d.getDay() !== 1) return 'Обери понеділок: тижні йдуть з понеділка по неділю.';
     if (d <= parseISODate_(CYCLE.start)) return 'Дата має бути пізнішою за початок поточного циклу (' + fmtShortDate_(CYCLE.start) + ').';
     return '';
   }
@@ -3705,9 +3728,9 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     const hasData = liveHasData_();
     const early = !cycleFinished_();
     $('cycle-info').innerHTML = (hasData
-      ? 'Поточний цикл ' + CYCLE.id + (early ? ' ще не закінчився — він збережеться в архів як <b>достроково завершений</b>' : ' збережеться в архів') +
-        ', і ти зможеш переглянути його будь-коли. Тижні, відмітки й суми почнуться з чистого аркуша. Список дій і цілі підуть у новий цикл як заготовка — їх можна змінити.'
-      : 'Поточний цикл порожній, тож в архів нічого не збережеться. Новий почнеться з чистого аркуша.');
+      ? 'Поточний цикл ' + CYCLE.id + (early ? ' ще не закінчився і збережеться в архів як <b>завершений достроково</b>' : ' збережеться в архів') +
+        '. Новий почнеться з порожніми тижнями, а дії й цілі перейдуть у нього, їх можна змінити.'
+      : 'Поточний цикл порожній, в архів нічого не піде.');
     $('cycle-start-input').value = nextMondayISO_();
     $('cycle-error').textContent = '';
     openModal($('cycle-overlay'), { focusEl: $('cycle-start-input') });
@@ -3748,7 +3771,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     if (err){ $('cycle-error').textContent = err; return; }
     closeNewCycleModal_();
     await startNewCycle_(iso);
-    showAppModal({ message: 'Цикл ' + CYCLE.id + ' створено (старт ' + fmtShortDate_(CYCLE.start) + '). Тепер задай цілі на новий цикл.', okLabel: 'Задати цілі', hideCancel: true, onOk: openGoalsModal });
+    showAppModal({ message: 'Цикл ' + CYCLE.id + ' створено (старт ' + fmtShortDate_(CYCLE.start) + '). Задай цілі на новий цикл.', okLabel: 'Задати цілі', hideCancel: true, onOk: openGoalsModal });
   };
   if ($('open-archive')) $('open-archive').onclick = () => openArchive_();
   if ($('new-cycle')) $('new-cycle').onclick = openNewCycleModal_;

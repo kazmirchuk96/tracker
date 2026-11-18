@@ -89,7 +89,7 @@ test('шлях B: забута вага 12-го тижня — підказка 
   await openDetail(dom);
 
   const goalCards = qa(dom, '.arch-goal-card');
-  assert.match(goalCards[0].querySelector('.arch-goal-note').textContent, /Останнє зважування — тиждень 11/);
+  assert.match(goalCards[0].querySelector('.arch-goal-note').textContent, /Останнє зважування на тижні 11/);
   assert.match(goalCards[0].querySelector('.arch-goal-result').textContent, /78\.5 кг/, 'до правки остання вага — з тижня 11');
 
   openEdit(dom, 12);

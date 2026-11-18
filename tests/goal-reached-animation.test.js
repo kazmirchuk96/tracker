@@ -28,7 +28,7 @@ const ALL_DAYS = [true, true, true, true, true, true, true];
 const CALORIE_LABEL = 'Не більше 2000 ккал/день';
 const LOG_LABEL = 'Облік їжі кожного дня';
 const CIRC = 2 * Math.PI * 19; // r=19 у renderJourney
-const TOAST_TEXT = 'Тиждень 1 · ціль 85% досягнута';
+const TOAST_TEXT = 'Тиждень 1: ціль 85% досягнута';
 
 // 5 дій по 20%: борг і капітал виконані повністю (150 = план тижня 1), w1 і
 // "облік їжі" теж; калорійні дні — k із 7. Score = (4 + k/7) / 5:
@@ -157,7 +157,7 @@ test('CSS: анімації досягнення (картка, число, ду
       assert.match(m[1].trim(), /^var\(--[\w-]+\)$/, `${name}: background-color лише з токена, отримав "${m[1]}"`);
     }
   }
-  assert.match(blocks['.goal-toast'], /font-family:\s*'Inter'/, 'тост поза #tracker-root не успадковує Inter — шрифт має бути заданий явно');
+  assert.match(blocks['.goal-toast'], /font-family:\s*var\(--font-ui\)/, 'тост поза #tracker-root не успадковує шрифт — його має бути задано явно');
   assert.match(blocks['.goal-reached::after'], /var\(--accent-celebrate\)/, 'рівномірна заливка — токеном --accent-celebrate');
   assert.match(blocks['goalCard keyframes'], /var\(--accent\)/, 'контур стає --accent');
 });
@@ -244,7 +244,7 @@ test('перехід 83 → 86: картка, число, дуга, конфет
 
   assert.equal(heroScore(document), '86%');
   assert.deepEqual(goalClassCounts(document), ALL);
-  assert.match(document.querySelector('#hero-wrap').textContent, /· 🎉 ціль досягнута!/, 'текст лишився');
+  assert.match(document.querySelector('#hero-wrap').textContent, /виконання тижня, ціль досягнута/, 'текст лишився');
 
   // Конфеті: рівно один запуск із центру щойно натиснутого чекбокса (100+16, 400+16).
   assert.equal(dom.canvasLog.created, 1, 'launchConfetti викликано рівно один раз');

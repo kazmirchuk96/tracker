@@ -75,7 +75,8 @@ test('ключ cycle задає старт: заголовок, тижні й п
     seed: { raw: { cycle: JSON.stringify({ id: 2, start: '2026-11-02' }) } },
   });
   await flush();
-  assert.equal(text(dom, 'cycle-range'), 'Цикл 2 · 2 листопада 2026 — 24 січня 2027');
+  assert.equal(text(dom, 'cycle-range'), '2 листопада 2026 — 24 січня 2027');
+  assert.equal(text(dom, 'cycle-num'), 'Цикл 2');
   assert.match(doc(dom).querySelector('#hero-wrap').textContent, /Тиждень 1/);
   assert.match(doc(dom).querySelector('#hero-wrap').textContent, /02\.11 – 08\.11/, 'дати тижня йдуть від нового старту');
 });
@@ -131,7 +132,7 @@ test('цикл завершився, але записів не було: арх
   const dom = mountTracker({ now: AFTER_END });
   await flush();
   assert.equal(dom.window.localStorage.getItem('tracker:archive:1'), null);
-  assert.match($(dom, 'cycle-banner').textContent, /не було записів/);
+  assert.match($(dom, 'cycle-banner').textContent, /Записів у циклі не було/);
   assert.equal($(dom, 'banner-open-archive'), null);
 });
 
@@ -176,7 +177,7 @@ test('зіпсований archive:N не ламає застосунок і н�
   assert.doesNotMatch(doc(dom).getElementById('tracker-root').innerHTML, /не зміг відобразитись/);
   click(dom, $(dom, 'open-archive'));
   await flush();
-  assert.match(text(dom, 'archive-body'), /Поки що порожньо/);
+  assert.match(text(dom, 'archive-body'), /Тут поки порожньо/);
 });
 
 // ═══ Перегляд архіву ═══════════════════════════════════════════════════════
@@ -187,7 +188,7 @@ test('архів: порожній стан, пояснює, коли з\'яви
   click(dom, $(dom, 'open-archive'));
   await flush();
   assert.ok(visible(dom, 'archive-overlay'));
-  assert.match(text(dom, 'archive-body'), /Поки що порожньо/);
+  assert.match(text(dom, 'archive-body'), /Тут поки порожньо/);
   assert.match(text(dom, 'archive-body'), /12-й тиждень/);
 });
 
@@ -208,7 +209,8 @@ test('архів: список → деталі з підсумком, діаг�
   const body = text(dom, 'archive-body');
   const snap = readLocal(dom, 'archive:1');
   assert.equal(text(dom, 'archive-title'), 'Цикл 1');
-  assert.match(body, /середнє виконання тижня/);
+  assert.match(body, /цілей досягнуто/);
+  assert.match(body, /дії в середньому за тиждень/);
   assert.match(body, /82\.4 кг/, 'остання вага в підсумку');
   assert.match(body, /\$300/, 'борг: 150 + 150');
   assert.match(body, /\$250/, 'капітал: 150 + 100');
@@ -334,7 +336,8 @@ test('новий цикл: архів старого лишається, жив�
 
   // цикл
   assert.deepEqual(readLocal(dom, 'cycle'), { id: 2, start: '2026-11-02' });
-  assert.equal(text(dom, 'cycle-range'), 'Цикл 2 · 2 листопада 2026 — 24 січня 2027');
+  assert.equal(text(dom, 'cycle-range'), '2 листопада 2026 — 24 січня 2027');
+  assert.equal(text(dom, 'cycle-num'), 'Цикл 2');
   // архів старого циклу цілий
   const archivedAfter = readLocal(dom, 'archive:1');
   assert.equal(archivedAfter.weeks['1'].weight, 83.2);
@@ -390,7 +393,7 @@ test('новий цикл ДОСТРОКОВО (старий ще йде): зн�
   await flush();
   await openNewCycle(dom, false);
   assert.match(text(dom, 'cycle-info'), /ще не закінчився/);
-  assert.match(text(dom, 'cycle-info'), /достроково завершений/);
+  assert.match(text(dom, 'cycle-info'), /завершений достроково/);
   await confirmNewCycle(dom, '2026-08-10');
 
   const snap = readLocal(dom, 'archive:1');
@@ -455,7 +458,7 @@ test('синхр.: у хмарі СТАРІШИЙ цикл — новий лок
   });
   await flush(12);
   assert.equal(readLocal(dom, 'week:1') === null || readLocal(dom, 'week:1').weight === null, true, 'тиждень 1 нового циклу не отримав вагу зі старого');
-  assert.equal(text(dom, 'cycle-range').startsWith('Цикл 2'), true);
+  assert.equal(text(dom, 'cycle-num'), 'Цикл 2');
   const keys = rec.posts.map((p) => p.key);
   assert.ok(keys.includes('cycle') && keys.includes('week:1'), `локальне має піти в хмару, отримав: ${keys.join(', ')}`);
   assert.equal(JSON.parse(rec.posts.find((p) => p.key === 'cycle').value).id, 2);
@@ -470,7 +473,8 @@ test('синхр.: у хмарі НОВІШИЙ цикл (створений н�
   const rec = recordingFetch(remote);
   const dom = mountTracker({ now: new Date(2026, 10, 5, 12), weburl: 'https://example.com/exec', fetchImpl: rec.impl });
   await flush(12);
-  assert.equal(text(dom, 'cycle-range'), 'Цикл 2 · 2 листопада 2026 — 24 січня 2027');
+  assert.equal(text(dom, 'cycle-range'), '2 листопада 2026 — 24 січня 2027');
+  assert.equal(text(dom, 'cycle-num'), 'Цикл 2');
   assert.equal(readLocal(dom, 'goals').weightStart, 80);
   assert.equal(readLocal(dom, 'week:1').weight, 79.5);
 });
@@ -522,7 +526,8 @@ test('бекап → чистий пристрій: після імпорту в
   await importJson(dst, backup);
 
   assert.deepEqual(readLocal(dst, 'cycle'), { id: 2, start: '2026-07-27' }, 'номер і дата циклу з бекапу');
-  assert.equal(text(dst, 'cycle-range'), 'Цикл 2 · 27 липня — 18 жовтня 2026');
+  assert.equal(text(dst, 'cycle-range'), '27 липня — 18 жовтня 2026');
+  assert.equal(text(dst, 'cycle-num'), 'Цикл 2');
   assert.equal(readLocal(dst, 'goals').weightEnd, 77);
   assert.equal(readLocal(dst, 'goals').debtEnd, 900);
   assert.deepEqual(readLocal(dst, 'tactics').map((t) => t.id), ['w1', 'a_z']);
@@ -622,8 +627,10 @@ test('картка циклу: кільце середнього, 12 стовп�
   click(dom, $(dom, 'open-archive'));
   const card = doc(dom).querySelector('#archive-body .arch-item');
 
-  // середнє лише по тижнях із даними: (90 + 70 + 100) / 3 = 87
-  assert.match(card.querySelector('.arch-card-ring').textContent, /^87%$/);
+  // кільце — досягнення цілей: вага 84→77.5 при цілі 78 = 100%, борг 1200/1800 = 67%, капітал 100% → 89%
+  assert.match(card.querySelector('.arch-card-ring').textContent, /^89%$/);
+  // середнє дій лише по тижнях із даними: (90 + 70 + 100) / 3 = 87 — у підписі під стовпчиками
+  assert.match(card.querySelector('.arch-bars-cap').textContent, /дії в середньому 87%/);
   assert.match(card.querySelector('.arch-pill').textContent, /^завершено$/);
   const bars = [...card.querySelectorAll('.arch-bar')];
   assert.equal(bars.length, 12);
@@ -638,7 +645,7 @@ test('картка циклу: кільце середнього, 12 стовп�
   assert.match(goals[2], /✓/, 'капітал 1900 з 1800 — так');
   const fills = [...card.querySelectorAll('.arch-goal-fill')].map((f) => f.style.width);
   assert.deepEqual(fills, ['100%', '67%', '100%'], 'смужки прогресу обмежені 100%');
-  assert.match(card.querySelector('.arch-card-foot').textContent, /Пік — тиждень 3 \(100%\)/);
+  assert.match(card.querySelector('.arch-card-foot').textContent, /Пік: тиждень 3 \(100%\)/);
   assert.match(card.getAttribute('aria-label'), /Цикл 1, 27 липня — 18 жовтня 2026/);
 });
 
@@ -656,4 +663,50 @@ test('картка циклу: достроково завершений — і�
   assert.ok(!card.querySelector('.arch-pill').classList.contains('ok'));
   assert.match(card.querySelectorAll('.arch-goals > div')[0].textContent, /Вага—/);
   assert.equal(card.querySelectorAll('.arch-goal-fill')[0].style.width, '0%');
+});
+
+test('кільце циклу = досягнення цілей, а не середній відсоток дій (реальний випадок: борг і капітал понад план, вага 76 при цілі 75)', async () => {
+  const snap = {
+    v: 1, id: 1, start: '2026-07-27', end: '2026-10-18', endedEarly: false, savedAt: '2026-10-19T09:00:00.000Z',
+    goals: { weightStart: 81, weightEnd: 75, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800 },
+    tactics: [], scores: [94, 80, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    weeks: { 1: week({ weight: 79, debtAmt: 2000, capitalAmt: 1000 }), 2: week({ weight: 77, debtAmt: 394, capitalAmt: 820 }), 3: week({ weight: 76 }) },
+  };
+  const dom = mountTracker({ now: IN_CYCLE, seed: { raw: { 'archive:1': JSON.stringify(snap) } } });
+  await flush();
+  click(dom, $(dom, 'open-archive'));
+  const card = doc(dom).querySelector('#archive-body .arch-item');
+  // вага: (81-76)/(81-75) = 83%, борг 100% (понад план не рахується більше), капітал 100% → (83+100+100)/3 = 94
+  assert.equal(card.querySelector('.arch-card-ring').textContent, '94%');
+  assert.match(card.textContent, /цілей досягнуто/);
+  click(dom, card);
+  assert.equal(doc(dom).querySelector('#archive-body .arch-hero .arch-card-ring').textContent, '94%');
+});
+
+test('ознаки "згенерованого" інтерфейсу прибрано: без Google Fonts, Fraunces/Inter, емодзі, крапок-роздільників і службового англійського рядка', async () => {
+  const dom = mountTracker({ now: AFTER_END, seed: SEEDED });
+  await flush();
+  const html = doc(dom).documentElement.outerHTML;
+  assert.doesNotMatch(html, /fonts\.googleapis/, 'шрифти не тягнуться з Google Fonts');
+  const css = [...doc(dom).querySelectorAll('style')].map((s) => s.textContent).join('\n');
+  assert.doesNotMatch(css.replace(/\/\*[\s\S]*?\*\//g, ''), /Fraunces|'Inter'/, 'у правилах CSS немає старої пари шрифтів');
+  click(dom, $(dom, 'banner-open-archive'));
+  const clone = doc(dom).body.cloneNode(true);
+  clone.querySelectorAll('style, script').forEach((el) => el.remove());
+  const visible = clone.textContent;
+  assert.doesNotMatch(visible, /[\u{1F300}-\u{1FAFF}]/u, 'жодних емодзі у видимому тексті');
+  assert.doesNotMatch(visible, /·/, 'жодних крапок-роздільників');
+  assert.doesNotMatch(visible, /build v\d|feat:|Weekly Execution Score|Publish|артефакт/);
+  assert.ok($(dom, 'tracker-root').querySelector('svg.app-icon rect'), 'нова іконка застосунку');
+});
+
+test('номер циклу — окрема позначка біля назви; для циклу 1 вона прихована', async () => {
+  const one = mountTracker({ now: IN_CYCLE });
+  await flush();
+  assert.ok($(one, 'cycle-num').hidden);
+  const two = mountTracker({ now: new Date(2026, 10, 5, 12), seed: { raw: { cycle: JSON.stringify({ id: 2, start: '2026-11-02' }) } } });
+  await flush();
+  assert.ok(!$(two, 'cycle-num').hidden);
+  assert.equal(text(two, 'cycle-num'), 'Цикл 2');
+  assert.doesNotMatch(text(two, 'cycle-range'), /Цикл/);
 });
