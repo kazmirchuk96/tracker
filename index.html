@@ -491,6 +491,58 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .arch-card-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); margin-top: var(--sp-4);
   padding-top: var(--sp-3); border-top: var(--bw) solid var(--border); font-size: var(--fs-sm); color: var(--text-secondary); }
 .arch-card-foot .more { color: var(--accent-text); font-weight: 600; white-space: nowrap; }
+/* --- Сторінка деталей циклу (та сама мова, що й картка списку) --- */
+.arch-back { background: none; border: none; padding: var(--sp-1) 0; margin: 0 0 var(--sp-3); font-family: inherit; font-size: var(--fs-sm);
+  color: var(--accent-text); cursor: pointer; min-height: var(--tap); }
+.arch-hero { display: flex; align-items: center; gap: var(--sp-4); }
+.arch-hero .arch-card-ring b { font-size: var(--fs-xl); }
+.arch-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin-top: var(--sp-4); }
+.arch-stats > div { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-3); }
+.arch-stats b { display: block; font-family: 'Fraunces', serif; font-size: var(--fs-xl); font-weight: 500; line-height: var(--lh-heading); }
+.arch-stats b small { font-family: 'Inter', sans-serif; font-size: var(--fs-xs); color: var(--text-muted); font-weight: 400; }
+.arch-stats span { font-size: var(--fs-xs); color: var(--text-muted); }
+.arch-bars-nums { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--sp-1); text-align: center; font-size: var(--fs-xs); color: var(--text-muted); }
+.arch-goal-card { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-3); }
+.arch-goal-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); }
+.arch-goal-name { display: inline-flex; align-items: center; gap: var(--sp-2); font-size: var(--fs-md); font-weight: 600; }
+.arch-goal-name i { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.arch-goal-result { font-family: 'Fraunces', serif; font-size: var(--fs-xl); font-weight: 500; font-variant-numeric: tabular-nums; text-align: right; }
+.arch-ok { font-family: 'Inter', sans-serif; font-size: var(--fs-xs); font-weight: 600; color: var(--accent-text); background: var(--accent-soft);
+  padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill); vertical-align: middle; }
+.arch-goal-path { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1); }
+.arch-goal-note { font-size: var(--fs-xs); color: var(--warn-text); margin-top: var(--sp-2); line-height: var(--lh-caption); }
+.arch-goal-card svg { margin-top: var(--sp-3); }
+.arch-week summary { align-items: center; min-height: var(--tap); box-sizing: border-box; }
+.arch-week-n { font-weight: 600; color: var(--text-primary); }
+.arch-week-d { color: var(--text-muted); }
+.arch-score { font-weight: 600; font-size: var(--fs-xs); padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill);
+  background: var(--neutral-progress-soft); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.arch-score.ok { background: var(--accent-soft); color: var(--accent-text); }
+.arch-score.empty { background: transparent; color: var(--text-muted); }
+.arch-week[open] summary { border-bottom: var(--bw) solid var(--border); margin-bottom: var(--sp-3); }
+.arch-week-body div.arch-week-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sp-2); margin-bottom: var(--sp-3); }
+.arch-week-metrics > div, .arch-week-metrics > label { background: var(--surface-2); border-radius: var(--r-md); padding: var(--sp-2) var(--sp-3); display: flex; flex-direction: column; gap: var(--sp-0); min-width: 0; }
+.arch-week-metrics span { font-size: var(--fs-xs); color: var(--text-muted); }
+.arch-week-metrics strong { color: var(--text-primary); font-weight: 600; font-variant-numeric: tabular-nums; }
+.arch-week-body div.arch-tactic { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); padding: var(--sp-1) 0; }
+.arch-tactic-l { min-width: 0; }
+.arch-tactic-v { display: inline-flex; align-items: center; gap: var(--sp-2); flex-shrink: 0; }
+.arch-dots { display: inline-flex; gap: 3px; }
+.arch-dots i { width: 8px; height: 8px; border-radius: 2px; background: var(--surface-3); display: inline-block; }
+.arch-dots i.on { background: var(--accent); }
+.arch-count { font-variant-numeric: tabular-nums; min-width: 2.2em; text-align: right; }
+.arch-tick.on { color: var(--accent-text); font-weight: 700; }
+.arch-week-body div.arch-week-actions { display: flex; justify-content: flex-end; gap: var(--sp-2); margin-top: var(--sp-3); flex-wrap: wrap; }
+.arch-edit-btn { border: var(--bw) solid var(--border-strong) !important; }
+.arch-field-in { display: flex; align-items: center; gap: var(--sp-1); }
+.arch-field-in input { width: 100%; min-width: 0; box-sizing: border-box; height: var(--tap); padding: 0 var(--sp-2); border-radius: var(--r-sm);
+  border: var(--bw) solid var(--border-strong); background: var(--surface-3); color: var(--text-primary); font: inherit; font-size: var(--fs-lg); text-align: right; }
+.arch-field-in em { font-style: normal; font-size: var(--fs-xs); color: var(--text-muted); }
+.arch-week-body div.arch-tactic-daily { flex-direction: column; align-items: stretch; }
+.arch-tactic-daily .arch-tactic-v { justify-content: space-between; gap: var(--sp-1); }
+.arch-toggle { width: var(--tap-sm); height: var(--tap-sm); border-radius: var(--r-sm); border: var(--bw) solid var(--border-strong); background: var(--surface-3);
+  color: var(--text-muted); font: inherit; font-size: var(--fs-xs); cursor: pointer; padding: 0; }
+.arch-toggle.on { background: var(--accent); border-color: var(--accent); color: var(--surface-0); font-weight: 700; }
 .arch-sub { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1); }
 .arch-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); margin: var(--sp-3) 0; }
 .arch-tile { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-3); }
@@ -503,7 +555,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .arch-week summary { cursor: pointer; padding: var(--sp-3); font-size: var(--fs-sm); list-style: none; display: flex; justify-content: space-between; gap: var(--sp-2); }
 .arch-week summary::-webkit-details-marker { display: none; }
 .arch-week-body { padding: 0 var(--sp-3) var(--sp-3); font-size: var(--fs-sm); color: var(--text-secondary); line-height: var(--lh-body); }
-.arch-week-body div { display: flex; justify-content: space-between; gap: var(--sp-2); }
 .cycle-banner { border-left: var(--bw-accent) solid var(--accent); border-radius: var(--r-lg); padding: var(--sp-4); margin-bottom: var(--sp-5);
   background: var(--surface-1); border-top: var(--bw) solid var(--border); border-right: var(--bw) solid var(--border); border-bottom: var(--bw) solid var(--border); }
 .cycle-banner b { display: block; font-size: var(--fs-md); margin-bottom: var(--sp-1); }
@@ -676,7 +727,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v59 · feat: richer archive cycle card (score ring, weekly bars, goal progress)</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v60 · feat: redesigned cycle details page + editing weeks of finished cycles</div>
 </div>
 
 <div id="archive-overlay" class="sheet-overlay" role="dialog" aria-modal="true" aria-labelledby="archive-title" style="display:none;">
@@ -3307,19 +3358,36 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       '<text x="2" y="' + (PY + 3) + '" font-size="9" fill="var(--text-muted)">' + fmt1(hi) + '</text>' +
       '<text x="2" y="' + (H - PY + 3) + '" font-size="9" fill="var(--text-muted)">' + fmt1(lo) + '</text></svg>';
   }
-  function ringHtml_(score, label){
-    const R = 15, C = 2 * Math.PI * R, off = C * (1 - score / 100);
-    const col = score >= 85 ? C_DONE : C_NEUTRAL;
-    return '<div class="arch-ring"><svg width="38" height="38" viewBox="0 0 38 38" aria-hidden="true"><circle cx="19" cy="19" r="' + R + '" fill="none" stroke="var(--surface-3)" stroke-width="3"/>' +
-      (score > 0 ? '<circle cx="19" cy="19" r="' + R + '" fill="none" stroke="' + col + '" stroke-width="3" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 19 19)"/>' : '') +
-      '<text x="19" y="23" text-anchor="middle" font-size="11" font-weight="700" fill="var(--text-primary)">' + score + '</text></svg><span>' + label + '</span></div>';
+  // --- Сторінка деталей циклу. Фідбек: "не гарно й не інформативно" — були
+  // шість однакових плиток, 12 кружечків і три голі графіки один під одним.
+  // Тепер та сама мова, що й у картці списку: підсумок угорі (кільце + 12
+  // стовпчиків), далі по картці на кожну ціль (результат, шлях старт → ціль,
+  // смужка прогресу й графік разом), далі тижні — і кожен тиждень можна
+  // ДОРЕДАГУВАТИ (наприклад, внести забуте фінальне зважування).
+  function scoreRingHtml_(score, size){
+    const sw = size >= 60 ? 5 : 4, R = size / 2 - sw, C = 2 * Math.PI * R, c = size / 2;
+    return '<div class="arch-card-ring" style="width:' + size + 'px; height:' + size + 'px;"><svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" aria-hidden="true">' +
+      '<circle cx="' + c + '" cy="' + c + '" r="' + R + '" fill="none" stroke="var(--surface-3)" stroke-width="' + sw + '"/>' +
+      (score > 0 ? '<circle cx="' + c + '" cy="' + c + '" r="' + R + '" fill="none" stroke="' + (score >= 85 ? C_DONE : C_NEUTRAL) + '" stroke-width="' + sw + '" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - score / 100)).toFixed(1) + '" transform="rotate(-90 ' + c + ' ' + c + ')"/>' : '') +
+      '</svg><b>' + score + '<small style="font-size:var(--fs-xs);">%</small></b></div>';
   }
+  function weekBarsHtml_(snap, withNumbers){
+    const bars = snap.scores.map((sc, idx) => {
+      const empty = !weekHasData_(snap.weeks[idx + 1]);
+      return '<div class="arch-bar' + (empty ? ' empty' : sc >= 85 ? ' hit' : '') + '" style="height:' + (empty ? 3 : Math.max(3, sc)) + '%;" title="Тиждень ' + (idx + 1) + ': ' + (empty ? 'без записів' : sc + '%') + '"></div>';
+    }).join('');
+    return '<div class="arch-bars" role="img" aria-label="Виконання по тижнях: ' + snap.scores.join(', ') + '%">' + bars + '</div>' +
+      (withNumbers ? '<div class="arch-bars-nums" aria-hidden="true">' + snap.scores.map((_, idx) => '<span>' + (idx + 1) + '</span>').join('') + '</div>' : '');
+  }
+  function lastWeightWeek_(snap){ for (let i = WEEKS; i >= 1; i--) if (snap.weeks[i].weight) return i; return 0; }
 
   function archiveDetailHtml_(snap){
     const st = snapshotStats_(snap), G = snap.goals;
     const startD = parseISODate_(snap.start), endD = parseISODate_(snap.end);
     const wkAt = i => addDays_(startD, (i - 1) * 7);
-    const range = i => pad2_(wkAt(i).getDate()) + '.' + pad2_(wkAt(i).getMonth() + 1) + ' – ' + pad2_(addDays_(wkAt(i), 6).getDate()) + '.' + pad2_(addDays_(wkAt(i), 6).getMonth() + 1);
+    const dm = d => pad2_(d.getDate()) + '.' + pad2_(d.getMonth() + 1);
+    const range = i => dm(wkAt(i)) + ' – ' + dm(addDays_(wkAt(i), 6));
+    const money = v => '$' + Math.round(v).toLocaleString();
     const weights = [], debts = [], caps = [];
     let cd = 0, cc = 0;
     for (let i = 1; i <= WEEKS; i++){
@@ -3329,36 +3397,203 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       debts.push(weekHasData_(w) ? G.debtStart + cd : null);
       caps.push(weekHasData_(w) ? G.capitalStart + cc : null);
     }
-    let h = '';
-    h += '<div class="arch-sub" style="margin-bottom:var(--sp-2);">' + escHtml(fmtRange_(startD, endD)) + (snap.endedEarly ? ' · завершено достроково' + (snap.endedAt ? ' ' + escHtml(fmtShortDate_(snap.endedAt)) : '') : '') + '</div>';
-    h += '<div class="arch-tiles">' +
-      '<div class="arch-tile"><b>' + st.avg + '%</b><span>середнє виконання тижня</span></div>' +
-      '<div class="arch-tile"><b>' + st.hits + ' з ' + WEEKS + '</b><span>тижнів із ціллю 85%+</span></div>' +
-      '<div class="arch-tile"><b>' + (st.lastWeight !== null ? fmt1(st.lastWeight) + ' кг' : '—') + '</b><span>вага: старт ' + fmt1(G.weightStart) + ' → ціль ' + fmt1(G.weightEnd) + (st.weightGoalReached ? ' ✓' : '') + '</span></div>' +
-      '<div class="arch-tile"><b>$' + Math.round(st.debtTotal).toLocaleString() + '</b><span>борг виплачено з $' + Math.round(st.debtGoal).toLocaleString() + '</span></div>' +
-      '<div class="arch-tile"><b>$' + Math.round(st.capTotal).toLocaleString() + '</b><span>капітал (внески) з $' + Math.round(st.capGoal).toLocaleString() + '</span></div>' +
-      '<div class="arch-tile"><b>' + (st.best ? 'Тиждень ' + st.best : '—') + '</b><span>найкращий тиждень' + (st.best ? ' · ' + snap.scores[st.best - 1] + '%' : '') + '</span></div></div>';
-    h += '<div class="arch-h">Виконання по тижнях</div><div class="arch-rings">' + snap.scores.map((sc, idx) => ringHtml_(sc, String(idx + 1))).join('') + '</div>';
-    h += '<div class="arch-h">Вага, кг</div>' + archiveChartSvg_(weights, G.weightStart, G.weightEnd, C_WEIGHT, 'вага');
-    h += '<div class="arch-h">Борг виплачено, $ (накопичено)</div>' + archiveChartSvg_(debts, G.debtStart, G.debtEnd, C_DEBT, 'борг');
-    h += '<div class="arch-h">Капітал, $ (накопичено)</div>' + archiveChartSvg_(caps, G.capitalStart, G.capitalEnd, C_CAPITAL, 'капітал');
+    const lastWW = lastWeightWeek_(snap);
+    let h = '<button type="button" class="arch-back" id="archive-back">‹ Усі цикли</button>';
+
+    // Підсумок
+    h += '<div class="arch-hero">' + scoreRingHtml_(st.avg, 68) +
+      '<div class="arch-card-meta">' +
+        '<div class="arch-title">' + (snap.endedEarly ? '<span class="arch-pill">завершено достроково</span>' : '<span class="arch-pill ok">завершено</span>') + '</div>' +
+        '<div class="arch-sub">' + escHtml(fmtRange_(startD, endD)) + (snap.endedEarly && snap.endedAt ? ' · завершено достроково ' + escHtml(fmtShortDate_(snap.endedAt)) : '') + '</div>' +
+        '<div class="arch-sub">середнє виконання тижня</div></div></div>';
+    h += '<div class="arch-stats">' +
+      '<div><b>' + st.hits + '<small> з ' + WEEKS + '</small></b><span>тижнів 85%+</span></div>' +
+      '<div><b>' + (st.best ? snap.scores[st.best - 1] + '%' : '—') + '</b><span>пік' + (st.best ? ' — тиждень ' + st.best : '') + '</span></div>' +
+      '<div><b>' + st.withData + '<small> з ' + WEEKS + '</small></b><span>тижнів із записами</span></div></div>';
+    h += weekBarsHtml_(snap, true);
+
+    // Цілі: результат + шлях + смужка + графік в одній картці
+    const goalCard = (label, color, result, path, prog, chart, note) =>
+      '<div class="arch-goal-card"><div class="arch-goal-head"><span class="arch-goal-name"><i style="background:' + color + ';"></i>' + label + '</span>' +
+        '<span class="arch-goal-result">' + result + (prog.reached ? ' <span class="arch-ok">✓ ціль</span>' : '') + '</span></div>' +
+        '<div class="arch-goal-path">' + path + '</div>' +
+        '<div class="arch-goal-track"><div class="arch-goal-fill" style="width:' + prog.pct + '%; background:' + color + ';"></div></div>' +
+        (note ? '<div class="arch-goal-note">' + note + '</div>' : '') + chart + '</div>';
+    h += '<div class="arch-h">Цілі</div>';
+    h += goalCard('Вага', C_WEIGHT, st.lastWeight !== null ? fmt1(st.lastWeight) + ' кг' : '—',
+      'старт ' + fmt1(G.weightStart) + ' кг → ціль ' + fmt1(G.weightEnd) + ' кг' + (st.lastWeight !== null ? ' · ' + (st.lastWeight <= G.weightStart ? '−' : '+') + fmt1(Math.abs(G.weightStart - st.lastWeight)) + ' кг' : ''),
+      goalProgress_(G.weightStart, G.weightEnd, st.lastWeight),
+      archiveChartSvg_(weights, G.weightStart, G.weightEnd, C_WEIGHT, 'вага'),
+      lastWW && lastWW < WEEKS ? 'Останнє зважування — тиждень ' + lastWW + '. Забуте можна внести нижче, у самому тижні.' : '');
+    h += goalCard('Борг виплачено', C_DEBT, money(st.debtTotal), 'план ' + money(st.debtGoal) + ' за 12 тижнів',
+      goalProgress_(0, st.debtGoal, st.debtTotal), archiveChartSvg_(debts, G.debtStart, G.debtEnd, C_DEBT, 'борг'), '');
+    h += goalCard('Капітал (внески)', C_CAPITAL, money(st.capTotal), 'план ' + money(st.capGoal) + ' за 12 тижнів',
+      goalProgress_(0, st.capGoal, st.capTotal), archiveChartSvg_(caps, G.capitalStart, G.capitalEnd, C_CAPITAL, 'капітал'), '');
+
+    // Тижні
     h += '<div class="arch-h">Тижні</div>';
     for (let i = 1; i <= WEEKS; i++){
-      const w = snap.weeks[i];
-      let body = '<div><span>Вага</span><span>' + (w.weight ? fmt1(w.weight) + ' кг' : '—') + '</span></div>' +
-        '<div><span>Борг</span><span>' + (w.debtAmt ? '$' + Math.round(w.debtAmt).toLocaleString() : '—') + '</span></div>' +
-        '<div><span>Капітал</span><span>' + (w.capitalAmt ? '$' + Math.round(w.capitalAmt).toLocaleString() : '—') + '</span></div>';
-      snap.tactics.forEach(t => {
-        if (!tacticAppliesTo(t, i)) return;
-        const v = snapTacticValue_(snap, i, t);
-        body += '<div><span>' + escHtml(t.label) + '</span><span>' + (t.type === 'weekly' ? (v ? '✓' : '—') : v.filter(Boolean).length + '/7') + '</span></div>';
-      });
-      h += '<details class="arch-week"><summary><span>Тиждень ' + i + ' · ' + range(i) + '</span><b>' + snap.scores[i - 1] + '%</b></summary><div class="arch-week-body">' + body + '</div></details>';
+      const has = weekHasData_(snap.weeks[i]), sc = snap.scores[i - 1];
+      h += '<details class="arch-week" data-week="' + i + '"><summary>' +
+        '<span><span class="arch-week-n">Тиждень ' + i + '</span> <span class="arch-week-d">' + range(i) + '</span></span>' +
+        '<span class="arch-score' + (!has ? ' empty' : sc >= 85 ? ' ok' : '') + '">' + (has ? sc + '%' : '—') + '</span></summary>' +
+        '<div class="arch-week-body">' + archiveWeekViewHtml_(snap, i) + '</div></details>';
     }
     h += '<div class="sheet-actions" style="margin-top:var(--sp-4);">' +
-      '<button type="button" class="btn btn-secondary" id="archive-back">← До списку</button>' +
       '<button type="button" class="btn btn-secondary" id="archive-export">Завантажити JSON циклу</button></div>';
     return h;
+  }
+
+  function archiveWeekViewHtml_(snap, i){
+    const w = snap.weeks[i];
+    const money = v => '$' + Math.round(v).toLocaleString();
+    let h = '<div class="arch-week-metrics">' +
+      '<div><span>Вага</span><strong>' + (w.weight ? fmt1(w.weight) + ' кг' : '—') + '</strong></div>' +
+      '<div><span>Борг</span><strong>' + (w.debtAmt ? money(w.debtAmt) : '—') + '</strong></div>' +
+      '<div><span>Капітал</span><strong>' + (w.capitalAmt ? money(w.capitalAmt) : '—') + '</strong></div></div>';
+    snap.tactics.forEach(t => {
+      if (!tacticAppliesTo(t, i)) return;
+      const v = snapTacticValue_(snap, i, t);
+      const val = t.type === 'weekly'
+        ? '<span class="arch-tick' + (v ? ' on' : '') + '">' + (v ? '✓' : '—') + '</span>'
+        : '<span class="arch-dots" aria-hidden="true">' + [0,1,2,3,4,5,6].map(d => '<i class="' + (v[d] ? 'on' : '') + '"></i>').join('') + '</span><span class="arch-count">' + v.filter(Boolean).length + '/7</span>';
+      h += '<div class="arch-tactic"><span class="arch-tactic-l">' + escHtml(t.label) + '</span><span class="arch-tactic-v">' + val + '</span></div>';
+    });
+    h += '<div class="arch-week-actions"><button type="button" class="btn btn-secondary arch-edit-btn" data-edit-week="' + i + '">✎ Доредагувати тиждень</button></div>';
+    return h;
+  }
+
+  // --- Доредагування тижня завершеного циклу ---
+  // score() залежить від "живих" state/GOALS/TACTICS/START і поточної дати.
+  // Щоб перерахувати відсоток ОДНОГО відредагованого тижня знімка за тими ж
+  // правилами, тимчасово підставляємо дані знімка й відновлюємо в finally.
+  // Інші тижні не перераховуємо — їхні заморожені відсотки лишаються як є.
+  function scoreInSnapshot_(snap, i){
+    const saved = { state: state, GOALS: GOALS, TACTICS: TACTICS, START: START };
+    try {
+      state = {}; for (let n = 1; n <= WEEKS; n++) state[n] = JSON.parse(JSON.stringify(snap.weeks[n]));
+      GOALS = Object.assign({}, snap.goals); TACTICS = snap.tactics; START = parseISODate_(snap.start);
+      return score(i);
+    } finally { state = saved.state; GOALS = saved.GOALS; TACTICS = saved.TACTICS; START = saved.START; }
+  }
+  function parseNumField_(raw){
+    const t = String(raw || '').trim();
+    if (!t) return { ok: true, value: null };
+    const v = parseFloat(t.replace(',', '.'));
+    // Регулярка вже відкидає мінус, зайві коми й літери; isNaN — про запас.
+    return (isNaN(v) || !/^\d+([.,]\d+)?$/.test(t)) ? { ok: false } : { ok: true, value: v };
+  }
+  function archiveWeekEditHtml_(snap, i){
+    const w = snap.weeks[i];
+    const field = (key, label, unit, val, dec) =>
+      '<label class="arch-field"><span>' + label + '</span><span class="arch-field-in"><input type="text" inputmode="' + (dec ? 'decimal' : 'numeric') + '" data-field="' + key + '" value="' + (val === null || val === undefined ? '' : val) + '" aria-label="' + label + ', ' + unit + '"><em>' + unit + '</em></span></label>';
+    let h = '<div class="arch-edit" data-week="' + i + '"><div class="arch-week-metrics arch-edit-fields">' +
+      field('weight', 'Вага', 'кг', w.weight, true) + field('debtAmt', 'Борг', '$', w.debtAmt, false) + field('capitalAmt', 'Капітал', '$', w.capitalAmt, false) + '</div>';
+    snap.tactics.forEach(t => {
+      if (!tacticAppliesTo(t, i)) return;
+      const v = snapTacticValue_(snap, i, t);
+      if (t.type === 'weekly'){
+        h += '<div class="arch-tactic"><span class="arch-tactic-l">' + escHtml(t.label) + '</span><span class="arch-tactic-v">' +
+          '<button type="button" class="arch-toggle' + (v ? ' on' : '') + '" role="checkbox" aria-checked="' + (v ? 'true' : 'false') + '" aria-label="' + escHtml(t.label) + '" data-tactic="' + escHtml(t.id) + '">' + (v ? '✓' : '') + '</button></span></div>';
+      } else {
+        h += '<div class="arch-tactic arch-tactic-daily"><span class="arch-tactic-l">' + escHtml(t.label) + '</span><span class="arch-tactic-v">' +
+          DAY_LABELS.map((dl, d) => '<button type="button" class="arch-toggle' + (v[d] ? ' on' : '') + '" role="checkbox" aria-checked="' + (v[d] ? 'true' : 'false') + '" aria-label="' + DAY_FULL[d] + ' — ' + escHtml(t.label) + '" data-tactic="' + escHtml(t.id) + '" data-day="' + d + '">' + dl + '</button>').join('') +
+          '</span></div>';
+      }
+    });
+    h += '<div class="sheet-error" role="alert"></div><div class="arch-week-actions">' +
+      '<button type="button" class="btn btn-secondary" data-edit-cancel="' + i + '">Скасувати</button>' +
+      '<button type="button" class="btn btn-primary" data-edit-save="' + i + '">Зберегти</button></div></div>';
+    return h;
+  }
+  function readArchiveEdit_(box, snap, i){
+    const nums = {};
+    for (const key of ['weight', 'debtAmt', 'capitalAmt']){
+      const r = parseNumField_(box.querySelector('[data-field="' + key + '"]').value);
+      if (!r.ok) return { error: 'Перевір поле «' + (key === 'weight' ? 'Вага' : key === 'debtAmt' ? 'Борг' : 'Капітал') + '»: тут має бути число (кома чи крапка — обидві підходять).' };
+      nums[key] = r.value;
+    }
+    const raw = JSON.parse(JSON.stringify(snap.weeks[i]));
+    Object.assign(raw, nums);
+    snap.tactics.forEach(t => {
+      if (!tacticAppliesTo(t, i)) return;
+      const btns = [...box.querySelectorAll('[data-tactic]')].filter(b => b.getAttribute('data-tactic') === t.id);
+      if (t.type === 'weekly'){
+        const on = !!(btns[0] && btns[0].getAttribute('aria-checked') === 'true');
+        if (t.id === 'w1'){ raw.checks = Object.assign({}, raw.checks, { w1: on }); }
+        else { raw.custom = Object.assign({}, raw.custom); raw.custom[t.id] = on; }
+      } else {
+        const arr = [0,1,2,3,4,5,6].map(d => { const b = btns.filter(x => x.getAttribute('data-day') === String(d))[0]; return !!(b && b.getAttribute('aria-checked') === 'true'); });
+        if (t.id === 'logDays' || t.id === 'calorieDays') raw[t.id] = arr;
+        else { raw.custom = Object.assign({}, raw.custom); raw.custom[t.id] = arr; }
+      }
+    });
+    const res = sanitizeWeek(raw);
+    if (res.skipped.length) return { error: 'Значення поза межами: ' + res.skipped.join(', ') + '.' };
+    return { week: res.clean };
+  }
+  // Збереження. Якщо цей цикл досі "живий" (новий ще не почали), правка йде
+  // в живий тиждень — інакше автознімок (syncCurrentCycleArchive_) при
+  // наступному відкритті перезаписав би правку живими даними. Для старих
+  // циклів правиться сам знімок: тиждень, його відсоток і savedAt (за ним
+  // хмара вирішує, яка версія новіша).
+  async function saveArchivedWeek_(snap, i, week){
+    if (snap.id === CYCLE.id && cycleFinished_()){
+      state[i] = week;
+      await saveWeek(i);
+      refreshPrevScores();
+      syncCurrentCycleArchive_();
+      render();
+      return parseSnapshot_(localGet(archiveKey_(snap.id)));
+    }
+    const next = JSON.parse(JSON.stringify(snap));
+    // Вага на відсоток тижня не впливає. Якщо змінилась лише вона (типово —
+    // внести забуте зважування), заморожений відсоток лишаємо як є: перерахунок
+    // за сьогоднішньою датою міг би дати інше число, хоч дії не змінювались.
+    const onlyWeight = JSON.stringify(Object.assign({}, next.weeks[i], { weight: null })) === JSON.stringify(Object.assign({}, week, { weight: null }));
+    next.weeks[i] = week;
+    if (!onlyWeight) next.scores[i - 1] = scoreInSnapshot_(next, i);
+    next.savedAt = new Date().toISOString();
+    await storage.set(archiveKey_(snap.id), JSON.stringify(next));
+    return parseSnapshot_(localGet(archiveKey_(snap.id)));
+  }
+  function bindArchiveDetail_(snap){
+    const body = $('archive-body');
+    $('archive-back').onclick = renderArchiveList_;
+    $('archive-export').onclick = () => downloadFile_(JSON.stringify(snap, null, 2), 'application/json', '12-week-tracker-cycle-' + snap.id + '.json');
+    body.querySelectorAll('[data-edit-week]').forEach(btn => {
+      btn.onclick = () => {
+        const i = Number(btn.getAttribute('data-edit-week'));
+        const wb = body.querySelector('details.arch-week[data-week="' + i + '"] .arch-week-body');
+        wb.innerHTML = archiveWeekEditHtml_(snap, i);
+        const box = wb.querySelector('.arch-edit');
+        box.querySelectorAll('.arch-toggle').forEach(tg => tg.onclick = () => {
+          const on = tg.getAttribute('aria-checked') !== 'true';
+          tg.setAttribute('aria-checked', on ? 'true' : 'false'); tg.classList.toggle('on', on);
+          if (!tg.hasAttribute('data-day')) tg.textContent = on ? '✓' : '';
+        });
+        box.querySelector('[data-edit-cancel]').onclick = () => { wb.innerHTML = archiveWeekViewHtml_(snap, i); bindArchiveDetail_(snap); };
+        box.querySelector('[data-edit-save]').onclick = async () => {
+          const r = readArchiveEdit_(box, snap, i);
+          if (r.error){ box.querySelector('.sheet-error').textContent = r.error; return; }
+          const updated = await saveArchivedWeek_(snap, i, r.week);
+          renderArchiveDetail_(updated || snap, i);
+          showSaveStatus('Збережено ✓');
+        };
+        const first = box.querySelector('input'); if (first) first.focus();
+      };
+    });
+  }
+  function renderArchiveDetail_(snap, openWeek){
+    const body = $('archive-body');
+    $('archive-title').textContent = 'Цикл ' + snap.id;
+    body.innerHTML = archiveDetailHtml_(snap);
+    bindArchiveDetail_(snap);
+    const panel = body.parentNode;
+    if (openWeek){
+      const d = body.querySelector('details.arch-week[data-week="' + openWeek + '"]');
+      if (d){ d.open = true; if (panel && d.offsetTop) panel.scrollTop = d.offsetTop - 80; }
+    } else if (panel) panel.scrollTop = 0;
   }
 
   // Прогрес по одній цілі для картки архіву: частка шляху старт → ціль (0–100%)
@@ -3377,18 +3612,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
   function archiveCardHtml_(snap){
     const st = snapshotStats_(snap), G = snap.goals;
     const startD = parseISODate_(snap.start), endD = parseISODate_(snap.end);
-    const R = 24, C = 2 * Math.PI * R, ok = st.avg >= 85;
-    const ring = '<div class="arch-card-ring"><svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">' +
-      '<circle cx="28" cy="28" r="' + R + '" fill="none" stroke="var(--surface-3)" stroke-width="4"/>' +
-      (st.avg > 0 ? '<circle cx="28" cy="28" r="' + R + '" fill="none" stroke="' + (ok ? C_DONE : C_NEUTRAL) + '" stroke-width="4" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - st.avg / 100)).toFixed(1) + '" transform="rotate(-90 28 28)"/>' : '') +
-      '</svg><b>' + st.avg + '<small style="font-size:var(--fs-xs);">%</small></b></div>';
+    const ring = scoreRingHtml_(st.avg, 56);
     const status = snap.endedEarly
       ? '<span class="arch-pill">завершено достроково</span>'
       : '<span class="arch-pill ok">завершено</span>';
-    const bars = snap.scores.map((sc, idx) => {
-      const empty = !weekHasData_(snap.weeks[idx + 1]);
-      return '<div class="arch-bar' + (empty ? ' empty' : sc >= 85 ? ' hit' : '') + '" style="height:' + (empty ? 3 : Math.max(3, sc)) + '%;" title="Тиждень ' + (idx + 1) + ': ' + sc + '%"></div>';
-    }).join('');
     const wProg = goalProgress_(G.weightStart, G.weightEnd, st.lastWeight);
     const dProg = goalProgress_(0, st.debtGoal, st.debtTotal);
     const cProg = goalProgress_(0, st.capGoal, st.capTotal);
@@ -3396,7 +3623,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     return '<div class="arch-card-head">' + ring +
         '<div class="arch-card-meta"><div class="arch-title">Цикл ' + snap.id + status + '</div>' +
         '<div class="arch-sub">' + escHtml(fmtRange_(startD, endD)) + '</div></div></div>' +
-      '<div class="arch-bars" role="img" aria-label="Виконання по тижнях: ' + snap.scores.join(', ') + '%">' + bars + '</div>' +
+      weekBarsHtml_(snap, false) +
       '<div class="arch-bars-cap"><span>тиждень 1</span><span>' + st.hits + ' з ' + WEEKS + ' тижнів 85%+</span><span>12</span></div>' +
       '<div class="arch-goals">' +
         archiveGoalRow_('Вага', st.lastWeight !== null ? fmt1(G.weightStart) + ' → ' + fmt1(st.lastWeight) + ' кг <span style="color:var(--text-muted); font-weight:400;">· ціль ' + fmt1(G.weightEnd) + '</span>' : '—', wProg, C_WEIGHT) +
@@ -3424,14 +3651,6 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       btn.onclick = () => renderArchiveDetail_(snap);
       body.appendChild(btn);
     });
-  }
-  function renderArchiveDetail_(snap){
-    const body = $('archive-body');
-    $('archive-title').textContent = 'Цикл ' + snap.id;
-    body.innerHTML = archiveDetailHtml_(snap);
-    $('archive-back').onclick = renderArchiveList_;
-    $('archive-export').onclick = () => downloadFile_(JSON.stringify(snap, null, 2), 'application/json', '12-week-tracker-cycle-' + snap.id + '.json');
-    const panel = body.parentNode; if (panel) panel.scrollTop = 0;
   }
   function openArchive_(id){
     renderArchiveList_();

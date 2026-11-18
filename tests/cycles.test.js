@@ -212,9 +212,10 @@ test('архів: список → деталі з підсумком, діаг�
   assert.match(body, /82\.4 кг/, 'остання вага в підсумку');
   assert.match(body, /\$300/, 'борг: 150 + 150');
   assert.match(body, /\$250/, 'капітал: 150 + 100');
-  assert.match(body, new RegExp('Тиждень 1 · 27\\.07 – 02\\.08'));
+  assert.match(body, /Тиждень 1\s*27\.07 – 02\.08/);
   assert.equal(doc(dom).querySelectorAll('#archive-body svg[role="img"]').length, 3, 'три діаграми: вага, борг, капітал');
-  assert.equal(doc(dom).querySelectorAll('#archive-body .arch-ring').length, 12, '12 кілець виконання');
+  assert.equal(doc(dom).querySelectorAll('#archive-body .arch-bars .arch-bar').length, 12, '12 стовпчиків виконання');
+  assert.ok(doc(dom).querySelector('#archive-body .arch-hero .arch-card-ring'), 'кільце середнього в підсумку');
   assert.equal(doc(dom).querySelectorAll('#archive-body details.arch-week').length, 12);
   const w2 = doc(dom).querySelectorAll('#archive-body details.arch-week')[1].textContent;
   assert.match(w2, /82\.4 кг/);
