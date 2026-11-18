@@ -606,3 +606,53 @@ test('імпорт не святкує "досягнення тижня" (від
   assert.equal(doc(dom).querySelectorAll('.goal-reached, .celebrate, .arc-reach').length, 0);
   assert.equal(dom.canvasLog.created, 0, 'конфеті не летить');
 });
+
+// ═══ Картка циклу в списку архіву ═════════════════════════════════════════
+
+test('картка циклу: кільце середнього, 12 стовпчиків тижнів, прогрес по трьох цілях і статус', async () => {
+  const snap = {
+    v: 1, id: 1, start: '2026-07-27', end: '2026-10-18', endedEarly: false, savedAt: '2026-10-19T09:00:00.000Z',
+    goals: { weightStart: 84, weightEnd: 78, debtStart: 0, debtEnd: 1800, capitalStart: 0, capitalEnd: 1800 },
+    tactics: [], scores: [90, 70, 100, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    weeks: { 1: week({ weight: 80, debtAmt: 900, capitalAmt: 1000 }), 2: week({ weight: 77.5, debtAmt: 300, capitalAmt: 900 }), 3: week({ debtAmt: 0, capitalAmt: 0, checks: { w1: true } }) },
+  };
+  const dom = mountTracker({ now: IN_CYCLE, seed: { raw: { 'archive:1': JSON.stringify(snap) } } });
+  await flush();
+  click(dom, $(dom, 'open-archive'));
+  const card = doc(dom).querySelector('#archive-body .arch-item');
+
+  // середнє лише по тижнях із даними: (90 + 70 + 100) / 3 = 87
+  assert.match(card.querySelector('.arch-card-ring').textContent, /^87%$/);
+  assert.match(card.querySelector('.arch-pill').textContent, /^завершено$/);
+  const bars = [...card.querySelectorAll('.arch-bar')];
+  assert.equal(bars.length, 12);
+  assert.deepEqual(bars.slice(0, 4).map((b) => b.className), ['arch-bar hit', 'arch-bar', 'arch-bar hit', 'arch-bar empty']);
+  assert.match(card.textContent, /2 з 12 тижнів 85%\+/);
+
+  const goals = [...card.querySelectorAll('.arch-goals > div')].map((g) => g.textContent);
+  assert.match(goals[0], /84 → 77\.5 кг/);
+  assert.match(goals[0], /✓/, 'вага 77.5 при цілі 78 — досягнута');
+  assert.match(goals[1], /\$1,?\s?200 з \$1,?\s?800/);
+  assert.doesNotMatch(goals[1], /✓/, 'борг 1200 з 1800 — ні');
+  assert.match(goals[2], /✓/, 'капітал 1900 з 1800 — так');
+  const fills = [...card.querySelectorAll('.arch-goal-fill')].map((f) => f.style.width);
+  assert.deepEqual(fills, ['100%', '67%', '100%'], 'смужки прогресу обмежені 100%');
+  assert.match(card.querySelector('.arch-card-foot').textContent, /Пік — тиждень 3 \(100%\)/);
+  assert.match(card.getAttribute('aria-label'), /Цикл 1, 27 липня — 18 жовтня 2026/);
+});
+
+test('картка циклу: достроково завершений — інша позначка, порожня вага — прочерк без падіння', async () => {
+  const snap = {
+    v: 1, id: 2, start: '2026-11-02', end: '2027-01-24', endedEarly: true, endedAt: '2026-11-20', savedAt: '2026-11-20T09:00:00.000Z',
+    goals: { weightStart: 80, weightEnd: 75, debtStart: 0, debtEnd: 600, capitalStart: 0, capitalEnd: 600 },
+    tactics: [], scores: Array(12).fill(0), weeks: { 1: week({ debtAmt: 50 }) },
+  };
+  const dom = mountTracker({ now: IN_CYCLE, seed: { raw: { 'archive:2': JSON.stringify(snap) } } });
+  await flush();
+  click(dom, $(dom, 'open-archive'));
+  const card = doc(dom).querySelector('#archive-body .arch-item');
+  assert.equal(card.querySelector('.arch-pill').textContent, 'завершено достроково');
+  assert.ok(!card.querySelector('.arch-pill').classList.contains('ok'));
+  assert.match(card.querySelectorAll('.arch-goals > div')[0].textContent, /Вага—/);
+  assert.equal(card.querySelectorAll('.arch-goal-fill')[0].style.width, '0%');
+});

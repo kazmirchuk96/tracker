@@ -442,9 +442,40 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
 .sheet-error { min-height: var(--sp-4); font-size: var(--fs-sm); color: var(--warn-text); margin: var(--sp-2) 0 var(--sp-3); }
 .sheet-actions { display: flex; justify-content: flex-end; gap: var(--sp-2); flex-wrap: wrap; }
 .arch-item { display: block; width: 100%; text-align: left; font-family: inherit; color: inherit; cursor: pointer; margin-bottom: var(--sp-3);
-  background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4); }
+  background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-lg); padding: var(--sp-4); box-sizing: border-box; }
 .arch-item:hover { background: var(--surface-3); }
 .arch-title { font-weight: 600; font-size: var(--fs-md); }
+/* --- Картка циклу в списку архіву. Фідбек: "не гарно й не інформативно" —
+   був рядок тексту з трьома числами через крапку. Тепер картка відповідає на
+   три питання з першого погляду: наскільки рівно йшов цикл (кільце середнього
+   + 12 стовпчиків тижнів), чого досягнуто по кожній цілі (три смужки
+   прогресу кольорами цілей, як у головному екрані) і де подробиці. --- */
+.arch-card-head { display: flex; align-items: center; gap: var(--sp-3); }
+.arch-card-ring { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+.arch-card-ring svg { position: absolute; inset: 0; }
+.arch-card-ring b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: 'Fraunces', serif; font-size: var(--fs-lg); font-weight: 600; font-variant-numeric: tabular-nums; }
+.arch-card-meta { flex: 1; min-width: 0; }
+.arch-card-meta .arch-title { display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; font-size: var(--fs-lg); }
+.arch-pill { font-size: var(--fs-xs); font-weight: 600; padding: var(--sp-0) var(--sp-2); border-radius: var(--r-pill);
+  background: var(--neutral-progress-soft); color: var(--text-secondary); }
+.arch-pill.ok { background: var(--accent-soft); color: var(--accent-text); }
+.arch-bars { position: relative; display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--sp-1); align-items: end; height: 40px; margin: var(--sp-4) 0 var(--sp-1); }
+/* Пунктир на висоті 85% — поріг "ціль тижня": видно, які стовпчики до нього дотягнули. */
+.arch-bars::after { content: ''; position: absolute; left: 0; right: 0; bottom: 85%; border-top: var(--bw) dashed var(--text-muted); opacity: 0.6; pointer-events: none; }
+.arch-bar { border-radius: var(--sp-0); background: var(--neutral-progress); min-height: 3px; }
+.arch-bar.hit { background: var(--accent); }
+.arch-bar.empty { background: var(--surface-3); }
+.arch-bars-cap { display: flex; justify-content: space-between; font-size: var(--fs-xs); color: var(--text-muted); }
+.arch-goals { margin-top: var(--sp-4); display: grid; gap: var(--sp-3); }
+.arch-goal-top { display: flex; justify-content: space-between; align-items: baseline; gap: var(--sp-2); font-size: var(--fs-sm); }
+.arch-goal-top span { color: var(--text-secondary); }
+.arch-goal-top b { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; }
+.arch-goal-track { height: 6px; border-radius: var(--r-pill); background: var(--surface-3); margin-top: var(--sp-1); overflow: hidden; }
+.arch-goal-fill { height: 100%; border-radius: var(--r-pill); }
+.arch-card-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--sp-2); margin-top: var(--sp-4);
+  padding-top: var(--sp-3); border-top: var(--bw) solid var(--border); font-size: var(--fs-sm); color: var(--text-secondary); }
+.arch-card-foot .more { color: var(--accent-text); font-weight: 600; white-space: nowrap; }
 .arch-sub { font-size: var(--fs-sm); color: var(--text-secondary); margin-top: var(--sp-1); }
 .arch-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-2); margin: var(--sp-3) 0; }
 .arch-tile { background: var(--surface-1); border: var(--bw) solid var(--border); border-radius: var(--r-md); padding: var(--sp-3); }
@@ -630,7 +661,7 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
       </div>
   </div>
 
-  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v58 · feat: cycles — archive of finished cycles, new cycle with own start date, full backup</div>
+  <div style="text-align:center; font-size:var(--fs-xs); color:var(--text-muted); opacity:0.5; margin-top:var(--sp-6);">build v59 · feat: richer archive cycle card (score ring, weekly bars, goal progress)</div>
 </div>
 
 <div id="archive-overlay" class="sheet-overlay" role="dialog" aria-modal="true" aria-labelledby="archive-title" style="display:none;">
@@ -3315,6 +3346,51 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     return h;
   }
 
+  // Прогрес по одній цілі для картки архіву: частка шляху старт → ціль (0–100%)
+  // і чи ціль досягнута. Для ваги шлях може йти в обидва боки (схуднення чи набір).
+  function goalProgress_(start, end, actual){
+    if (actual === null || actual === undefined) return { pct: 0, reached: false };
+    const total = end - start;
+    if (!total) return { pct: 0, reached: false };
+    const pct = Math.max(0, Math.min(100, Math.round((actual - start) / total * 100)));
+    return { pct: pct, reached: (actual - start) / total >= 1 };
+  }
+  function archiveGoalRow_(label, valueText, prog, color){
+    return '<div><div class="arch-goal-top"><span>' + label + '</span><b>' + valueText + (prog.reached ? ' <span style="color:var(--accent-text);">✓</span>' : '') + '</b></div>' +
+      '<div class="arch-goal-track"><div class="arch-goal-fill" style="width:' + prog.pct + '%; background:' + color + ';"></div></div></div>';
+  }
+  function archiveCardHtml_(snap){
+    const st = snapshotStats_(snap), G = snap.goals;
+    const startD = parseISODate_(snap.start), endD = parseISODate_(snap.end);
+    const R = 24, C = 2 * Math.PI * R, ok = st.avg >= 85;
+    const ring = '<div class="arch-card-ring"><svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">' +
+      '<circle cx="28" cy="28" r="' + R + '" fill="none" stroke="var(--surface-3)" stroke-width="4"/>' +
+      (st.avg > 0 ? '<circle cx="28" cy="28" r="' + R + '" fill="none" stroke="' + (ok ? C_DONE : C_NEUTRAL) + '" stroke-width="4" stroke-linecap="round" stroke-dasharray="' + C.toFixed(1) + '" stroke-dashoffset="' + (C * (1 - st.avg / 100)).toFixed(1) + '" transform="rotate(-90 28 28)"/>' : '') +
+      '</svg><b>' + st.avg + '<small style="font-size:var(--fs-xs);">%</small></b></div>';
+    const status = snap.endedEarly
+      ? '<span class="arch-pill">завершено достроково</span>'
+      : '<span class="arch-pill ok">завершено</span>';
+    const bars = snap.scores.map((sc, idx) => {
+      const empty = !weekHasData_(snap.weeks[idx + 1]);
+      return '<div class="arch-bar' + (empty ? ' empty' : sc >= 85 ? ' hit' : '') + '" style="height:' + (empty ? 3 : Math.max(3, sc)) + '%;" title="Тиждень ' + (idx + 1) + ': ' + sc + '%"></div>';
+    }).join('');
+    const wProg = goalProgress_(G.weightStart, G.weightEnd, st.lastWeight);
+    const dProg = goalProgress_(0, st.debtGoal, st.debtTotal);
+    const cProg = goalProgress_(0, st.capGoal, st.capTotal);
+    const money = v => '$' + Math.round(v).toLocaleString();
+    return '<div class="arch-card-head">' + ring +
+        '<div class="arch-card-meta"><div class="arch-title">Цикл ' + snap.id + status + '</div>' +
+        '<div class="arch-sub">' + escHtml(fmtRange_(startD, endD)) + '</div></div></div>' +
+      '<div class="arch-bars" role="img" aria-label="Виконання по тижнях: ' + snap.scores.join(', ') + '%">' + bars + '</div>' +
+      '<div class="arch-bars-cap"><span>тиждень 1</span><span>' + st.hits + ' з ' + WEEKS + ' тижнів 85%+</span><span>12</span></div>' +
+      '<div class="arch-goals">' +
+        archiveGoalRow_('Вага', st.lastWeight !== null ? fmt1(G.weightStart) + ' → ' + fmt1(st.lastWeight) + ' кг <span style="color:var(--text-muted); font-weight:400;">· ціль ' + fmt1(G.weightEnd) + '</span>' : '—', wProg, C_WEIGHT) +
+        archiveGoalRow_('Борг виплачено', money(st.debtTotal) + ' <span style="color:var(--text-muted); font-weight:400;">з ' + money(st.debtGoal) + '</span>', dProg, C_DEBT) +
+        archiveGoalRow_('Капітал (внески)', money(st.capTotal) + ' <span style="color:var(--text-muted); font-weight:400;">з ' + money(st.capGoal) + '</span>', cProg, C_CAPITAL) +
+      '</div>' +
+      '<div class="arch-card-foot"><span>' + (st.best ? 'Пік — тиждень ' + st.best + ' (' + snap.scores[st.best - 1] + '%)' : 'Без записів') + '</span><span class="more">Детальніше ›</span></div>';
+  }
+
   function renderArchiveList_(){
     const body = $('archive-body');
     if (!body) return;
@@ -3326,12 +3402,10 @@ input[type=checkbox] { width: 18px; height: 18px; margin-right: var(--sp-0); cur
     }
     body.innerHTML = '';
     list.forEach(snap => {
-      const st = snapshotStats_(snap);
       const btn = document.createElement('button');
       btn.type = 'button'; btn.className = 'arch-item';
-      btn.innerHTML = '<div class="arch-title">Цикл ' + snap.id + '</div>' +
-        '<div class="arch-sub">' + escHtml(fmtRange_(parseISODate_(snap.start), parseISODate_(snap.end))) + (snap.endedEarly ? ' · достроково' : '') + '</div>' +
-        '<div class="arch-sub">Середнє ' + st.avg + '% · ' + st.hits + ' з ' + WEEKS + ' тижнів 85%+' + (st.lastWeight !== null ? ' · ' + fmt1(st.lastWeight) + ' кг' : '') + '</div>';
+      btn.setAttribute('aria-label', 'Цикл ' + snap.id + ', ' + fmtRange_(parseISODate_(snap.start), parseISODate_(snap.end)) + ' — відкрити підсумок');
+      btn.innerHTML = archiveCardHtml_(snap);
       btn.onclick = () => renderArchiveDetail_(snap);
       body.appendChild(btn);
     });
